@@ -43,28 +43,22 @@ namespace mizu {
         window_builder &operator=(window_builder &&other) = delete;
 
         window_builder &fullscreen();
-        window_builder &opengl();
-        window_builder &occluded();
+        // window_builder &opengl();
         window_builder &hidden();
         window_builder &borderless();
         window_builder &resizable();
         window_builder &minimized();
         window_builder &maximized();
         window_builder &mouse_grabbed();
-        window_builder &input_focus();
-        window_builder &mouse_focus();
-        window_builder &external();
-        window_builder &modal();
+        // window_builder &external();
+        // window_builder &modal();
         window_builder &high_pixel_density();
-        window_builder &mouse_capture();
-        window_builder &mouse_relative_mode();
         window_builder &always_on_top();
-        window_builder &utility();
-        window_builder &tooltip();
-        window_builder &popup_menu();
-        window_builder &keyboard_grabbed();
-        window_builder &vulkan();
-        window_builder &metal();
+        // window_builder &utility();
+        // window_builder &tooltip();
+        // window_builder &popup_menu();
+        // window_builder &vulkan();
+        // window_builder &metal();
         window_builder &transparent();
         window_builder &not_focusable();
 
@@ -78,14 +72,12 @@ namespace mizu {
         std::string title_;
         int width_;
         int height_;
-        SDL_WindowFlags window_flags_;
-
         int pos_x_, pos_y_;
         int display_idx_;
+        SDL_PropertiesID props_;
 
         std::expected<SDL_DisplayID, std::string> get_display_id();
-        std::expected<window, std::string> open_fullscreen_();
-        std::expected<window, std::string> open_windowed_();
+        std::expected<SDL_Rect, std::string> get_window_size_rect();
     };
 } // namespace mizu
 

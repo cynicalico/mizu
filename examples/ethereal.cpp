@@ -8,7 +8,7 @@ int main(int, char *[]) {
     spdlog::set_level(spdlog::level::debug);
 #endif
 
-    auto build_result = mizu::window_builder("ethereal").opengl().display(1).fullscreen().build();
+    auto build_result = mizu::window_builder("ethereal", 1280, 720).position_centered().build();
     if (!build_result.has_value()) {
         SPDLOG_ERROR("Failed to build window: {}", build_result.error());
         return EXIT_FAILURE;

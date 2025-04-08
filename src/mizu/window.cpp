@@ -53,131 +53,104 @@ namespace mizu {
     window_builder::window_builder(const std::string &title) : window_builder(title, 0, 0) {}
 
     window_builder::window_builder(const std::string &title, int width, int height) :
-        title_(title), width_(width), height_(height), window_flags_(0), pos_x_(SDL_WINDOWPOS_UNDEFINED),
-        pos_y_(SDL_WINDOWPOS_UNDEFINED), display_idx_(0) {}
+        title_(title), width_(width), height_(height), pos_x_(SDL_WINDOWPOS_UNDEFINED),
+        pos_y_(SDL_WINDOWPOS_UNDEFINED), display_idx_(0) {
+        props_ = SDL_CreateProperties();
+        SDL_SetBooleanProperty(props_, SDL_PROP_WINDOW_CREATE_OPENGL_BOOLEAN, true);
+    }
 
     window_builder &window_builder::fullscreen() {
-        window_flags_ |= SDL_WINDOW_FULLSCREEN;
+        SDL_SetBooleanProperty(props_, SDL_PROP_WINDOW_CREATE_FULLSCREEN_BOOLEAN, true);
         return *this;
     }
 
-    window_builder &window_builder::opengl() {
-        window_flags_ |= SDL_WINDOW_OPENGL;
-        return *this;
-    }
-
-    window_builder &window_builder::occluded() {
-        window_flags_ |= SDL_WINDOW_OCCLUDED;
-        return *this;
-    }
+    // window_builder &window_builder::opengl() {
+    //     SDL_SetBooleanProperty(props_, SDL_PROP_WINDOW_CREATE_OPENGL_BOOLEAN, true);
+    //     return *this;
+    // }
 
     window_builder &window_builder::hidden() {
-        window_flags_ |= SDL_WINDOW_HIDDEN;
+        SDL_SetBooleanProperty(props_, SDL_PROP_WINDOW_CREATE_HIDDEN_BOOLEAN, true);
         return *this;
     }
 
     window_builder &window_builder::borderless() {
-        window_flags_ |= SDL_WINDOW_BORDERLESS;
+        SDL_SetBooleanProperty(props_, SDL_PROP_WINDOW_CREATE_BORDERLESS_BOOLEAN, true);
         return *this;
     }
 
     window_builder &window_builder::resizable() {
-        window_flags_ |= SDL_WINDOW_RESIZABLE;
+        SDL_SetBooleanProperty(props_, SDL_PROP_WINDOW_CREATE_RESIZABLE_BOOLEAN, true);
         return *this;
     }
 
     window_builder &window_builder::minimized() {
-        window_flags_ |= SDL_WINDOW_MINIMIZED;
+        SDL_SetBooleanProperty(props_, SDL_PROP_WINDOW_CREATE_MINIMIZED_BOOLEAN, true);
         return *this;
     }
 
     window_builder &window_builder::maximized() {
-        window_flags_ |= SDL_WINDOW_MAXIMIZED;
+        SDL_SetBooleanProperty(props_, SDL_PROP_WINDOW_CREATE_MAXIMIZED_BOOLEAN, true);
         return *this;
     }
 
-    window_builder &window_builder::mouse_grabbed() {
-        window_flags_ |= SDL_WINDOW_MOUSE_GRABBED;
+    window_builder & window_builder::mouse_grabbed() {
+        SDL_SetBooleanProperty(props_, SDL_PROP_WINDOW_CREATE_MOUSE_GRABBED_BOOLEAN, true);
         return *this;
     }
 
-    window_builder &window_builder::input_focus() {
-        window_flags_ |= SDL_WINDOW_INPUT_FOCUS;
-        return *this;
-    }
-
-    window_builder &window_builder::mouse_focus() {
-        window_flags_ |= SDL_WINDOW_MOUSE_FOCUS;
-        return *this;
-    }
-
-    window_builder &window_builder::external() {
-        window_flags_ |= SDL_WINDOW_EXTERNAL;
-        return *this;
-    }
-
-    window_builder &window_builder::modal() {
-        window_flags_ |= SDL_WINDOW_MODAL;
-        return *this;
-    }
+    // window_builder &window_builder::external() {
+    //     SDL_SetBooleanProperty(props_, SDL_PROP_WINDOW_CREATE_EXTERNAL_GRAPHICS_CONTEXT_BOOLEAN, true);
+    //     return *this;
+    // }
+    //
+    // window_builder &window_builder::modal() {
+    //     SDL_SetBooleanProperty(props_, SDL_PROP_WINDOW_CREATE_MODAL_BOOLEAN, true);
+    //     return *this;
+    // }
 
     window_builder &window_builder::high_pixel_density() {
-        window_flags_ |= SDL_WINDOW_HIGH_PIXEL_DENSITY;
-        return *this;
-    }
-
-    window_builder &window_builder::mouse_capture() {
-        window_flags_ |= SDL_WINDOW_MOUSE_CAPTURE;
-        return *this;
-    }
-
-    window_builder &window_builder::mouse_relative_mode() {
-        window_flags_ |= SDL_WINDOW_MOUSE_RELATIVE_MODE;
+        SDL_SetBooleanProperty(props_, SDL_PROP_WINDOW_CREATE_HIGH_PIXEL_DENSITY_BOOLEAN, true);
         return *this;
     }
 
     window_builder &window_builder::always_on_top() {
-        window_flags_ |= SDL_WINDOW_ALWAYS_ON_TOP;
+        SDL_SetBooleanProperty(props_, SDL_PROP_WINDOW_CREATE_ALWAYS_ON_TOP_BOOLEAN, true);
         return *this;
     }
 
-    window_builder &window_builder::utility() {
-        window_flags_ |= SDL_WINDOW_UTILITY;
-        return *this;
-    }
-
-    window_builder &window_builder::tooltip() {
-        window_flags_ |= SDL_WINDOW_TOOLTIP;
-        return *this;
-    }
-
-    window_builder &window_builder::popup_menu() {
-        window_flags_ |= SDL_WINDOW_POPUP_MENU;
-        return *this;
-    }
-
-    window_builder &window_builder::keyboard_grabbed() {
-        window_flags_ |= SDL_WINDOW_KEYBOARD_GRABBED;
-        return *this;
-    }
-
-    window_builder &window_builder::vulkan() {
-        window_flags_ |= SDL_WINDOW_VULKAN;
-        return *this;
-    }
-
-    window_builder &window_builder::metal() {
-        window_flags_ |= SDL_WINDOW_METAL;
-        return *this;
-    }
+    // window_builder &window_builder::utility() {
+    //     SDL_SetBooleanProperty(props_, SDL_PROP_WINDOW_CREATE_UTILITY_BOOLEAN, true);
+    //     return *this;
+    // }
+    //
+    // window_builder &window_builder::tooltip() {
+    //     SDL_SetBooleanProperty(props_, SDL_PROP_WINDOW_CREATE_TOOLTIP_BOOLEAN, true);
+    //     return *this;
+    // }
+    //
+    // window_builder &window_builder::popup_menu() {
+    //     SDL_SetBooleanProperty(props_, SDL_PROP_WINDOW_CREATE_MENU_BOOLEAN, true);
+    //     return *this;
+    // }
+    //
+    // window_builder &window_builder::vulkan() {
+    //     SDL_SetBooleanProperty(props_, SDL_PROP_WINDOW_CREATE_VULKAN_BOOLEAN, true);
+    //     return *this;
+    // }
+    //
+    // window_builder &window_builder::metal() {
+    //     SDL_SetBooleanProperty(props_, SDL_PROP_WINDOW_CREATE_METAL_BOOLEAN, true);
+    //     return *this;
+    // }
 
     window_builder &window_builder::transparent() {
-        window_flags_ |= SDL_WINDOW_TRANSPARENT;
+        SDL_SetBooleanProperty(props_, SDL_PROP_WINDOW_CREATE_TRANSPARENT_BOOLEAN, true);
         return *this;
     }
 
     window_builder &window_builder::not_focusable() {
-        window_flags_ |= SDL_WINDOW_NOT_FOCUSABLE;
+        SDL_SetBooleanProperty(props_, SDL_PROP_WINDOW_CREATE_FOCUSABLE_BOOLEAN, false);
         return *this;
     }
 
@@ -210,10 +183,29 @@ namespace mizu {
                          SDL_VERSIONNUM_MINOR(sdl_version), SDL_VERSIONNUM_MICRO(sdl_version));
         });
 
-        if ((window_flags_ & SDL_WINDOW_FULLSCREEN) == SDL_WINDOW_FULLSCREEN) {
-            return open_fullscreen_();
+        auto window_properties = SDL_CreateProperties();
+        if (window_properties == 0) {
+            return std::unexpected(std::string(SDL_GetError()));
         }
-        return open_windowed_();
+
+        auto window_size_rect_result = get_window_size_rect();
+        if (!window_size_rect_result.has_value()) {
+            return std::unexpected(window_size_rect_result.error());
+        }
+        auto window_size_rect = window_size_rect_result.value();
+
+        SDL_SetNumberProperty(props_, SDL_PROP_WINDOW_CREATE_X_NUMBER, window_size_rect.x);
+        SDL_SetNumberProperty(props_, SDL_PROP_WINDOW_CREATE_Y_NUMBER, window_size_rect.y);
+        SDL_SetNumberProperty(props_, SDL_PROP_WINDOW_CREATE_WIDTH_NUMBER, window_size_rect.w);
+        SDL_SetNumberProperty(props_, SDL_PROP_WINDOW_CREATE_HEIGHT_NUMBER, window_size_rect.h);
+
+        auto sdl_window = SDL_CreateWindowWithProperties(props_);
+        if (!sdl_window) {
+            SPDLOG_ERROR("Failed to create SDL window: {}", SDL_GetError());
+            return std::unexpected(std::string(SDL_GetError()));
+        }
+
+        return window(sdl_window);
     }
 
     std::expected<SDL_DisplayID, std::string> window_builder::get_display_id() {
@@ -228,15 +220,13 @@ namespace mizu {
             display_idx_ = 0;
         }
 
-        return displays[display_idx_];
+        SDL_DisplayID display_id = displays[display_idx_];
+        SDL_free(displays);
+
+        return display_id;
     }
 
-    std::expected<window, std::string> window_builder::open_fullscreen_() {
-        auto sdl_window = SDL_CreateWindow(title_.c_str(), 1, 1, window_flags_ ^ SDL_WINDOW_FULLSCREEN);
-        if (!sdl_window) {
-            return std::unexpected(std::string(SDL_GetError()));
-        }
-
+    std::expected<SDL_Rect, std::string> window_builder::get_window_size_rect() {
         auto display_id_result = get_display_id();
         if (!display_id_result.has_value()) {
             return std::unexpected(display_id_result.error());
@@ -244,53 +234,25 @@ namespace mizu {
         auto display_id = display_id_result.value();
 
         SDL_Rect display_bounds;
-        if (SDL_GetDisplayBounds(display_id, &display_bounds)) {
-            if (!SDL_SetWindowPosition(sdl_window, display_bounds.x, display_bounds.y)) {
-                SPDLOG_WARN("Failed to set window position: {}", SDL_GetError());
-            }
-            if (!SDL_SetWindowSize(sdl_window, display_bounds.w, display_bounds.h)) {
-                SPDLOG_WARN("Failed to set window size: {}", SDL_GetError());
-            }
-            if (!SDL_SetWindowFullscreen(sdl_window, true)) {
-                SPDLOG_WARN("Failed to set window fullscreen: {}", SDL_GetError());
-            }
-        } else {
-            SPDLOG_WARN("Failed to get display bounds: {}", SDL_GetError());
-        }
-
-        return window(sdl_window);
-    }
-
-    std::expected<window, std::string> window_builder::open_windowed_() {
-        auto sdl_window = SDL_CreateWindow(title_.c_str(), width_, height_, window_flags_);
-        if (!sdl_window) {
+        if (!SDL_GetDisplayBounds(display_id, &display_bounds)) {
             return std::unexpected(std::string(SDL_GetError()));
         }
 
-        auto display_id_result = get_display_id();
-        if (!display_id_result.has_value()) {
-            return std::unexpected(display_id_result.error());
+        if (SDL_GetBooleanProperty(props_, SDL_PROP_WINDOW_CREATE_FULLSCREEN_BOOLEAN, false)) {
+            return display_bounds;
         }
-        auto display_id = display_id_result.value();
 
-        SDL_Rect display_bounds;
-        if (SDL_GetDisplayBounds(display_id, &display_bounds)) {
-            int window_x, window_y;
-            if (pos_x_ == SDL_WINDOWPOS_CENTERED && pos_y_ == SDL_WINDOWPOS_CENTERED) {
-                window_x = SDL_WINDOWPOS_CENTERED_DISPLAY(display_id);
-                window_y = SDL_WINDOWPOS_CENTERED_DISPLAY(display_id);
-            } else {
-                window_x = display_bounds.x + pos_x_;
-                window_y = display_bounds.y + pos_y_;
-            }
-
-            if (!SDL_SetWindowPosition(sdl_window, window_x, window_y)) {
-                SPDLOG_WARN("Failed to set window position: {}", SDL_GetError());
-            }
+        SDL_Rect window_size_rect;
+        if (pos_x_ == SDL_WINDOWPOS_CENTERED && pos_y_ == SDL_WINDOWPOS_CENTERED) {
+            window_size_rect.x = SDL_WINDOWPOS_CENTERED_DISPLAY(display_id);
+            window_size_rect.y = SDL_WINDOWPOS_CENTERED_DISPLAY(display_id);
         } else {
-            SPDLOG_WARN("Failed to get display bounds: {}", SDL_GetError());
+            window_size_rect.x = display_bounds.x + pos_x_;
+            window_size_rect.y = display_bounds.y + pos_y_;
         }
+        window_size_rect.w = width_;
+        window_size_rect.h = height_;
 
-        return window(sdl_window);
+        return window_size_rect;
     }
 } // namespace mizu
