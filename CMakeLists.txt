@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 4.0)
-project(mizu)
+project(mizu LANGUAGES C CXX)
 
 option(BUILD_SHARED_LIBS "Build using shared libraries" ON)
 

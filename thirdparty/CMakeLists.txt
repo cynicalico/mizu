@@ -17,7 +17,7 @@ add_subdirectory(${glad2_SOURCE_DIR}/cmake ${glad2_BINARY_DIR})
 if (WIN32)
     glad_add_library(glad_gl_core_mx_33 REPRODUCIBLE MX API gl:core=3.3 wgl=1.0)
 else ()
-    glad_add_library(glad_gl_core_mx_33 REPRODUCIBLE MX API gl:core=3.3 glx=1.4 egl=1.5)
+    glad_add_library(glad_gl_core_mx_33 REPRODUCIBLE MX API gl:core=3.3 egl=1.5)
 endif ()
 
 CPMAddPackage(
@@ -35,13 +35,6 @@ CPMAddPackage(
         NAME sdl3
         GITHUB_REPOSITORY libsdl-org/SDL
         GIT_TAG release-3.2.10)
-
-# For libpng
-CPMAddPackage(
-        NAME zlib
-        GITHUB_REPOSITORY madler/zlib
-        GIT_TAG 5a82f71
-        OPTIONS "ZLIB_BUILD_TESTING OFF")
 
 CPMAddPackage(
         NAME libpng
@@ -61,11 +54,16 @@ CPMAddPackage(
         GIT_TAG ea9ff56
         OPTIONS "BUILD_PROGRAMS OFF" "BUILD_EXAMPLES OFF")
 
+if (MSVC)
+    set(OPENAL_SOFT_CPM_OPTIONS "ALSOFT_UTILS OFF" "ALSOFT_EXAMPLES OFF" "ALSOFT_REQUIRE_WASAPI ON")
+else ()
+    set(OPENAL_SOFT_CPM_OPTIONS "ALSOFT_UTILS OFF" "ALSOFT_EXAMPLES OFF")
+endif ()
 CPMAddPackage(
         NAME openal-soft
         GITHUB_REPOSITORY kcat/openal-soft
         GIT_TAG 481c9e0
-        OPTIONS "ALSOFT_UTILS OFF" "ALSOFT_EXAMPLES OFF" "ALSOFT_REQUIRE_WASAPI ON")
+        OPTIONS ${OPENAL_SOFT_CPM_OPTIONS})
 
 add_library(mizu_thirdparty INTERFACE)
 
