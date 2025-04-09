@@ -225,6 +225,8 @@ std::expected<window, std::string> window_builder::build() {
         return std::unexpected(window_size_rect_result.error());
     auto window_size_rect = window_size_rect_result.value();
 
+    SDL_SetStringProperty(props_, SDL_PROP_WINDOW_CREATE_TITLE_STRING, title_.c_str());
+
     SDL_SetNumberProperty(props_, SDL_PROP_WINDOW_CREATE_X_NUMBER, window_size_rect.x);
     SDL_SetNumberProperty(props_, SDL_PROP_WINDOW_CREATE_Y_NUMBER, window_size_rect.y);
     SDL_SetNumberProperty(props_, SDL_PROP_WINDOW_CREATE_WIDTH_NUMBER, window_size_rect.w);
