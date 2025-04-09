@@ -4,81 +4,112 @@
 #include <SDL3/SDL_video.h>
 #include <expected>
 #include <string>
+#include "types.hpp"
 
 namespace mizu {
-    class window {
-        friend class window_builder;
+class window {
+    friend class window_builder;
 
-    public:
-        ~window();
+public:
+    ~window();
 
-        window(const window &) = delete;
-        window &operator=(const window &) = delete;
+    window(const window &) = delete;
 
-        window(window &&other) noexcept;
-        window &operator=(window &&other) noexcept;
+    window &operator=(const window &) = delete;
 
-        SDL_GLContext get_context() const;
+    window(window &&other) noexcept;
 
-        void swap();
+    window &operator=(window &&other) noexcept;
 
-    private:
-        SDL_Window *sdl_window_;
-        SDL_GLContext gl_context_;
+    SDL_GLContext get_context() const;
 
-        explicit window(SDL_Window *sdl_window);
-    };
+    void swap();
 
-    class window_builder {
-    public:
-        window_builder(const std::string &title, int width, int height);
-        window_builder(const std::string &title);
+    size2d<int> get_size() const;
 
-        ~window_builder() = default;
+    void set_size(size2d<int> size);
 
-        window_builder(const window_builder &) = delete;
-        window_builder &operator=(const window_builder &) = delete;
+    pos2d<int> get_pos() const;
 
-        window_builder(window_builder &&other) noexcept = delete;
-        window_builder &operator=(window_builder &&other) = delete;
+    void set_pos(pos2d<int> pos);
 
-        window_builder &fullscreen();
-        // window_builder &opengl();
-        window_builder &hidden();
-        window_builder &borderless();
-        window_builder &resizable();
-        window_builder &minimized();
-        window_builder &maximized();
-        window_builder &mouse_grabbed();
-        // window_builder &external();
-        // window_builder &modal();
-        window_builder &high_pixel_density();
-        window_builder &always_on_top();
-        // window_builder &utility();
-        // window_builder &tooltip();
-        // window_builder &popup_menu();
-        // window_builder &vulkan();
-        // window_builder &metal();
-        window_builder &transparent();
-        window_builder &not_focusable();
+private:
+    SDL_Window *sdl_window_;
+    SDL_GLContext gl_context_;
 
-        window_builder &position(int x, int y);
-        window_builder &position_centered();
-        window_builder &display(int idx);
+    explicit window(SDL_Window *sdl_window);
+};
 
-        [[nodiscard]] std::expected<window, std::string> build();
+class window_builder {
+public:
+    window_builder(const std::string &title, size2d<int> size);
 
-    private:
-        std::string title_;
-        int width_;
-        int height_;
-        int pos_x_, pos_y_;
-        int display_idx_;
-        SDL_PropertiesID props_;
+    explicit window_builder(const std::string &title);
 
-        std::expected<SDL_DisplayID, std::string> get_display_id();
-        std::expected<SDL_Rect, std::string> get_window_size_rect();
-    };
+    ~window_builder() = default;
+
+    window_builder(const window_builder &) = delete;
+
+    window_builder &operator=(const window_builder &) = delete;
+
+    window_builder(window_builder &&other) noexcept = delete;
+
+    window_builder &operator=(window_builder &&other) = delete;
+
+    window_builder &fullscreen();
+
+    window_builder &opengl();
+
+    window_builder &hidden();
+
+    window_builder &borderless();
+
+    window_builder &resizable();
+
+    window_builder &minimized();
+
+    window_builder &maximized();
+
+    window_builder &mouse_grabbed();
+
+    // window_builder &external();
+
+    // window_builder &modal();
+
+    window_builder &high_pixel_density();
+
+    window_builder &always_on_top();
+
+    // window_builder &utility();
+
+    // window_builder &tooltip();
+
+    // window_builder &popup_menu();
+
+    // window_builder &vulkan();
+
+    // window_builder &metal();
+
+    window_builder &transparent();
+
+    window_builder &not_focusable();
+
+    window_builder &position(int x, int y);
+
+    window_builder &display(int idx);
+
+    [[nodiscard]] std::expected<window, std::string> build();
+
+private:
+    std::string title_;
+    SDL_Rect location_;
+    int display_idx_;
+    SDL_PropertiesID props_;
+
+    std::expected<SDL_DisplayID, std::string> get_display_id();
+
+    std::expected<SDL_Rect, std::string> get_window_size_rect();
+};
 } // namespace mizu
 
 #endif // MIZU_WINDOW_HPP

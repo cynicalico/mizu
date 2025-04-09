@@ -3,7 +3,7 @@ project(mizu LANGUAGES C CXX)
 
 option(BUILD_SHARED_LIBS "Build using shared libraries" OFF)
 
-set(${PROJECT_NAME}_headers include/mizu/log.hpp include/mizu/window.hpp)
+set(${PROJECT_NAME}_headers include/mizu/log.hpp include/mizu/types.hpp include/mizu/window.hpp)
 set(${PROJECT_NAME}_sources src/mizu/window.cpp)
 
 add_library(mizu ${${PROJECT_NAME}_headers} ${${PROJECT_NAME}_sources})

@@ -8,8 +8,9 @@ int main(int, char *[]) {
     spdlog::set_level(spdlog::level::debug);
 #endif
 
-    auto build_result = mizu::window_builder("ethereal", 1280, 720).position_centered().build();
-    if (!build_result.has_value()) {
+    auto build_result =
+            mizu::window_builder("ethereal", mizu::size2d(1280, 720)).resizable().high_pixel_density().build();
+    if (!build_result) {
         SPDLOG_ERROR("Failed to build window: {}", build_result.error());
         return EXIT_FAILURE;
     }
@@ -34,16 +35,20 @@ int main(int, char *[]) {
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
             switch (event.type) {
-                case SDL_EVENT_QUIT:
+            case SDL_EVENT_QUIT:
+                running = false;
+                break;
+            case SDL_EVENT_KEY_DOWN:
+                switch (event.key.key) {
+                case SDLK_ESCAPE:
                     running = false;
-                    break;
-                case SDL_EVENT_KEY_DOWN:
-                    if (event.key.key == SDLK_ESCAPE) {
-                        running = false;
-                    }
                     break;
                 default:
                     break;
+                }
+                break;
+            default:
+                break;
             }
         }
     } while (running);
