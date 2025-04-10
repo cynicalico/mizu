@@ -1,10 +1,17 @@
-cmake_minimum_required(VERSION 4.0)
+cmake_minimum_required(VERSION 3.30)
 project(mizu LANGUAGES C CXX)
 
 option(BUILD_SHARED_LIBS "Build using shared libraries" OFF)
 
-set(${PROJECT_NAME}_headers include/mizu/log.hpp include/mizu/types.hpp include/mizu/window.hpp)
-set(${PROJECT_NAME}_sources src/mizu/window.cpp)
+set(${PROJECT_NAME}_headers
+        include/mizu/engine.hpp
+        include/mizu/log.hpp
+        include/mizu/types.hpp
+        include/mizu/window.hpp)
+
+set(${PROJECT_NAME}_sources
+        src/mizu/engine.cpp
+        src/mizu/window.cpp)
 
 add_library(mizu ${${PROJECT_NAME}_headers} ${${PROJECT_NAME}_sources})
 

@@ -2,32 +2,29 @@
 #include <SDL3/SDL.h>
 #include "mizu/log.hpp"
 
-std::atomic_uint open_window_count;
-std::once_flag initialize_sdl;
-
 namespace mizu {
-window::~window() {
-    if (sdl_window_) {
-        SDL_DestroyWindow(sdl_window_);
-        sdl_window_ = nullptr;
-
+Window::~Window() {
+    if (gl_context_) {
         if (!SDL_GL_DestroyContext(gl_context_))
             SPDLOG_ERROR("Failed to destroy GL context: {}", SDL_GetError());
+        else
+            SPDLOG_DEBUG("Destroyed GL context");
         gl_context_ = nullptr;
+    }
 
-        if (--open_window_count == 0) {
-            SDL_Quit();
-            SPDLOG_DEBUG("Quit SDL");
-        }
+    if (sdl_window_) {
+        SDL_DestroyWindow(sdl_window_);
+        SPDLOG_DEBUG("Destroyed SDL window");
+        sdl_window_ = nullptr;
     }
 }
 
-window::window(window &&other) noexcept : sdl_window_(other.sdl_window_), gl_context_(other.gl_context_) {
+Window::Window(Window &&other) noexcept : sdl_window_(other.sdl_window_), gl_context_(other.gl_context_) {
     other.sdl_window_ = nullptr;
     other.gl_context_ = nullptr;
 }
 
-window &window::operator=(window &&other) noexcept {
+Window &Window::operator=(Window &&other) noexcept {
     if (this != &other) {
         sdl_window_ = other.sdl_window_;
         gl_context_ = other.gl_context_;
@@ -38,45 +35,51 @@ window &window::operator=(window &&other) noexcept {
     return *this;
 }
 
-SDL_GLContext window::get_context() const { return gl_context_; }
+SDL_GLContext Window::get_context() const { return gl_context_; }
 
-void window::swap() {
+void Window::make_context_current() { SDL_GL_MakeCurrent(sdl_window_, gl_context_); }
+
+void Window::swap() {
     if (!SDL_GL_SwapWindow(sdl_window_))
         SPDLOG_ERROR("Failed to swap window: {}", SDL_GetError());
 }
 
-size2d<int> window::get_size() const {
-    size2d<int> size;
+Size2d<int> Window::get_size() const {
+    Size2d<int> size;
     if (!SDL_GetWindowSize(sdl_window_, &size.w, &size.h))
         SPDLOG_ERROR("Failed to get size of window: {}", SDL_GetError());
     return size;
 }
 
-void window::set_size(size2d<int> size) {
+void Window::set_size(Size2d<int> size) {
     if (!SDL_SetWindowSize(sdl_window_, size.w, size.h))
         SPDLOG_ERROR("Failed to set size of window: {}", SDL_GetError());
 }
 
-pos2d<int> window::get_pos() const {
-    pos2d<int> pos;
+Pos2d<int> Window::get_pos() const {
+    Pos2d<int> pos;
     if (!SDL_GetWindowPosition(sdl_window_, &pos.x, &pos.y))
         SPDLOG_ERROR("Failed to get pos of window: {}", SDL_GetError());
     return pos;
 }
 
-void window::set_pos(pos2d<int> pos) {
+void Window::set_pos(Pos2d<int> pos) {
     if (!SDL_SetWindowPosition(sdl_window_, pos.x, pos.y))
         SPDLOG_ERROR("Failed to set pos of window: {}", SDL_GetError());
 }
 
-window::window(SDL_Window *sdl_window) : sdl_window_(sdl_window) {
-    ++open_window_count;
+Window::Window(SDL_Window *sdl_window) : sdl_window_(sdl_window) {
     gl_context_ = SDL_GL_CreateContext(sdl_window);
+    if (!gl_context_) {
+        SPDLOG_ERROR("Failed to create GL context: {}", SDL_GetError());
+        std::exit(EXIT_FAILURE);
+    }
+    SPDLOG_DEBUG("Created GL context");
 }
 
-window_builder::window_builder(const std::string &title) : window_builder(title, size2d<int>()) {}
+window_builder::window_builder(const std::string &title) : window_builder(title, Size2d<int>()) {}
 
-window_builder::window_builder(const std::string &title, size2d<int> size)
+window_builder::window_builder(const std::string &title, Size2d<int> size)
     : title_(title),
       location_(static_cast<int>(SDL_WINDOWPOS_CENTERED), static_cast<int>(SDL_WINDOWPOS_CENTERED), size.w, size.h),
       display_idx_(0) {
@@ -204,22 +207,7 @@ window_builder &window_builder::display(int idx) {
     return *this;
 }
 
-std::expected<window, std::string> window_builder::build() {
-    std::call_once(initialize_sdl, [&] {
-        if (!SDL_Init(SDL_INIT_VIDEO)) {
-            SPDLOG_ERROR("Failed to initialize SDL: {}", SDL_GetError());
-            std::exit(EXIT_FAILURE);
-        }
-
-        int sdl_version = SDL_GetVersion();
-        SPDLOG_DEBUG(
-                "Initialized SDL v{}.{}.{}",
-                SDL_VERSIONNUM_MAJOR(sdl_version),
-                SDL_VERSIONNUM_MINOR(sdl_version),
-                SDL_VERSIONNUM_MICRO(sdl_version)
-        );
-    });
-
+std::expected<Window, std::string> window_builder::build() {
     auto window_size_rect_result = get_window_size_rect();
     if (!window_size_rect_result)
         return std::unexpected(window_size_rect_result.error());
@@ -237,8 +225,9 @@ std::expected<window, std::string> window_builder::build() {
         SPDLOG_ERROR("Failed to create SDL window: {}", SDL_GetError());
         return std::unexpected(std::string(SDL_GetError()));
     }
+    SPDLOG_DEBUG("Created SDL window");
 
-    return window(sdl_window);
+    return Window(sdl_window);
 }
 
 std::expected<SDL_DisplayID, std::string> window_builder::get_display_id() {
