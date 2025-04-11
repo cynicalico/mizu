@@ -6,12 +6,6 @@ CPMAddPackage(
         GIT_TAG release-3.2.10
         OPTIONS "BUILD_SHARED_LIBS OFF")
 
-CPMAddPackage(
-        NAME sdl3_mixer
-        GITHUB_REPOSITORY libsdl-org/SDL_mixer
-        GIT_TAG a983517
-        OPTIONS "BUILD_SHARED_LIBS OFF")
-
 # We need Jinja2 for Glad 2 to work
 find_package(Python3 REQUIRED COMPONENTS Interpreter)
 execute_process(COMMAND ${Python3_EXECUTABLE} -m pip show Jinja2 RESULT_VARIABLE EXIT_CODE OUTPUT_QUIET)
@@ -23,7 +17,8 @@ CPMAddPackage(
         NAME glad2
         GITHUB_REPOSITORY Dav1dde/glad
         GIT_TAG 56e406e
-        DOWNLOAD_ONLY YES)
+        DOWNLOAD_ONLY YES
+)
 
 add_subdirectory(${glad2_SOURCE_DIR}/cmake ${glad2_BINARY_DIR})
 if (WIN32)
@@ -36,38 +31,90 @@ CPMAddPackage(
         NAME glm
         GITHUB_REPOSITORY g-truc/glm
         GIT_TAG 2d4c4b4
-        OPTIONS "BUILD_SHARED_LIBS OFF" "GLM_ENABLE_CXX_20 ON" "GLM_ENABLE_LANG_EXTENSIONS ON")
+        OPTIONS "BUILD_SHARED_LIBS OFF" "GLM_ENABLE_CXX_20 ON" "GLM_ENABLE_LANG_EXTENSIONS ON"
+)
 
+set(OPENAL_SOFT_CPM_OPTIONS "ALSOFT_UTILS OFF" "ALSOFT_EXAMPLES OFF")
 if (MSVC)
-    set(OPENAL_SOFT_CPM_OPTIONS "ALSOFT_UTILS OFF" "ALSOFT_EXAMPLES OFF" "ALSOFT_REQUIRE_WASAPI ON")
-else ()
-    set(OPENAL_SOFT_CPM_OPTIONS "ALSOFT_UTILS OFF" "ALSOFT_EXAMPLES OFF")
+    set(OPENAL_SOFT_CPM_OPTIONS ${OPENAL_SOFT_CPM_OPTIONS} "ALSOFT_REQUIRE_WASAPI ON")
 endif ()
 CPMAddPackage(
         NAME openal-soft
         GITHUB_REPOSITORY kcat/openal-soft
         GIT_TAG 481c9e0
-        OPTIONS ${OPENAL_SOFT_CPM_OPTIONS})
+        OPTIONS ${OPENAL_SOFT_CPM_OPTIONS}
+)
 
 CPMAddPackage(
         NAME fmt
         GITHUB_REPOSITORY fmtlib/fmt
         GIT_TAG 11.1.4
-        OPTIONS "BUILD_SHARED_LIBS OFF")
+        OPTIONS "BUILD_SHARED_LIBS OFF"
+)
 
 CPMAddPackage(
         NAME spdlog
         GITHUB_REPOSITORY gabime/spdlog
         VERSION 1.15.2
-        OPTIONS "BUILD_SHARED_LIBS OFF" "SPDLOG_FMT_EXTERNAL ON")
+        OPTIONS "BUILD_SHARED_LIBS OFF" "SPDLOG_FMT_EXTERNAL ON"
+)
 
-add_library(mizu_thirdparty INTERFACE)
+CPMAddPackage(
+        NAME libsndfile
+        GITHUB_REPOSITORY libsndfile/libsndfile
+        GIT_TAG ea9ff56
+        OPTIONS "BUILD_SHARED_LIBS OFF"
+)
 
-target_link_libraries(mizu_thirdparty INTERFACE
-        SDL3::SDL3
-        SDL3_mixer::SDL3_mixer
-        glad_gl_core_mx_33
-        glm::glm
-        OpenAL::OpenAL
+CPMAddPackage(
+        NAME pcg
+        GITHUB_REPOSITORY imneme/pcg-cpp
+        GIT_TAG 428802d
+        DOWNLOAD_ONLY YES
+)
+
+CPMAddPackage(
+        NAME imgui
+        GITHUB_REPOSITORY ocornut/imgui
+        GIT_TAG f4d9359
+        DOWNLOAD_ONLY TRUE
+)
+
+add_library(mizu_thirdparty STATIC
+        ${pcg_SOURCE_DIR}/include/pcg_extras.hpp
+        ${pcg_SOURCE_DIR}/include/pcg_random.hpp
+        ${pcg_SOURCE_DIR}/include/pcg_uint128.hpp
+
+        ${imgui_SOURCE_DIR}/imconfig.h
+        ${imgui_SOURCE_DIR}/imgui.h
+        ${imgui_SOURCE_DIR}/imgui_internal.h
+        ${imgui_SOURCE_DIR}/imstb_rectpack.h
+        ${imgui_SOURCE_DIR}/imstb_textedit.h
+        ${imgui_SOURCE_DIR}/imstb_truetype.h
+        ${imgui_SOURCE_DIR}/backends/imgui_impl_opengl3.h
+        ${imgui_SOURCE_DIR}/backends/imgui_impl_sdl3.h
+
+        ${imgui_SOURCE_DIR}/imgui.cpp
+        ${imgui_SOURCE_DIR}/imgui_demo.cpp
+        ${imgui_SOURCE_DIR}/imgui_draw.cpp
+        ${imgui_SOURCE_DIR}/imgui_tables.cpp
+        ${imgui_SOURCE_DIR}/imgui_widgets.cpp
+        ${imgui_SOURCE_DIR}/backends/imgui_impl_opengl3.cpp
+        ${imgui_SOURCE_DIR}/backends/imgui_impl_sdl3.cpp
+)
+
+target_include_directories(mizu_thirdparty PUBLIC
+        ${pcg_SOURCE_DIR}/include
+        ${imgui_SOURCE_DIR}
+        ${imgui_SOURCE_DIR}/backends
+)
+
+target_link_libraries(mizu_thirdparty PUBLIC
         fmt::fmt
-        spdlog::spdlog)
+        spdlog::spdlog
+        glm::glm
+        glad_gl_core_mx_33
+        SndFile::sndfile
+        OpenAL::OpenAL
+        SDL3::SDL3
+)
