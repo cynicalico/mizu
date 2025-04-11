@@ -7,7 +7,7 @@
 
 class Ethereal : public mizu::Application {
 public:
-    Ethereal(mizu::Engine *engine) : Application(engine) {}
+    explicit Ethereal(mizu::Engine *engine) : Application(engine) {}
 
     void update(double dt) override {}
 

@@ -35,9 +35,12 @@ Window &Window::operator=(Window &&other) noexcept {
     return *this;
 }
 
-SDL_GLContext Window::get_context() const { return gl_context_; }
+SDL_GLContext Window::gl_context() const { return gl_context_; }
 
-void Window::make_context_current() { SDL_GL_MakeCurrent(sdl_window_, gl_context_); }
+void Window::make_context_current() {
+    if (!SDL_GL_MakeCurrent(sdl_window_, gl_context_))
+        SPDLOG_ERROR("Failed to make GL context current: {}", SDL_GetError());
+}
 
 void Window::swap() {
     if (!SDL_GL_SwapWindow(sdl_window_))
@@ -213,12 +216,20 @@ std::expected<Window, std::string> window_builder::build() {
         return std::unexpected(window_size_rect_result.error());
     auto window_size_rect = window_size_rect_result.value();
 
-    SDL_SetStringProperty(props_, SDL_PROP_WINDOW_CREATE_TITLE_STRING, title_.c_str());
+    if (!SDL_SetStringProperty(props_, SDL_PROP_WINDOW_CREATE_TITLE_STRING, title_.c_str()))
+        SPDLOG_ERROR("Failed to set SDL property, window create title: {}", SDL_GetError());
 
-    SDL_SetNumberProperty(props_, SDL_PROP_WINDOW_CREATE_X_NUMBER, window_size_rect.x);
-    SDL_SetNumberProperty(props_, SDL_PROP_WINDOW_CREATE_Y_NUMBER, window_size_rect.y);
-    SDL_SetNumberProperty(props_, SDL_PROP_WINDOW_CREATE_WIDTH_NUMBER, window_size_rect.w);
-    SDL_SetNumberProperty(props_, SDL_PROP_WINDOW_CREATE_HEIGHT_NUMBER, window_size_rect.h);
+    if (!SDL_SetNumberProperty(props_, SDL_PROP_WINDOW_CREATE_X_NUMBER, window_size_rect.x))
+        SPDLOG_ERROR("Failed to set SDL property, window create x number: {}", SDL_GetError());
+
+    if (!SDL_SetNumberProperty(props_, SDL_PROP_WINDOW_CREATE_Y_NUMBER, window_size_rect.y))
+        SPDLOG_ERROR("Failed to set SDL property, window create y number: {}", SDL_GetError());
+
+    if (!SDL_SetNumberProperty(props_, SDL_PROP_WINDOW_CREATE_WIDTH_NUMBER, window_size_rect.w))
+        SPDLOG_ERROR("Failed to set SDL property, window create width: {}", SDL_GetError());
+
+    if (!SDL_SetNumberProperty(props_, SDL_PROP_WINDOW_CREATE_HEIGHT_NUMBER, window_size_rect.h))
+        SPDLOG_ERROR("Failed to set SDL property, window create height: {}", SDL_GetError());
 
     auto sdl_window = SDL_CreateWindowWithProperties(props_);
     if (!sdl_window) {

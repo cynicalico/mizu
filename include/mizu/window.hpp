@@ -19,7 +19,7 @@ public:
     Window(Window &&other) noexcept;
     Window &operator=(Window &&other) noexcept;
 
-    SDL_GLContext get_context() const;
+    SDL_GLContext gl_context() const;
     void make_context_current();
 
     void swap();

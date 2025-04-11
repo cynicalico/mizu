@@ -4,7 +4,10 @@ project(mizu LANGUAGES C CXX)
 option(BUILD_SHARED_LIBS "Build using shared libraries" OFF)
 
 set(${PROJECT_NAME}_headers
+        include/mizu/application.hpp
         include/mizu/engine.hpp
+        include/mizu/enum_class_bitops.hpp
+        include/mizu/gl_context.hpp
         include/mizu/log.hpp
         include/mizu/types.hpp
         include/mizu/window.hpp
@@ -12,6 +15,7 @@ set(${PROJECT_NAME}_headers
 
 set(${PROJECT_NAME}_sources
         src/mizu/engine.cpp
+        src/mizu/gl_context.cpp
         src/mizu/window.cpp
 )
 
