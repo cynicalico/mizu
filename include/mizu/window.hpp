@@ -8,7 +8,7 @@
 
 namespace mizu {
 class Window {
-    friend class window_builder;
+    friend class WindowBuilder;
 
 public:
     ~Window();
@@ -37,33 +37,33 @@ private:
     explicit Window(SDL_Window *sdl_window);
 };
 
-class window_builder {
+class WindowBuilder {
 public:
-    window_builder(const std::string &title, Size2d<int> size);
-    explicit window_builder(const std::string &title);
+    WindowBuilder(const std::string &title, Size2d<int> size);
+    explicit WindowBuilder(const std::string &title);
 
-    ~window_builder() = default;
+    ~WindowBuilder() = default;
 
-    window_builder(const window_builder &) = delete;
-    window_builder &operator=(const window_builder &) = delete;
+    WindowBuilder(const WindowBuilder &) = delete;
+    WindowBuilder &operator=(const WindowBuilder &) = delete;
 
-    window_builder(window_builder &&other) noexcept = delete;
-    window_builder &operator=(window_builder &&other) = delete;
+    WindowBuilder(WindowBuilder &&other) noexcept = delete;
+    WindowBuilder &operator=(WindowBuilder &&other) = delete;
 
-    window_builder &fullscreen();
-    window_builder &opengl();
-    window_builder &hidden();
-    window_builder &borderless();
-    window_builder &resizable();
-    window_builder &minimized();
-    window_builder &maximized();
-    window_builder &mouse_grabbed();
+    WindowBuilder &fullscreen();
+    WindowBuilder &opengl();
+    WindowBuilder &hidden();
+    WindowBuilder &borderless();
+    WindowBuilder &resizable();
+    WindowBuilder &minimized();
+    WindowBuilder &maximized();
+    WindowBuilder &mouse_grabbed();
 
     // window_builder &external();
     // window_builder &modal();
 
-    window_builder &high_pixel_density();
-    window_builder &always_on_top();
+    WindowBuilder &high_pixel_density();
+    WindowBuilder &always_on_top();
 
     // window_builder &utility();
     // window_builder &tooltip();
@@ -71,11 +71,11 @@ public:
     // window_builder &vulkan();
     // window_builder &metal();
 
-    window_builder &transparent();
-    window_builder &not_focusable();
+    WindowBuilder &transparent();
+    WindowBuilder &not_focusable();
 
-    window_builder &position(int x, int y);
-    window_builder &display(int idx);
+    WindowBuilder &position(int x, int y);
+    WindowBuilder &display(int idx);
 
     [[nodiscard]] std::expected<Window, std::string> build();
 

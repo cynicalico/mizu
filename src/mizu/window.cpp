@@ -80,9 +80,9 @@ Window::Window(SDL_Window *sdl_window) : sdl_window_(sdl_window) {
     SPDLOG_DEBUG("Created GL context");
 }
 
-window_builder::window_builder(const std::string &title) : window_builder(title, Size2d<int>()) {}
+WindowBuilder::WindowBuilder(const std::string &title) : WindowBuilder(title, Size2d<int>()) {}
 
-window_builder::window_builder(const std::string &title, Size2d<int> size)
+WindowBuilder::WindowBuilder(const std::string &title, Size2d<int> size)
     : title_(title),
       location_(static_cast<int>(SDL_WINDOWPOS_CENTERED), static_cast<int>(SDL_WINDOWPOS_CENTERED), size.w, size.h),
       display_idx_(0) {
@@ -92,49 +92,49 @@ window_builder::window_builder(const std::string &title, Size2d<int> size)
     this->opengl();
 }
 
-window_builder &window_builder::fullscreen() {
+WindowBuilder &WindowBuilder::fullscreen() {
     if (!SDL_SetBooleanProperty(props_, SDL_PROP_WINDOW_CREATE_FULLSCREEN_BOOLEAN, true))
         SPDLOG_ERROR("Failed to set SDL property, window fullscreen: {}", SDL_GetError());
     return *this;
 }
 
-window_builder &window_builder::opengl() {
+WindowBuilder &WindowBuilder::opengl() {
     if (!SDL_SetBooleanProperty(props_, SDL_PROP_WINDOW_CREATE_OPENGL_BOOLEAN, true))
         SPDLOG_ERROR("Failed to set SDL property, window opengl: {}", SDL_GetError());
     return *this;
 }
 
-window_builder &window_builder::hidden() {
+WindowBuilder &WindowBuilder::hidden() {
     if (!SDL_SetBooleanProperty(props_, SDL_PROP_WINDOW_CREATE_HIDDEN_BOOLEAN, true))
         SPDLOG_ERROR("Failed to set SDL property, window hidden: {}", SDL_GetError());
     return *this;
 }
 
-window_builder &window_builder::borderless() {
+WindowBuilder &WindowBuilder::borderless() {
     if (!SDL_SetBooleanProperty(props_, SDL_PROP_WINDOW_CREATE_BORDERLESS_BOOLEAN, true))
         SPDLOG_ERROR("Failed to set SDL property, window borderless: {}", SDL_GetError());
     return *this;
 }
 
-window_builder &window_builder::resizable() {
+WindowBuilder &WindowBuilder::resizable() {
     if (!SDL_SetBooleanProperty(props_, SDL_PROP_WINDOW_CREATE_RESIZABLE_BOOLEAN, true))
         SPDLOG_ERROR("Failed to set SDL property, window resizable: {}", SDL_GetError());
     return *this;
 }
 
-window_builder &window_builder::minimized() {
+WindowBuilder &WindowBuilder::minimized() {
     if (!SDL_SetBooleanProperty(props_, SDL_PROP_WINDOW_CREATE_MINIMIZED_BOOLEAN, true))
         SPDLOG_ERROR("Failed to set SDL property, window minimized: {}", SDL_GetError());
     return *this;
 }
 
-window_builder &window_builder::maximized() {
+WindowBuilder &WindowBuilder::maximized() {
     if (!SDL_SetBooleanProperty(props_, SDL_PROP_WINDOW_CREATE_MAXIMIZED_BOOLEAN, true))
         SPDLOG_ERROR("Failed to set SDL property, window maximized: {}", SDL_GetError());
     return *this;
 }
 
-window_builder &window_builder::mouse_grabbed() {
+WindowBuilder &WindowBuilder::mouse_grabbed() {
     if (!SDL_SetBooleanProperty(props_, SDL_PROP_WINDOW_CREATE_MOUSE_GRABBED_BOOLEAN, true))
         SPDLOG_ERROR("Failed to set SDL property, window mouse grabbed: {}", SDL_GetError());
     return *this;
@@ -150,13 +150,13 @@ window_builder &window_builder::mouse_grabbed() {
 //     return *this;
 // }
 
-window_builder &window_builder::high_pixel_density() {
+WindowBuilder &WindowBuilder::high_pixel_density() {
     if (!SDL_SetBooleanProperty(props_, SDL_PROP_WINDOW_CREATE_HIGH_PIXEL_DENSITY_BOOLEAN, true))
         SPDLOG_ERROR("Failed to set SDL property, window high pixel density: {}", SDL_GetError());
     return *this;
 }
 
-window_builder &window_builder::always_on_top() {
+WindowBuilder &WindowBuilder::always_on_top() {
     if (!SDL_SetBooleanProperty(props_, SDL_PROP_WINDOW_CREATE_ALWAYS_ON_TOP_BOOLEAN, true))
         SPDLOG_ERROR("Failed to set SDL property, window always on top: {}", SDL_GetError());
     return *this;
@@ -187,30 +187,30 @@ window_builder &window_builder::always_on_top() {
 //     return *this;
 // }
 
-window_builder &window_builder::transparent() {
+WindowBuilder &WindowBuilder::transparent() {
     if (!SDL_SetBooleanProperty(props_, SDL_PROP_WINDOW_CREATE_TRANSPARENT_BOOLEAN, true))
         SPDLOG_ERROR("Failed to set SDL property, window transparent: {}", SDL_GetError());
     return *this;
 }
 
-window_builder &window_builder::not_focusable() {
+WindowBuilder &WindowBuilder::not_focusable() {
     if (!SDL_SetBooleanProperty(props_, SDL_PROP_WINDOW_CREATE_FOCUSABLE_BOOLEAN, false))
         SPDLOG_ERROR("Failed to set SDL property, window not focusable: {}", SDL_GetError());
     return *this;
 }
 
-window_builder &window_builder::position(int x, int y) {
+WindowBuilder &WindowBuilder::position(int x, int y) {
     location_.x = x;
     location_.y = y;
     return *this;
 }
 
-window_builder &window_builder::display(int idx) {
+WindowBuilder &WindowBuilder::display(int idx) {
     display_idx_ = idx;
     return *this;
 }
 
-std::expected<Window, std::string> window_builder::build() {
+std::expected<Window, std::string> WindowBuilder::build() {
     auto window_size_rect_result = get_window_size_rect();
     if (!window_size_rect_result)
         return std::unexpected(window_size_rect_result.error());
@@ -241,7 +241,7 @@ std::expected<Window, std::string> window_builder::build() {
     return Window(sdl_window);
 }
 
-std::expected<SDL_DisplayID, std::string> window_builder::get_display_id() {
+std::expected<SDL_DisplayID, std::string> WindowBuilder::get_display_id() {
     int display_count;
     auto displays = SDL_GetDisplays(&display_count);
     if (!displays)
@@ -258,7 +258,7 @@ std::expected<SDL_DisplayID, std::string> window_builder::get_display_id() {
     return display_id;
 }
 
-std::expected<SDL_Rect, std::string> window_builder::get_window_size_rect() {
+std::expected<SDL_Rect, std::string> WindowBuilder::get_window_size_rect() {
     auto display_id_result = get_display_id();
     if (!display_id_result)
         return std::unexpected(display_id_result.error());

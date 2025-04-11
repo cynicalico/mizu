@@ -16,7 +16,7 @@ void gl_debug_message_callback(
         const void *userParam
 );
 
-Engine::Engine(const std::string &window_title, const Size2d<int> window_size, const window_build_f &f)
+Engine::Engine(const std::string &window_title, const Size2d<int> window_size, const WindowBuildFunc &f)
     : gl(), running_(true) {
 #if !defined(NDEBUG)
     spdlog::set_level(spdlog::level::debug);
@@ -42,7 +42,7 @@ Engine::Engine(const std::string &window_title, const Size2d<int> window_size, c
     GlAttr::set_context_flags().debug().set();
 #endif
 
-    auto builder = window_builder(window_title, window_size);
+    auto builder = WindowBuilder(window_title, window_size);
     auto window_result = f(builder.opengl().high_pixel_density());
     if (!window_result) {
         SPDLOG_ERROR("Failed to build window: {}", window_result.error());
@@ -74,7 +74,7 @@ Engine::Engine(const std::string &window_title, const Size2d<int> window_size, c
     );
 }
 
-Engine::Engine(const std::string &window_title, const window_build_f &f) : Engine(window_title, Size2d(0, 0), f) {}
+Engine::Engine(const std::string &window_title, const WindowBuildFunc &f) : Engine(window_title, Size2d(0, 0), f) {}
 
 Engine::~Engine() {
     window.reset();

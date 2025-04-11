@@ -12,15 +12,15 @@
 
 namespace mizu {
 class Engine {
-    using window_build_f =
-            std::function<std::invoke_result_t<decltype(&window_builder::build), window_builder>(window_builder &)>;
+    using WindowBuildFunc =
+            std::function<std::invoke_result_t<decltype(&WindowBuilder::build), WindowBuilder>(WindowBuilder &)>;
 
 public:
     std::unique_ptr<Window> window{nullptr};
     GladGLContext gl;
 
-    Engine(const std::string &window_title, Size2d<int> window_size, const window_build_f &f);
-    Engine(const std::string &window_title, const window_build_f &f);
+    Engine(const std::string &window_title, Size2d<int> window_size, const WindowBuildFunc &f);
+    Engine(const std::string &window_title, const WindowBuildFunc &f);
 
     ~Engine();
 
