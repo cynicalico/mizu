@@ -4,7 +4,7 @@
 
 ### Windows
 
-Use vcpkg
+Use [vcpkg](https://github.com/microsoft/vcpkg)
 ```pwsh
 # Powershell
 
