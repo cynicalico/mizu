@@ -1,8 +1,6 @@
 #include "mizu/engine.hpp"
-
-#include "mizu/gl_context.hpp"
-
 #include <SDL3/SDL.h>
+#include "gloo/sdl3/gl_attr.hpp"
 #include "mizu/log.hpp"
 
 namespace mizu {
@@ -17,7 +15,7 @@ void gl_debug_message_callback(
 );
 
 Engine::Engine(const std::string &window_title, const Size2d<int> window_size, const WindowBuildFunc &f)
-    : gl(), running_(true) {
+    : running_(true) {
 #if !defined(NDEBUG)
     spdlog::set_level(spdlog::level::debug);
 #endif
@@ -35,11 +33,11 @@ Engine::Engine(const std::string &window_title, const Size2d<int> window_size, c
             SDL_VERSIONNUM_MICRO(sdl_version)
     );
 
-    GlAttr::set_context_version(GlContextVersion(3, 3));
-    GlAttr::set_context_profile(GlProfile::Core);
+    gloo::sdl3::GlAttr::set_context_version(gloo::GlContextVersion(4, 3));
+    gloo::sdl3::GlAttr::set_context_profile(gloo::sdl3::GlProfile::Core);
 
 #if !defined(NDEBUG)
-    GlAttr::set_context_flags().debug().set();
+    gloo::sdl3::GlAttr::set_context_flags().debug().set();
 #endif
 
     auto builder = WindowBuilder(window_title, window_size);
@@ -53,24 +51,25 @@ Engine::Engine(const std::string &window_title, const Size2d<int> window_size, c
 
     window->make_context_current();
 
-    auto glad_version = gladLoadGLContext(&gl, SDL_GL_GetProcAddress);
-    if (!glad_version) {
+    auto glad_version_opt = gl.load(SDL_GL_GetProcAddress);
+    if (!glad_version_opt) {
         SPDLOG_ERROR("Failed to initialize OpenGL context");
         SDL_Quit();
         std::exit(EXIT_FAILURE);
     }
 
 #if !defined(NDEBUG)
-    gl.Enable(GL_DEBUG_OUTPUT);
-    gl.DebugMessageCallback(gl_debug_message_callback, nullptr);
+    gl.enable(gloo::GlCapability::DebugOutput);
+    gl.enable(gloo::GlCapability::DebugOutputSync);
+    gl.ctx.DebugMessageCallback(gl_debug_message_callback, nullptr);
 #endif
 
     SPDLOG_DEBUG(
             "Loaded OpenGL v{}.{}, vendor: {}, renderer: {}",
-            GLAD_VERSION_MAJOR(glad_version),
-            GLAD_VERSION_MINOR(glad_version),
-            reinterpret_cast<const char *>(gl.GetString(GL_VENDOR)),
-            reinterpret_cast<const char *>(gl.GetString(GL_RENDERER))
+            glad_version_opt->major,
+            glad_version_opt->minor,
+            reinterpret_cast<const char *>(gl.ctx.GetString(GL_VENDOR)),
+            reinterpret_cast<const char *>(gl.ctx.GetString(GL_RENDERER))
     );
 }
 

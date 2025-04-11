@@ -1,7 +1,7 @@
-#include "mizu/gl_context.hpp"
+#include "gloo/sdl3/gl_attr.hpp"
 #include "mizu/log.hpp"
 
-namespace mizu {
+namespace gloo::sdl3 {
 std::optional<int> GlAttr::red_bits() {
     int v;
     if (!SDL_GL_GetAttribute(SDL_GL_RED_SIZE, &v)) {
@@ -340,33 +340,4 @@ void GlAttr::set_error_checking_disabled(bool v) {
     if (!SDL_GL_SetAttribute(SDL_GL_CONTEXT_NO_ERROR, v ? 1 : 0))
         SPDLOG_ERROR("Failed to set context error checking state: {}", SDL_GetError());
 }
-
-GlContextFlagsBuilder::GlContextFlagsBuilder() : flags_(GlContextFlags::None) {}
-
-GlContextFlagsBuilder &GlContextFlagsBuilder::debug() {
-    flags_ |= GlContextFlags::Debug;
-    return *this;
-}
-
-GlContextFlagsBuilder &GlContextFlagsBuilder::forward_compatible() {
-    flags_ |= GlContextFlags::ForwardCompatible;
-    return *this;
-}
-
-GlContextFlagsBuilder &GlContextFlagsBuilder::robust_access() {
-    flags_ |= GlContextFlags::RobustAccess;
-    return *this;
-}
-
-GlContextFlagsBuilder &GlContextFlagsBuilder::reset_isolation() {
-    flags_ |= GlContextFlags::ResetIsolation;
-    return *this;
-}
-
-void GlContextFlagsBuilder::set() {
-    if (!SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, static_cast<int>(flags_)))
-        SPDLOG_ERROR("Failed to set context flags: {}", SDL_GetError());
-}
-
-
-} // namespace mizu
+} // namespace gloo::sdl3

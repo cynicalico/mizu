@@ -2,10 +2,10 @@
 #define MIZU_ENGINE_HPP
 
 #include <functional>
-#include <glad/gl.h>
 #include <memory>
 #include <optional>
 #include <string>
+#include "gloo/context.hpp"
 #include "mizu/application.hpp"
 #include "mizu/types.hpp"
 #include "mizu/window.hpp"
@@ -17,7 +17,7 @@ class Engine {
 
 public:
     std::unique_ptr<Window> window{nullptr};
-    GladGLContext gl;
+    gloo::GlContext gl;
 
     Engine(const std::string &window_title, Size2d<int> window_size, const WindowBuildFunc &f);
     Engine(const std::string &window_title, const WindowBuildFunc &f);

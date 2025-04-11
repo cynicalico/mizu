@@ -12,8 +12,8 @@ public:
     void update(double dt) override {}
 
     void draw() override {
-        engine->gl.ClearColor(1.0f, 0.0f, 0.0f, 1.0f);
-        engine->gl.Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        engine->gl.ctx.ClearColor(1.0f, 0.0f, 0.0f, 1.0f);
+        engine->gl.ctx.Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
 };
 

@@ -1,40 +1,25 @@
-#ifndef MIZU_GL_CONTEXT_HPP
-#define MIZU_GL_CONTEXT_HPP
-#include "enum_class_bitops.hpp"
-
+#ifndef GLOO_SDL3_GL_ATTR_HPP
+#define GLOO_SDL3_GL_ATTR_HPP
 
 #include <SDL3/SDL_video.h>
 #include <optional>
+#include "gloo/sdl3/gl_context_flags.hpp"
+#include "gloo/context.hpp"
 
-namespace mizu {
+namespace gloo::sdl3 {
 
-struct GlContextVersion {
-    int major;
-    int minor;
-
-    GlContextVersion(int major, int minor) : major(major), minor(minor) {}
-};
-
-enum class GlProfile {
+enum class GlProfile : int {
     Core = SDL_GL_CONTEXT_PROFILE_CORE,
     Compatibility = SDL_GL_CONTEXT_PROFILE_COMPATIBILITY,
     Es = SDL_GL_CONTEXT_PROFILE_ES,
 };
 
-enum class GlContextFlags {
-    None = 0,
-    Debug = SDL_GL_CONTEXT_DEBUG_FLAG,
-    ForwardCompatible = SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG,
-    RobustAccess = SDL_GL_CONTEXT_ROBUST_ACCESS_FLAG,
-    ResetIsolation = SDL_GL_CONTEXT_RESET_ISOLATION_FLAG
-};
-
-enum class GlContextRelease {
+enum class GlContextRelease : int {
     None = SDL_GL_CONTEXT_RELEASE_BEHAVIOR_NONE,
     Flush = SDL_GL_CONTEXT_RELEASE_BEHAVIOR_FLUSH,
 };
 
-enum class GlContextResetNotification {
+enum class GlContextResetNotification : int {
     None = SDL_GL_CONTEXT_RESET_NO_NOTIFICATION,
     LoseContext = SDL_GL_CONTEXT_RESET_LOSE_CONTEXT,
 };
@@ -95,23 +80,6 @@ public:
     static void set_error_checking_disabled(bool v);
 };
 
-class GlContextFlagsBuilder {
-public:
-    GlContextFlagsBuilder();
+} // namespace gloo::sdl3
 
-    GlContextFlagsBuilder &debug();
-    GlContextFlagsBuilder &forward_compatible();
-    GlContextFlagsBuilder &robust_access();
-    GlContextFlagsBuilder &reset_isolation();
-
-    void set();
-
-private:
-    GlContextFlags flags_;
-};
-
-} // namespace mizu
-
-ENUM_CLASS_ENABLE_BITOPS(mizu::GlContextFlags);
-
-#endif // MIZU_GL_CONTEXT_HPP
+#endif //GLOO_SDL3_GL_ATTR_HPP
