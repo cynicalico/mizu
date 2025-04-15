@@ -14,6 +14,7 @@ set(${PROJECT_NAME}_headers
         include/mizu/log.hpp
         include/mizu/types.hpp
         include/mizu/window.hpp
+        include/mizu/ds/priority_queue.hpp
 )
 
 set(${PROJECT_NAME}_sources
