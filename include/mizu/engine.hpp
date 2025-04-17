@@ -7,6 +7,7 @@
 #include <string>
 #include "gloo/context.hpp"
 #include "mizu/application.hpp"
+#include "mizu/id_mgr.hpp"
 #include "mizu/types.hpp"
 #include "mizu/window.hpp"
 
@@ -16,8 +17,10 @@ class Engine {
             std::function<std::invoke_result_t<decltype(&WindowBuilder::build), WindowBuilder>(WindowBuilder &)>;
 
 public:
+    IdMgr ids{};
+    gloo::GlContext gl{};
+
     std::unique_ptr<Window> window{nullptr};
-    gloo::GlContext gl;
 
     Engine(const std::string &window_title, Size2d<int> window_size, const WindowBuildFunc &f);
     Engine(const std::string &window_title, const WindowBuildFunc &f);
@@ -39,7 +42,7 @@ private:
 template<typename T>
     requires std::derived_from<T, Application>
 void Engine::mainloop() {
-    T application = T(this);
+    auto application = T(this);
 
     do {
         poll_events_();
