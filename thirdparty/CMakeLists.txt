@@ -22,9 +22,9 @@ CPMAddPackage(
 
 add_subdirectory(${glad2_SOURCE_DIR}/cmake ${glad2_BINARY_DIR})
 if (WIN32)
-    glad_add_library(glad_gl_core_mx_33 STATIC REPRODUCIBLE MX API gl:core=3.3 wgl=1.0)
+    glad_add_library(glad_gl_core_mx_43 STATIC REPRODUCIBLE MX API gl:core=4.3 wgl=1.0)
 else ()
-    glad_add_library(glad_gl_core_mx_33 STATIC REPRODUCIBLE MX API gl:core=3.3 egl=1.5)
+    glad_add_library(glad_gl_core_mx_43 STATIC REPRODUCIBLE MX API gl:core=4.3 egl=1.5)
 endif ()
 
 CPMAddPackage(
@@ -113,7 +113,7 @@ target_link_libraries(mizu_thirdparty PUBLIC
         fmt::fmt
         spdlog::spdlog
         glm::glm
-        glad_gl_core_mx_33
+        glad_gl_core_mx_43
         SndFile::sndfile
         OpenAL::OpenAL
         SDL3::SDL3
