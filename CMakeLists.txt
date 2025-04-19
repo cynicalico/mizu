@@ -9,11 +9,11 @@ set(${PROJECT_NAME}_headers
         include/gloo/sdl3/gl_context_flags.hpp
 
         include/mizu/application.hpp
+        include/mizu/callback_mgr.hpp
         include/mizu/engine.hpp
-        include/mizu/enum_class_bitops.hpp
-        include/mizu/id_mgr.hpp
+        include/mizu/enum_class_helpers.hpp
         include/mizu/log.hpp
-        include/mizu/module.hpp
+        include/mizu/payloads.hpp
         include/mizu/types.hpp
         include/mizu/window.hpp
         include/mizu/ds/priority_queue.hpp
@@ -24,8 +24,8 @@ set(${PROJECT_NAME}_sources
         src/gloo/sdl3/gl_attr.cpp
         src/gloo/sdl3/gl_context_flags.cpp
 
+        src/mizu/application.cpp
         src/mizu/engine.cpp
-        src/mizu/id_mgr.cpp
         src/mizu/window.cpp
 )
 

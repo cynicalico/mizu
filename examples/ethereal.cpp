@@ -23,7 +23,5 @@ void Ethereal::draw() {
 }
 
 int main(int, char *[]) {
-    mizu::Engine("ethereal", mizu::Size2d(1280, 720), [](auto &builder) {
-        return builder.build();
-    }).mainloop<Ethereal>();
+    mizu::Engine("ethereal", mizu::Size2d(1280, 720), [](auto &) {}).mainloop<Ethereal>();
 }

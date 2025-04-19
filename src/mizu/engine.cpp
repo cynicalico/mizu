@@ -1,5 +1,7 @@
 #include "mizu/engine.hpp"
 #include <SDL3/SDL.h>
+
+#include <utility>
 #include "gloo/sdl3/gl_attr.hpp"
 #include "mizu/log.hpp"
 
@@ -14,8 +16,8 @@ void gl_debug_message_callback(
         const void *userParam
 );
 
-Engine::Engine(const std::string &window_title, const Size2d<int> window_size, const WindowBuildFunc &f)
-    : running_(true) {
+Engine::Engine(const std::string &window_title, Size2d<int> window_size, WindowBuildFunc f)
+    : running_(true), window_builder_params_(window_title, window_size, std::move(f)) {
 #if !defined(NDEBUG)
     spdlog::set_level(spdlog::level::debug);
 #endif
@@ -32,7 +34,18 @@ Engine::Engine(const std::string &window_title, const Size2d<int> window_size, c
             SDL_VERSIONNUM_MINOR(sdl_version),
             SDL_VERSIONNUM_MICRO(sdl_version)
     );
+}
 
+Engine::Engine(const std::string &window_title, WindowBuildFunc f) : Engine(window_title, Size2d(0, 0), std::move(f)) {}
+
+Engine::~Engine() {
+    window.reset();
+
+    SDL_Quit();
+    SPDLOG_DEBUG("Quit SDL");
+}
+
+void Engine::initialize_systems_() {
     gloo::sdl3::GlAttr::set_context_version(gloo::GlContextVersion(4, 3));
     gloo::sdl3::GlAttr::set_context_profile(gloo::sdl3::GlProfile::Core);
 
@@ -40,8 +53,12 @@ Engine::Engine(const std::string &window_title, const Size2d<int> window_size, c
     gloo::sdl3::GlAttr::set_context_flags().debug().set();
 #endif
 
-    auto builder = WindowBuilder(window_title, window_size);
-    auto window_result = f(builder.opengl().high_pixel_density());
+    auto builder = WindowBuilder(window_builder_params_.window_title, window_builder_params_.window_size);
+
+    builder.opengl().high_pixel_density();
+    window_builder_params_.build(builder);
+
+    auto window_result = builder.build(callbacks);
     if (!window_result) {
         SPDLOG_ERROR("Failed to build window: {}", window_result.error());
         SDL_Quit();
@@ -73,16 +90,6 @@ Engine::Engine(const std::string &window_title, const Size2d<int> window_size, c
     );
 }
 
-Engine::Engine(const std::string &window_title, const WindowBuildFunc &f) : Engine(window_title, Size2d(0, 0), f) {}
-
-Engine::~Engine() {
-    window.reset();
-
-    SDL_Quit();
-    SPDLOG_DEBUG("Quit SDL");
-}
-
-bool Engine::is_running_() const { return running_; }
 
 void Engine::poll_events_() {
     SDL_Event event;
@@ -118,6 +125,7 @@ void gl_debug_message_callback(
 #define STRINGIFY(e)                                                                                                   \
     case e:                                                                                                            \
         return #e;
+
     const std::string source_str = std::invoke([source] {
         switch (source) {
             STRINGIFY(GL_DEBUG_SOURCE_API)
@@ -163,6 +171,7 @@ void gl_debug_message_callback(
     default:
         break; // won't happen
     }
+
 #undef STRINGIFY
 }
 } // namespace mizu

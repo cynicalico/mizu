@@ -4,7 +4,8 @@
 #include <SDL3/SDL_video.h>
 #include <expected>
 #include <string>
-#include "types.hpp"
+#include "mizu/callback_mgr.hpp"
+#include "mizu/types.hpp"
 
 namespace mizu {
 class Window {
@@ -31,10 +32,13 @@ public:
     void set_pos(Pos2d<int> pos);
 
 private:
+    CallbackMgr &callbacks_;
+    std::size_t callback_id_;
+
     SDL_Window *sdl_window_;
     SDL_GLContext gl_context_;
 
-    explicit Window(SDL_Window *sdl_window);
+    explicit Window(SDL_Window *sdl_window, CallbackMgr &callbacks);
 };
 
 class WindowBuilder {
@@ -77,7 +81,7 @@ public:
     WindowBuilder &position(int x, int y);
     WindowBuilder &display(int idx);
 
-    [[nodiscard]] std::expected<Window, std::string> build();
+    [[nodiscard]] std::expected<Window, std::string> build(CallbackMgr &callbacks);
 
 private:
     std::string title_;

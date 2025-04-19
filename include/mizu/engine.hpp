@@ -7,23 +7,23 @@
 #include <string>
 #include "gloo/context.hpp"
 #include "mizu/application.hpp"
-#include "mizu/id_mgr.hpp"
+#include "mizu/callback_mgr.hpp"
+#include "mizu/payloads.hpp"
 #include "mizu/types.hpp"
 #include "mizu/window.hpp"
 
 namespace mizu {
 class Engine {
-    using WindowBuildFunc =
-            std::function<std::invoke_result_t<decltype(&WindowBuilder::build), WindowBuilder>(WindowBuilder &)>;
+    using WindowBuildFunc = std::function<void(WindowBuilder &)>;
 
 public:
-    IdMgr ids{};
     gloo::GlContext gl{};
+    CallbackMgr callbacks{};
 
     std::unique_ptr<Window> window{nullptr};
 
-    Engine(const std::string &window_title, Size2d<int> window_size, const WindowBuildFunc &f);
-    Engine(const std::string &window_title, const WindowBuildFunc &f);
+    Engine(const std::string& window_title, Size2d<int> window_size, WindowBuildFunc f);
+    Engine(const std::string &window_title, WindowBuildFunc f);
 
     ~Engine();
 
@@ -34,7 +34,14 @@ public:
 private:
     bool running_;
 
-    bool is_running_() const;
+    struct WindowBuilderParams_ {
+        std::string window_title;
+        Size2d<int> window_size;
+        WindowBuildFunc build;
+    };
+
+    WindowBuilderParams_ window_builder_params_;
+    void initialize_systems_();
 
     void poll_events_();
 };
@@ -42,16 +49,23 @@ private:
 template<typename T>
     requires std::derived_from<T, Application>
 void Engine::mainloop() {
+    initialize_systems_();
+
     auto application = T(this);
 
     do {
         poll_events_();
 
-        application.update(0.0);
-        application.draw();
+        callbacks.pub_nowait<PPreUpdate>();
+        callbacks.pub_nowait<PUpdate>(0.0);
+        callbacks.pub_nowait<PPostUpdate>();
 
-        window->swap();
-    } while (is_running_());
+        callbacks.pub_nowait<PPreDraw>();
+        callbacks.pub_nowait<PDraw>();
+        callbacks.pub_nowait<PPostDraw>();
+
+        callbacks.pub_nowait<PPresent>();
+    } while (running_);
 }
 } // namespace mizu
 

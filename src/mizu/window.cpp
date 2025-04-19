@@ -1,6 +1,7 @@
 #include "mizu/window.hpp"
 #include <SDL3/SDL.h>
 #include "mizu/log.hpp"
+#include "mizu/payloads.hpp"
 
 namespace mizu {
 Window::~Window() {
@@ -19,18 +20,30 @@ Window::~Window() {
     }
 }
 
-Window::Window(Window &&other) noexcept : sdl_window_(other.sdl_window_), gl_context_(other.gl_context_) {
+Window::Window(Window &&other) noexcept
+    : callbacks_(other.callbacks_), callback_id_(other.callback_id_), sdl_window_(other.sdl_window_),
+      gl_context_(other.gl_context_) {
+    other.callback_id_ = 0;
     other.sdl_window_ = nullptr;
     other.gl_context_ = nullptr;
+
+    callbacks_.sub<PPresent>(callback_id_, [&](const auto &) { swap(); });
 }
 
 Window &Window::operator=(Window &&other) noexcept {
     if (this != &other) {
-        sdl_window_ = other.sdl_window_;
-        gl_context_ = other.gl_context_;
+        std::swap(callbacks_, other.callbacks_);
 
+        callback_id_ = other.callback_id_;
+        other.callback_id_ = 0;
+
+        sdl_window_ = other.sdl_window_;
         other.sdl_window_ = nullptr;
+
+        gl_context_ = other.gl_context_;
         other.gl_context_ = nullptr;
+
+        callbacks_.sub<PPresent>(callback_id_, [&](const auto &) { swap(); });
     }
     return *this;
 }
@@ -71,13 +84,17 @@ void Window::set_pos(Pos2d<int> pos) {
         SPDLOG_ERROR("Failed to set pos of window: {}", SDL_GetError());
 }
 
-Window::Window(SDL_Window *sdl_window) : sdl_window_(sdl_window) {
+Window::Window(SDL_Window *sdl_window, CallbackMgr &callbacks) : callbacks_(callbacks), sdl_window_(sdl_window) {
     gl_context_ = SDL_GL_CreateContext(sdl_window);
     if (!gl_context_) {
         SPDLOG_ERROR("Failed to create GL context: {}", SDL_GetError());
         std::exit(EXIT_FAILURE);
     }
     SPDLOG_DEBUG("Created GL context");
+
+    callback_id_ = callbacks.reg();
+
+    callbacks_.sub<PPresent>(callback_id_, [&](const auto &) { swap(); });
 }
 
 WindowBuilder::WindowBuilder(const std::string &title) : WindowBuilder(title, Size2d<int>()) {}
@@ -210,7 +227,7 @@ WindowBuilder &WindowBuilder::display(int idx) {
     return *this;
 }
 
-std::expected<Window, std::string> WindowBuilder::build() {
+std::expected<Window, std::string> WindowBuilder::build(CallbackMgr &callbacks) {
     auto window_size_rect_result = get_window_size_rect();
     if (!window_size_rect_result)
         return std::unexpected(window_size_rect_result.error());
@@ -238,7 +255,7 @@ std::expected<Window, std::string> WindowBuilder::build() {
     }
     SPDLOG_DEBUG("Created SDL window");
 
-    return Window(sdl_window);
+    return Window(sdl_window, callbacks);
 }
 
 std::expected<SDL_DisplayID, std::string> WindowBuilder::get_display_id() {

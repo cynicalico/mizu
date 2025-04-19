@@ -1,23 +1,25 @@
 #ifndef MIZU_APPLICATION_HPP
 #define MIZU_APPLICATION_HPP
 
-#include "mizu/module.hpp"
+#include <cstdlib>
 
 namespace mizu {
 class Engine;
 
-class Application : public Module {
+class Application {
 public:
     Engine *engine;
 
-    explicit Application(Engine *engine) : engine(engine) {}
-    ~Application() override { engine = nullptr; }
+    explicit Application(Engine *engine);
 
-    std::string name() const override { return "mizu::Application"; }
+    virtual ~Application() { engine = nullptr; }
 
     virtual void update(double dt) = 0;
 
     virtual void draw() = 0;
+
+protected:
+    std::size_t callback_id{};
 };
 } // namespace mizu
 

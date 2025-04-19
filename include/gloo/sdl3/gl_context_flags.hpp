@@ -2,7 +2,7 @@
 #define GLOO_SDL3_GL_CONTEXT_FLAGS_HPP
 
 #include <SDL3/SDL_video.h>
-#include "mizu/enum_class_bitops.hpp"
+#include "mizu/enum_class_helpers.hpp"
 
 namespace gloo::sdl3 {
 
@@ -29,8 +29,8 @@ private:
     GlContextFlags flags_;
 };
 
-} // namespace gloo:sdl3
+} // namespace gloo::sdl3
 
 ENUM_CLASS_ENABLE_BITOPS(gloo::sdl3::GlContextFlags);
 
-#endif //GLOO_SDL3_GL_CONTEXT_FLAGS_HPP
+#endif // GLOO_SDL3_GL_CONTEXT_FLAGS_HPP

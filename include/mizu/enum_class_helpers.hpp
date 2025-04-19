@@ -1,7 +1,22 @@
 #ifndef MIZU_ENUM_CLASS_BITOPS_HPP
 #define MIZU_ENUM_CLASS_BITOPS_HPP
 
+#include <ranges>
 #include <type_traits>
+
+/* Enum class iteration
+ * Requirements:
+ * 1. Enums must have a numeric underlying type
+ * 2. There must be no gaps in the underlying values (i.e., 1, 2, 3 is fine, 1, 2, 4 is not)
+ */
+
+constexpr inline auto enum_range = [](auto front, auto back) {
+    return std::views::iota(std::to_underlying(front), std::to_underlying(back) + 1) |
+           std::views::transform([](auto e) { return decltype(front)(e); });
+};
+
+/* Enum class bitmask operations
+ */
 
 template<typename Enum>
 struct MizuEnableBitops {
