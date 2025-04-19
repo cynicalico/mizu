@@ -1,8 +1,6 @@
 #include <glad/gl.h>
-#include "mizu/application.hpp"
 #include "mizu/engine.hpp"
 #include "mizu/log.hpp"
-#include "mizu/window.hpp"
 
 class Ethereal final : public mizu::Application {
 public:

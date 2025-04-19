@@ -17,4 +17,7 @@ bool GlContext::is_enabled(GlCapability cap) const { return ctx.IsEnabled(static
 void GlContext::blend_func(GlBlendFunc sfactor, GlBlendFunc dfactor) {
     ctx.BlendFunc(static_cast<GLenum>(sfactor), static_cast<GLenum>(dfactor));
 }
+void GlContext::debug_message_callback(GLDEBUGPROC callback, const void *user_param) {
+    ctx.DebugMessageCallback(callback, user_param);
+}
 } // namespace gloo

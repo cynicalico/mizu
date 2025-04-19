@@ -16,8 +16,9 @@ void gl_debug_message_callback(
         const void *userParam
 );
 
-Engine::Engine(const std::string &window_title, Size2d<int> window_size, WindowBuildFunc f)
-    : running_(true), window_builder_params_(window_title, window_size, std::move(f)) {
+Engine::Engine(const std::string &window_title, Size2d<int> window_size, WindowBuildFunc f) : running_(true) {
+    register_callbacks_();
+
 #if !defined(NDEBUG)
     spdlog::set_level(spdlog::level::debug);
 #endif
@@ -34,18 +35,7 @@ Engine::Engine(const std::string &window_title, Size2d<int> window_size, WindowB
             SDL_VERSIONNUM_MINOR(sdl_version),
             SDL_VERSIONNUM_MICRO(sdl_version)
     );
-}
 
-Engine::Engine(const std::string &window_title, WindowBuildFunc f) : Engine(window_title, Size2d(0, 0), std::move(f)) {}
-
-Engine::~Engine() {
-    window.reset();
-
-    SDL_Quit();
-    SPDLOG_DEBUG("Quit SDL");
-}
-
-void Engine::initialize_systems_() {
     gloo::sdl3::GlAttr::set_context_version(gloo::GlContextVersion(4, 3));
     gloo::sdl3::GlAttr::set_context_profile(gloo::sdl3::GlProfile::Core);
 
@@ -53,10 +43,8 @@ void Engine::initialize_systems_() {
     gloo::sdl3::GlAttr::set_context_flags().debug().set();
 #endif
 
-    auto builder = WindowBuilder(window_builder_params_.window_title, window_builder_params_.window_size);
-
-    builder.opengl().high_pixel_density();
-    window_builder_params_.build(builder);
+    auto builder = WindowBuilder(window_title, window_size);
+    f(builder.opengl().high_pixel_density());
 
     auto window_result = builder.build(callbacks);
     if (!window_result) {
@@ -67,7 +55,6 @@ void Engine::initialize_systems_() {
     window = std::make_unique<Window>(std::move(window_result.value()));
 
     window->make_context_current();
-
     auto glad_version_opt = gl.load(SDL_GL_GetProcAddress);
     if (!glad_version_opt) {
         SPDLOG_ERROR("Failed to initialize OpenGL context");
@@ -78,7 +65,7 @@ void Engine::initialize_systems_() {
 #if !defined(NDEBUG)
     gl.enable(gloo::GlCapability::DebugOutput);
     gl.enable(gloo::GlCapability::DebugOutputSync);
-    gl.ctx.DebugMessageCallback(gl_debug_message_callback, nullptr);
+    gl.debug_message_callback(gl_debug_message_callback, nullptr);
 #endif
 
     SPDLOG_DEBUG(
@@ -88,29 +75,93 @@ void Engine::initialize_systems_() {
             reinterpret_cast<const char *>(gl.ctx.GetString(GL_VENDOR)),
             reinterpret_cast<const char *>(gl.ctx.GetString(GL_RENDERER))
     );
+
+    input = std::make_unique<InputMgr>(callbacks);
 }
 
+Engine::Engine(const std::string &window_title, WindowBuildFunc f) : Engine(window_title, Size2d(0, 0), std::move(f)) {}
+
+Engine::~Engine() {
+    unregister_callbacks_();
+
+    window.reset();
+
+    SDL_Quit();
+    SPDLOG_DEBUG("Quit SDL");
+}
 
 void Engine::poll_events_() {
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
         switch (event.type) {
-        case SDL_EVENT_QUIT:
-            running_ = false;
-            break;
         case SDL_EVENT_KEY_DOWN:
-            switch (event.key.key) {
-            case SDLK_ESCAPE:
-                running_ = false;
-                break;
-            default:
-                break;
-            }
+            callbacks.pub<PEventKeyDown>(
+                    event.key.timestamp, event.key.scancode, event.key.key, event.key.mod, event.key.repeat
+            );
+            break;
+        case SDL_EVENT_KEY_UP:
+            callbacks.pub<PEventKeyUp>(event.key.timestamp, event.key.scancode, event.key.key, event.key.mod);
+            break;
+        case SDL_EVENT_MOUSE_MOTION:
+            callbacks.pub<PEventMouseMotion>(
+                    event.motion.timestamp, event.motion.x, event.motion.y, event.motion.xrel, event.motion.yrel
+            );
+            break;
+        case SDL_EVENT_MOUSE_BUTTON_DOWN:
+            callbacks.pub<PEventMouseButtonDown>(
+                    event.button.timestamp, event.button.button, event.button.clicks, event.button.x, event.button.y
+            );
+            break;
+        case SDL_EVENT_MOUSE_BUTTON_UP:
+            callbacks.pub<PEventMouseButtonUp>(
+                    event.button.timestamp, event.button.button, event.button.x, event.button.y
+            );
+            break;
+        case SDL_EVENT_MOUSE_WHEEL:
+            callbacks.pub<PEventMouseWheel>(
+                    event.wheel.timestamp,
+                    event.wheel.direction == SDL_MOUSEWHEEL_FLIPPED,
+                    event.wheel.x,
+                    event.wheel.y,
+                    event.wheel.mouse_x,
+                    event.wheel.mouse_y
+            );
+            break;
+        case SDL_EVENT_WINDOW_MOUSE_ENTER:
+            callbacks.pub<PEventMouseEnter>(event.window.timestamp);
+            break;
+        case SDL_EVENT_WINDOW_MOUSE_LEAVE:
+            callbacks.pub<PEventMouseLeave>(event.window.timestamp);
+            break;
+        case SDL_EVENT_WINDOW_RESIZED:
+            callbacks.pub<PEventWindowResized>(event.window.timestamp, event.window.data1, event.window.data2);
+            break;
+        case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED:
+            callbacks.pub<PEventWindowPixelSizeChanged>(event.window.timestamp, event.window.data1, event.window.data2);
+            break;
+        case SDL_EVENT_WINDOW_FOCUS_GAINED:
+            callbacks.pub<PEventWindowFocusGained>(event.window.timestamp);
+            break;
+        case SDL_EVENT_WINDOW_FOCUS_LOST:
+            callbacks.pub<PEventWindowFocusLost>(event.window.timestamp);
+            break;
+        case SDL_EVENT_QUIT:
+            callbacks.pub<PEventQuit>(event.quit.timestamp);
             break;
         default:
             break;
         }
     }
+}
+
+void Engine::register_callbacks_() {
+    callback_id_ = callbacks.reg();
+    callbacks.sub<PEventQuit>(callback_id_, [&](const auto &) { running_ = false; });
+}
+
+void Engine::unregister_callbacks_() {
+    callbacks.unsub<PEventQuit>(callback_id_);
+    callback_id_ = 0;
 }
 
 void gl_debug_message_callback(

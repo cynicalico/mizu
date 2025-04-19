@@ -75,6 +75,8 @@ public:
     bool is_enabled(GlCapability cap) const;
 
     void blend_func(GlBlendFunc sfactor, GlBlendFunc dfactor);
+
+    void debug_message_callback(GLDEBUGPROC callback, const void *user_param);
 };
 
 } // namespace gloo

@@ -5,6 +5,8 @@
 
 namespace mizu {
 Window::~Window() {
+    unregister_callbacks_();
+
     if (gl_context_) {
         if (!SDL_GL_DestroyContext(gl_context_))
             SPDLOG_ERROR("Failed to destroy GL context: {}", SDL_GetError());
@@ -18,8 +20,6 @@ Window::~Window() {
         SPDLOG_DEBUG("Destroyed SDL window");
         sdl_window_ = nullptr;
     }
-
-    unregister_callbacks_();
 }
 
 Window::Window(Window &&other) noexcept
@@ -84,14 +84,14 @@ void Window::set_pos(Pos2d<int> pos) {
 }
 
 Window::Window(SDL_Window *sdl_window, CallbackMgr &callbacks) : callbacks_(callbacks), sdl_window_(sdl_window) {
+    register_callbacks_();
+
     gl_context_ = SDL_GL_CreateContext(sdl_window);
     if (!gl_context_) {
         SPDLOG_ERROR("Failed to create GL context: {}", SDL_GetError());
         std::exit(EXIT_FAILURE);
     }
     SPDLOG_DEBUG("Created GL context");
-
-    register_callbacks_();
 }
 
 void Window::register_callbacks_() {

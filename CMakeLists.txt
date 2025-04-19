@@ -12,6 +12,7 @@ set(${PROJECT_NAME}_headers
         include/mizu/callback_mgr.hpp
         include/mizu/engine.hpp
         include/mizu/enum_class_helpers.hpp
+        include/mizu/input_mgr.hpp
         include/mizu/log.hpp
         include/mizu/payloads.hpp
         include/mizu/types.hpp
@@ -26,6 +27,7 @@ set(${PROJECT_NAME}_sources
 
         src/mizu/application.cpp
         src/mizu/engine.cpp
+        src/mizu/input_mgr.cpp
         src/mizu/window.cpp
 )
 

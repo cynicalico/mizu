@@ -5,7 +5,6 @@
 #include <functional>
 #include <optional>
 #include <vector>
-#include "mizu/log.hpp"
 
 namespace mizu {
 class CallbackMgr {
@@ -119,7 +118,7 @@ void CallbackMgr::poll(std::size_t id) {
     auto &buffer = buffers_<T>()[id];
     std::optional<T> payload;
     while ((payload = buffer.pop()) != std::nullopt)
-        callback(payload);
+        callback(*payload);
 }
 
 template<typename T>
