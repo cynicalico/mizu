@@ -39,6 +39,9 @@ private:
     SDL_GLContext gl_context_;
 
     explicit Window(SDL_Window *sdl_window, CallbackMgr &callbacks);
+
+    void register_callbacks_();
+    void unregister_callbacks_();
 };
 
 class WindowBuilder {

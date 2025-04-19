@@ -5,6 +5,7 @@
 #include <functional>
 #include <optional>
 #include <vector>
+#include "mizu/log.hpp"
 
 namespace mizu {
 class CallbackMgr {
@@ -14,9 +15,10 @@ public:
     template<typename T>
     struct Buffer {
         std::size_t idx;
+        bool active;
         std::array<T, MAX_BUFFER_SIZE> data;
 
-        Buffer() : idx(0), data() {}
+        Buffer() : idx(0), active(false), data() {}
 
         template<typename... Args>
         void push(Args &&...args) {
@@ -35,10 +37,22 @@ public:
     template<typename T>
     using Callback = std::function<void(const T &)>;
 
-    std::size_t reg() { return next_id_++; }
+    std::size_t reg() {
+        if (!recycled_ids_.empty()) {
+            auto id = recycled_ids_.back();
+            recycled_ids_.pop_back();
+            return id;
+        }
+        return next_id_++;
+    }
+
+    void unreg(std::size_t id) { recycled_ids_.push_back(id); }
 
     template<typename T>
     void sub(std::size_t id, Callback<T> &&callback);
+
+    template<typename T>
+    void unsub(std::size_t id);
 
     template<typename T, typename... Args>
     void pub(Args &&...args);
@@ -50,7 +64,8 @@ public:
     void poll(std::size_t id);
 
 private:
-    std::size_t next_id_{0};
+    std::size_t next_id_{1};
+    std::vector<std::size_t> recycled_ids_{};
 
     template<typename T>
     std::vector<Callback<T>> &callbacks_();
@@ -67,12 +82,23 @@ void CallbackMgr::sub(std::size_t id, Callback<T> &&callback) {
         buffers_<T>().resize(id + 1);
     }
     callbacks[id] = std::forward<Callback<T>>(callback);
+    buffers_<T>()[id].active = true;
+}
+
+template<typename T>
+void CallbackMgr::unsub(std::size_t id) {
+    auto &callbacks = callbacks_<T>();
+    if (id < callbacks.size()) {
+        callbacks[id] = nullptr;
+        buffers_<T>()[id].active = false;
+    }
 }
 
 template<typename T, typename... Args>
 void CallbackMgr::pub(Args &&...args) {
     for (auto &buffers = buffers_<T>(); auto &b: buffers)
-        b.push(std::forward<Args>(args)...);
+        if (b.active)
+            b.push(std::forward<Args>(args)...);
 }
 
 template<typename T, typename... Args>

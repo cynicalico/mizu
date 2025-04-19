@@ -18,32 +18,31 @@ Window::~Window() {
         SPDLOG_DEBUG("Destroyed SDL window");
         sdl_window_ = nullptr;
     }
+
+    unregister_callbacks_();
 }
 
 Window::Window(Window &&other) noexcept
-    : callbacks_(other.callbacks_), callback_id_(other.callback_id_), sdl_window_(other.sdl_window_),
-      gl_context_(other.gl_context_) {
-    other.callback_id_ = 0;
+    : callbacks_(other.callbacks_), sdl_window_(other.sdl_window_), gl_context_(other.gl_context_) {
+    other.unregister_callbacks_();
+    register_callbacks_();
+
     other.sdl_window_ = nullptr;
     other.gl_context_ = nullptr;
-
-    callbacks_.sub<PPresent>(callback_id_, [&](const auto &) { swap(); });
 }
 
 Window &Window::operator=(Window &&other) noexcept {
     if (this != &other) {
+        unregister_callbacks_();
+        other.unregister_callbacks_();
         std::swap(callbacks_, other.callbacks_);
-
-        callback_id_ = other.callback_id_;
-        other.callback_id_ = 0;
+        register_callbacks_();
 
         sdl_window_ = other.sdl_window_;
         other.sdl_window_ = nullptr;
 
         gl_context_ = other.gl_context_;
         other.gl_context_ = nullptr;
-
-        callbacks_.sub<PPresent>(callback_id_, [&](const auto &) { swap(); });
     }
     return *this;
 }
@@ -92,9 +91,18 @@ Window::Window(SDL_Window *sdl_window, CallbackMgr &callbacks) : callbacks_(call
     }
     SPDLOG_DEBUG("Created GL context");
 
-    callback_id_ = callbacks.reg();
+    register_callbacks_();
+}
 
+void Window::register_callbacks_() {
+    callback_id_ = callbacks_.reg();
     callbacks_.sub<PPresent>(callback_id_, [&](const auto &) { swap(); });
+}
+
+void Window::unregister_callbacks_() {
+    callbacks_.unsub<PPresent>(callback_id_);
+    callbacks_.unreg(callback_id_);
+    callback_id_ = 0;
 }
 
 WindowBuilder::WindowBuilder(const std::string &title) : WindowBuilder(title, Size2d<int>()) {}
