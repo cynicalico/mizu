@@ -35,6 +35,8 @@ public:
     Engine(Engine &&other) noexcept = delete;
     Engine &operator=(Engine &&other) = delete;
 
+    void shutdown();
+
     template<typename T>
         requires std::derived_from<T, Application>
     void mainloop();

@@ -7,7 +7,7 @@
 #include "mizu/payloads.hpp"
 
 namespace mizu {
-enum class Key {
+enum class Key : int {
     Unknown = SDLK_UNKNOWN,
     Return = SDLK_RETURN,
     Escape = SDLK_ESCAPE,
@@ -266,7 +266,7 @@ enum class Key {
     RHyper = SDLK_RHYPER,
 };
 
-enum class Mod {
+enum class Mod : int {
     None = SDL_KMOD_NONE,
     LShift = SDL_KMOD_LSHIFT,
     RShift = SDL_KMOD_RSHIFT,
@@ -298,7 +298,20 @@ public:
     InputMgr(InputMgr &&other) noexcept = delete;
     InputMgr &operator=(InputMgr &&other) = delete;
 
+    bool down(Key key, Mod mods = Mod::None);
+    bool pressed(Key key, Mod mods = Mod::None);
+    bool released(Key key, Mod mods = Mod::None);
+
 private:
+    struct KeyState {
+        std::uint64_t timestamp;
+        bool pressed;
+        Mod mods;
+    };
+
+    std::unordered_map<Key, KeyState> key_state_{};
+    std::unordered_map<Key, KeyState> prev_key_state_{};
+
     std::size_t callback_id_{0};
     CallbackMgr &callbacks_;
 
@@ -307,8 +320,8 @@ private:
 
     void update_(double dt);
 
-    void key_down_(std::uint64_t timestamp, SDL_Keycode key, SDL_Keymod mod);
-    void key_up_(std::uint64_t timestamp, SDL_Keycode key, SDL_Keymod mod);
+    void key_down_(std::uint64_t timestamp, SDL_Keycode sdl_key, SDL_Keymod sdl_mods);
+    void key_up_(std::uint64_t timestamp, SDL_Keycode sdl_key, SDL_Keymod sdl_mods);
 };
 } // namespace mizu
 

@@ -13,7 +13,9 @@ public:
 
 Ethereal::Ethereal(mizu::Engine *engine) : Application(engine) {}
 
-void Ethereal::update(double dt) {}
+void Ethereal::update(double dt) {
+    if (engine->input->pressed(mizu::Key::Escape)) engine->shutdown();
+}
 
 void Ethereal::draw() {
     engine->gl.ctx.ClearColor(1.0f, 0.0f, 0.0f, 1.0f);

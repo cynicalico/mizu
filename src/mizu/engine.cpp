@@ -90,6 +90,10 @@ Engine::~Engine() {
     SPDLOG_DEBUG("Quit SDL");
 }
 
+void Engine::shutdown() {
+    running_ = false;
+}
+
 void Engine::poll_events_() {
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
