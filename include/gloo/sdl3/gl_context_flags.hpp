@@ -5,7 +5,6 @@
 #include "mizu/enum_class_helpers.hpp"
 
 namespace gloo::sdl3 {
-
 enum class GlContextFlags : int {
     None = 0,
     Debug = SDL_GL_CONTEXT_DEBUG_FLAG,
@@ -28,7 +27,6 @@ public:
 private:
     GlContextFlags flags_;
 };
-
 } // namespace gloo::sdl3
 
 ENUM_CLASS_ENABLE_BITOPS(gloo::sdl3::GlContextFlags);

@@ -127,29 +127,18 @@ void Engine::poll_events_() {
                     event.wheel.mouse_y
             );
             break;
-        case SDL_EVENT_WINDOW_MOUSE_ENTER:
-            callbacks.pub<PEventMouseEnter>(event.window.timestamp);
-            break;
-        case SDL_EVENT_WINDOW_MOUSE_LEAVE:
-            callbacks.pub<PEventMouseLeave>(event.window.timestamp);
-            break;
+        case SDL_EVENT_WINDOW_MOUSE_ENTER: callbacks.pub<PEventMouseEnter>(event.window.timestamp); break;
+        case SDL_EVENT_WINDOW_MOUSE_LEAVE: callbacks.pub<PEventMouseLeave>(event.window.timestamp); break;
         case SDL_EVENT_WINDOW_RESIZED:
             callbacks.pub<PEventWindowResized>(event.window.timestamp, event.window.data1, event.window.data2);
             break;
         case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED:
             callbacks.pub<PEventWindowPixelSizeChanged>(event.window.timestamp, event.window.data1, event.window.data2);
             break;
-        case SDL_EVENT_WINDOW_FOCUS_GAINED:
-            callbacks.pub<PEventWindowFocusGained>(event.window.timestamp);
-            break;
-        case SDL_EVENT_WINDOW_FOCUS_LOST:
-            callbacks.pub<PEventWindowFocusLost>(event.window.timestamp);
-            break;
-        case SDL_EVENT_QUIT:
-            callbacks.pub<PEventQuit>(event.quit.timestamp);
-            break;
-        default:
-            break;
+        case SDL_EVENT_WINDOW_FOCUS_GAINED: callbacks.pub<PEventWindowFocusGained>(event.window.timestamp); break;
+        case SDL_EVENT_WINDOW_FOCUS_LOST: callbacks.pub<PEventWindowFocusLost>(event.window.timestamp); break;
+        case SDL_EVENT_QUIT: callbacks.pub<PEventQuit>(event.quit.timestamp); break;
+        default: break;
         }
     }
 }
@@ -174,8 +163,7 @@ void gl_debug_message_callback(
         const void *userParam
 ) {
 #define STRINGIFY(e)                                                                                                   \
-    case e:                                                                                                            \
-        return #e;
+    case e: return #e;
 
     const std::string source_str = std::invoke([source] {
         switch (source) {
@@ -185,8 +173,7 @@ void gl_debug_message_callback(
             STRINGIFY(GL_DEBUG_SOURCE_THIRD_PARTY)
             STRINGIFY(GL_DEBUG_SOURCE_APPLICATION)
             STRINGIFY(GL_DEBUG_SOURCE_OTHER)
-        default:
-            return "?";
+        default: return "?";
         }
     });
 
@@ -201,8 +188,7 @@ void gl_debug_message_callback(
             STRINGIFY(GL_DEBUG_TYPE_PUSH_GROUP)
             STRINGIFY(GL_DEBUG_TYPE_POP_GROUP)
             STRINGIFY(GL_DEBUG_TYPE_OTHER)
-        default:
-            return "?";
+        default: return "?";
         }
     });
 
@@ -219,8 +205,7 @@ void gl_debug_message_callback(
     case GL_DEBUG_SEVERITY_NOTIFICATION:
         SPDLOG_TRACE("OpenGL: source={} type={} id={} msg={}", source_str.substr(9), type_str.substr(9), id, message);
         break;
-    default:
-        break; // won't happen
+    default: break; // won't happen
     }
 
 #undef STRINGIFY

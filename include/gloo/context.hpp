@@ -5,7 +5,6 @@
 #include <optional>
 
 namespace gloo {
-
 struct GlContextVersion {
     int major;
     int minor;
@@ -78,7 +77,6 @@ public:
 
     void debug_message_callback(GLDEBUGPROC callback, const void *user_param);
 };
-
 } // namespace gloo
 
 #endif // GLOO_CONTEXT_HPP

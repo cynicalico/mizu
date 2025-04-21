@@ -3,11 +3,10 @@
 
 #include <SDL3/SDL_video.h>
 #include <optional>
-#include "gloo/sdl3/gl_context_flags.hpp"
 #include "gloo/context.hpp"
+#include "gloo/sdl3/gl_context_flags.hpp"
 
 namespace gloo::sdl3 {
-
 enum class GlProfile : int {
     Core = SDL_GL_CONTEXT_PROFILE_CORE,
     Compatibility = SDL_GL_CONTEXT_PROFILE_COMPATIBILITY,
@@ -79,7 +78,6 @@ public:
     static void set_context_reset_notification(GlContextResetNotification notif);
     static void set_error_checking_disabled(bool v);
 };
-
 } // namespace gloo::sdl3
 
-#endif //GLOO_SDL3_GL_ATTR_HPP
+#endif // GLOO_SDL3_GL_ATTR_HPP

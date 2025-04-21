@@ -2,7 +2,6 @@
 #include "mizu/log.hpp"
 
 namespace gloo::sdl3 {
-
 GlContextFlagsBuilder::GlContextFlagsBuilder() : flags_(GlContextFlags::None) {}
 
 GlContextFlagsBuilder &GlContextFlagsBuilder::debug() {
@@ -29,5 +28,4 @@ void GlContextFlagsBuilder::set() {
     if (!SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, unwrap(flags_)))
         SPDLOG_ERROR("Failed to set context flags: {}", SDL_GetError());
 }
-
 } // namespace gloo::sdl3

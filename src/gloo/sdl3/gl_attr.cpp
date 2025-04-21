@@ -223,8 +223,7 @@ std::optional<bool> GlAttr::error_checking_disabled() {
 }
 
 void GlAttr::set_red_bits(int min_size) {
-    if (!SDL_GL_SetAttribute(SDL_GL_RED_SIZE, min_size))
-        SPDLOG_ERROR("Failed to set red bit size: {}", SDL_GetError());
+    if (!SDL_GL_SetAttribute(SDL_GL_RED_SIZE, min_size)) SPDLOG_ERROR("Failed to set red bit size: {}", SDL_GetError());
 }
 
 void GlAttr::set_green_bits(int min_size) {
@@ -283,8 +282,7 @@ void GlAttr::set_accum_alpha_bits(int min_size) {
 }
 
 void GlAttr::set_stereo_3d(bool v) {
-    if (!SDL_GL_SetAttribute(SDL_GL_STEREO, v ? 1 : 0))
-        SPDLOG_ERROR("Failed to set stereo 3D: {}", SDL_GetError());
+    if (!SDL_GL_SetAttribute(SDL_GL_STEREO, v ? 1 : 0)) SPDLOG_ERROR("Failed to set stereo 3D: {}", SDL_GetError());
 }
 
 void GlAttr::set_multisample_buffers(int buffer_count) {
@@ -309,7 +307,9 @@ void GlAttr::set_context_version(GlContextVersion version) {
         SPDLOG_ERROR("Failed to set context minor version: {}", SDL_GetError());
 }
 
-GlContextFlagsBuilder GlAttr::set_context_flags() { return GlContextFlagsBuilder(); }
+GlContextFlagsBuilder GlAttr::set_context_flags() {
+    return GlContextFlagsBuilder();
+}
 
 void GlAttr::set_context_profile(GlProfile profile) {
     if (!SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, static_cast<int>(profile)))
