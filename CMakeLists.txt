@@ -4,31 +4,52 @@ project(mizu LANGUAGES C CXX)
 option(BUILD_SHARED_LIBS "Build using shared libraries" OFF)
 
 set(${PROJECT_NAME}_headers
+        #[=[ [[[cog
+        import cog, glob
+        from pathlib import Path
+        patterns = ['include/**/*.h', 'include/**/*.hpp']
+        for p in patterns:
+            for f in glob.glob(p, recursive=True):
+                cog.outl(f"\t{Path(f).as_posix()}")
+        ]]] ]=]
         include/gloo/context.hpp
         include/gloo/sdl3/gl_attr.hpp
         include/gloo/sdl3/gl_context_flags.hpp
-
         include/mizu/application.hpp
         include/mizu/callback_mgr.hpp
+        include/mizu/color.hpp
         include/mizu/engine.hpp
         include/mizu/enum_class_helpers.hpp
+        include/mizu/g2d.hpp
         include/mizu/input_mgr.hpp
         include/mizu/log.hpp
+        include/mizu/mizu.hpp
         include/mizu/payloads.hpp
         include/mizu/types.hpp
         include/mizu/window.hpp
         include/mizu/ds/priority_queue.hpp
+        # [[[end]]]
 )
 
 set(${PROJECT_NAME}_sources
+        #[=[ [[[cog
+        import cog, glob
+        from pathlib import Path
+        patterns = ['src/**/*.c', 'src/**/*.cpp']
+        for p in patterns:
+            for f in glob.glob(p, recursive=True):
+                cog.outl(f"\t{Path(f).as_posix()}")
+        ]]] ]=]
         src/gloo/context.cpp
         src/gloo/sdl3/gl_attr.cpp
         src/gloo/sdl3/gl_context_flags.cpp
-
         src/mizu/application.cpp
+        src/mizu/color.cpp
         src/mizu/engine.cpp
+        src/mizu/g2d.cpp
         src/mizu/input_mgr.cpp
         src/mizu/window.cpp
+        # [[[end]]]
 )
 
 add_library(mizu ${${PROJECT_NAME}_headers} ${${PROJECT_NAME}_sources})

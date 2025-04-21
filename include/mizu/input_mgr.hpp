@@ -1,6 +1,10 @@
 #ifndef MIZU_INPUT_MGR_HPP
 #define MIZU_INPUT_MGR_HPP
 
+#include "types.hpp"
+
+
+#include <SDL3/SDL_mouse.h>
 #include <fmt/format.h>
 #include "mizu/callback_mgr.hpp"
 #include "mizu/enum_class_helpers.hpp"
@@ -266,6 +270,14 @@ enum class Key : int {
     RHyper = SDLK_RHYPER,
 };
 
+enum class MouseButton : int {
+    Left = SDL_BUTTON_LEFT,
+    Middle = SDL_BUTTON_MIDDLE,
+    Right = SDL_BUTTON_RIGHT,
+    X1 = SDL_BUTTON_X1,
+    X2 = SDL_BUTTON_X2
+};
+
 enum class Mod : int {
     None = SDL_KMOD_NONE,
     LShift = SDL_KMOD_LSHIFT,
@@ -302,6 +314,17 @@ public:
     bool pressed(Key key, Mod mods = Mod::None);
     bool released(Key key, Mod mods = Mod::None);
 
+    bool down(MouseButton button, Mod mods = Mod::None);
+    bool pressed(MouseButton button, Mod mods = Mod::None);
+    bool released(MouseButton button, Mod mods = Mod::None);
+
+    float mouse_x() const;
+    float mouse_y() const;
+    float mouse_px() const;
+    float mouse_py() const;
+    float mouse_dx() const;
+    float mouse_dy() const;
+
 private:
     struct KeyState {
         std::uint64_t timestamp;
@@ -311,6 +334,18 @@ private:
 
     std::unordered_map<Key, KeyState> key_state_{};
     std::unordered_map<Key, KeyState> prev_key_state_{};
+
+    struct MouseButtonState {
+        std::uint64_t timestamp;
+        bool pressed;
+        Mod mods;
+    };
+
+    std::unordered_map<MouseButton, MouseButtonState> mouse_button_state_{};
+    std::unordered_map<MouseButton, MouseButtonState> prev_mouse_button_state_{};
+    Pos2d<float> mouse_pos_{};
+    Pos2d<float> prev_mouse_pos_{};
+    Pos2d<float> mouse_relative_{};
 
     std::size_t callback_id_{0};
     CallbackMgr &callbacks_;
@@ -322,6 +357,9 @@ private:
 
     void key_down_(std::uint64_t timestamp, SDL_Keycode sdl_key, SDL_Keymod sdl_mods);
     void key_up_(std::uint64_t timestamp, SDL_Keycode sdl_key, SDL_Keymod sdl_mods);
+    void mouse_motion_(std::uint64_t timestamp, float x, float y, float dx, float dy);
+    void mouse_down_(std::uint64_t timestamp, std::uint8_t sdl_button, float x, float y);
+    void mouse_up_(std::uint64_t timestamp, std::uint8_t sdl_button, float x, float y);
 };
 } // namespace mizu
 

@@ -77,6 +77,8 @@ Engine::Engine(const std::string &window_title, Size2d<int> window_size, WindowB
     );
 
     input = std::make_unique<InputMgr>(callbacks);
+
+    g2d = std::make_unique<G2d>(gl, callbacks);
 }
 
 Engine::Engine(const std::string &window_title, WindowBuildFunc f) : Engine(window_title, Size2d(0, 0), std::move(f)) {}
@@ -84,6 +86,8 @@ Engine::Engine(const std::string &window_title, WindowBuildFunc f) : Engine(wind
 Engine::~Engine() {
     unregister_callbacks_();
 
+    g2d.reset();
+    input.reset();
     window.reset();
 
     SDL_Quit();

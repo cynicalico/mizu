@@ -8,6 +8,7 @@
 #include "gloo/context.hpp"
 #include "mizu/application.hpp"
 #include "mizu/callback_mgr.hpp"
+#include "mizu/g2d.hpp"
 #include "mizu/input_mgr.hpp"
 #include "mizu/payloads.hpp"
 #include "mizu/types.hpp"
@@ -23,6 +24,7 @@ public:
 
     std::unique_ptr<Window> window{nullptr};
     std::unique_ptr<InputMgr> input{nullptr};
+    std::unique_ptr<G2d> g2d{nullptr};
 
     Engine(const std::string &window_title, Size2d<int> window_size, WindowBuildFunc f);
     Engine(const std::string &window_title, WindowBuildFunc f);
