@@ -31,7 +31,8 @@ public:
     const Node &top() const { return heap_.front(); }
 
     void pop() {
-        if (empty()) return;
+        if (empty())
+            return;
 
         key_to_heap_pos_[heap_.front().key] = HEAP_POS_NONE;
         if (size() > 1) {
@@ -43,7 +44,8 @@ public:
     }
 
     std::optional<Node> pop_value() {
-        if (empty()) return std::nullopt;
+        if (empty())
+            return std::nullopt;
 
         Node ret = std::move(*heap_.begin());
         key_to_heap_pos_[ret.key] = HEAP_POS_NONE;
@@ -66,7 +68,8 @@ public:
 
     std::optional<std::size_t> get_priority(std::size_t key) {
         if (key < key_to_heap_pos_.size()) {
-            if (size_t pos = key_to_heap_pos_[key]; pos != HEAP_POS_NONE) return heap_[pos].priority;
+            if (size_t pos = key_to_heap_pos_[key]; pos != HEAP_POS_NONE)
+                return heap_[pos].priority;
         }
         return std::nullopt;
     }
@@ -74,7 +77,8 @@ public:
     bool push(std::size_t key, std::size_t priority, T value) {
         check_resize_ids(key);
 
-        if (key_to_heap_pos_[key] != HEAP_POS_NONE) return false;
+        if (key_to_heap_pos_[key] != HEAP_POS_NONE)
+            return false;
 
         std::size_t pos = heap_.size();
         key_to_heap_pos_[key] = pos;
@@ -85,10 +89,12 @@ public:
     }
 
     bool update(std::size_t key, std::size_t new_priority, bool only_if_higher = false) {
-        if (key >= key_to_heap_pos_.size()) return false;
+        if (key >= key_to_heap_pos_.size())
+            return false;
 
         std::size_t heap_pos = key_to_heap_pos_[key];
-        if (heap_pos == HEAP_POS_NONE) return false;
+        if (heap_pos == HEAP_POS_NONE)
+            return false;
 
         std::size_t &priority = heap_[heap_pos].priority;
         if (!comp_f_(new_priority, priority)) {
@@ -112,11 +118,13 @@ private:
     std::vector<Node> heap_{};
 
     void check_resize_ids(std::size_t needed_capacity) {
-        if (key_to_heap_pos_.size() < needed_capacity + 1) key_to_heap_pos_.resize(needed_capacity + 1, HEAP_POS_NONE);
+        if (key_to_heap_pos_.size() < needed_capacity + 1)
+            key_to_heap_pos_.resize(needed_capacity + 1, HEAP_POS_NONE);
     }
 
     void sift_down(std::size_t heap_pos) {
-        if (size() <= 1) return;
+        if (size() <= 1)
+            return;
 
         std::size_t child = greater_priority_child_(heap_pos);
 
@@ -130,7 +138,8 @@ private:
     }
 
     void sift_up(std::size_t heap_pos) {
-        if (size() <= 1) return;
+        if (size() <= 1)
+            return;
 
         std::size_t parent = PARENT(heap_pos);
 
@@ -147,9 +156,11 @@ private:
         auto left = LEFT(heap_pos);
         auto right = RIGHT(heap_pos);
 
-        if (left >= size()) return HEAP_POS_NONE;
+        if (left >= size())
+            return HEAP_POS_NONE;
 
-        if (right < size() && !comp_f_(heap_[right].priority, heap_[left].priority)) return right;
+        if (right < size() && !comp_f_(heap_[right].priority, heap_[left].priority))
+            return right;
 
         return left;
     }

@@ -23,7 +23,7 @@ bool InputMgr::pressed(Key key, Mod mods) {
         auto it2 = prev_key_state_.find(key);
         if (it2 != prev_key_state_.end())
             return it->second.pressed && is_flag_set(it->second.mods, mods) && !it2->second.pressed;
-        return true;
+        return it->second.pressed && is_flag_set(it->second.mods, mods);
     }
     return false;
 }
@@ -34,7 +34,7 @@ bool InputMgr::released(Key key, Mod mods) {
         auto it2 = prev_key_state_.find(key);
         if (it2 != prev_key_state_.end())
             return !it->second.pressed && is_flag_set(it2->second.mods, mods) && it2->second.pressed;
-        return true;
+        return false;
     }
     return false;
 }
@@ -51,7 +51,7 @@ bool InputMgr::pressed(MouseButton button, Mod mods) {
         auto it2 = prev_mouse_button_state_.find(button);
         if (it2 != prev_mouse_button_state_.end())
             return it->second.pressed && is_flag_set(it->second.mods, mods) && !it2->second.pressed;
-        return true;
+        return it->second.pressed && is_flag_set(it->second.mods, mods);
     }
     return false;
 }
@@ -62,7 +62,7 @@ bool InputMgr::released(MouseButton button, Mod mods) {
         auto it2 = prev_mouse_button_state_.find(button);
         if (it2 != prev_mouse_button_state_.end())
             return !it->second.pressed && is_flag_set(it2->second.mods, mods) && it2->second.pressed;
-        return true;
+        return false;
     }
     return false;
 }
@@ -138,14 +138,14 @@ void InputMgr::update_(double dt) {
 }
 
 void InputMgr::key_down_(std::uint64_t timestamp, SDL_Keycode sdl_key, SDL_Keymod sdl_mods) {
-    auto key = static_cast<Key>(sdl_key);
+    const auto key = static_cast<Key>(sdl_key);
     key_state_[key].timestamp = timestamp;
     key_state_[key].pressed = true;
     key_state_[key].mods = static_cast<Mod>(sdl_mods);
 }
 
 void InputMgr::key_up_(std::uint64_t timestamp, SDL_Keycode sdl_key, SDL_Keymod sdl_mods) {
-    auto key = static_cast<Key>(sdl_key);
+    const auto key = static_cast<Key>(sdl_key);
     key_state_[key].timestamp = timestamp;
     key_state_[key].pressed = false;
     key_state_[key].mods = static_cast<Mod>(sdl_mods);
@@ -159,14 +159,14 @@ void InputMgr::mouse_motion_(std::uint64_t, float x, float y, float dx, float dy
 }
 
 void InputMgr::mouse_down_(std::uint64_t timestamp, std::uint8_t sdl_button, float x, float y) {
-    auto button = static_cast<MouseButton>(sdl_button);
+    const auto button = static_cast<MouseButton>(sdl_button);
     mouse_button_state_[button].timestamp = timestamp;
     mouse_button_state_[button].pressed = true;
     mouse_button_state_[button].mods = static_cast<Mod>(SDL_GetModState());
 }
 
 void InputMgr::mouse_up_(std::uint64_t timestamp, std::uint8_t sdl_button, float x, float y) {
-    auto button = static_cast<MouseButton>(sdl_button);
+    const auto button = static_cast<MouseButton>(sdl_button);
     mouse_button_state_[button].timestamp = timestamp;
     mouse_button_state_[button].pressed = false;
     mouse_button_state_[button].mods = static_cast<Mod>(SDL_GetModState());

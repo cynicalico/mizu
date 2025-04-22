@@ -6,6 +6,7 @@
 #include "mizu/color.hpp"
 #include "mizu/engine.hpp"
 #include "mizu/g2d.hpp"
+#include "mizu/image.hpp"
 #include "mizu/input_mgr.hpp"
 #include "mizu/log.hpp"
 #include "mizu/payloads.hpp"

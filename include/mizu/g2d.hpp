@@ -24,7 +24,7 @@ public:
 private:
     gloo::GlContext &gl_;
 
-    glm::vec4 clear_color_;
+    glm::vec4 clear_color_{0, 0, 0, 0};
 
     std::size_t callback_id_{0};
     CallbackMgr &callbacks_;

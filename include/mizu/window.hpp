@@ -31,6 +31,8 @@ public:
     Pos2d<int> get_pos() const;
     void set_pos(Pos2d<int> pos);
 
+    void set_icon(SDL_Surface *icon);
+
 private:
     CallbackMgr &callbacks_;
     std::size_t callback_id_;

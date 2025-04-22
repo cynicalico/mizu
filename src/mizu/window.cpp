@@ -84,6 +84,11 @@ void Window::set_pos(Pos2d<int> pos) {
         SPDLOG_ERROR("Failed to set pos of window: {}", SDL_GetError());
 }
 
+void Window::set_icon(SDL_Surface *icon) {
+    if (!SDL_SetWindowIcon(sdl_window_, icon))
+        SPDLOG_ERROR("Failed to set window icon: {}", SDL_GetError());
+}
+
 Window::Window(SDL_Window *sdl_window, CallbackMgr &callbacks) : callbacks_(callbacks), sdl_window_(sdl_window) {
     register_callbacks_();
 

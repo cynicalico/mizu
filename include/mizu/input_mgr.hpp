@@ -1,14 +1,12 @@
 #ifndef MIZU_INPUT_MGR_HPP
 #define MIZU_INPUT_MGR_HPP
 
-#include "types.hpp"
-
-
 #include <SDL3/SDL_mouse.h>
 #include <fmt/format.h>
 #include "mizu/callback_mgr.hpp"
 #include "mizu/enum_class_helpers.hpp"
 #include "mizu/payloads.hpp"
+#include "mizu/types.hpp"
 
 namespace mizu {
 enum class Key : int {
@@ -632,21 +630,51 @@ struct fmt::formatter<mizu::Key> : formatter<string_view> {
 };
 
 template<>
+struct fmt::formatter<mizu::MouseButton> : formatter<string_view> {
+    auto format(mizu::MouseButton b, format_context &ctx) const -> format_context::iterator {
+        string_view repr;
+        switch (b) {
+        case mizu::MouseButton::Left: repr = "Left"; break;
+        case mizu::MouseButton::Middle: repr = "Middle"; break;
+        case mizu::MouseButton::Right: repr = "Right"; break;
+        case mizu::MouseButton::X1: repr = "X1"; break;
+        case mizu::MouseButton::X2: repr = "X2"; break;
+        }
+        return formatter<string_view>::format(repr, ctx);
+    }
+};
+
+template<>
 struct fmt::formatter<mizu::Mod> : formatter<string_view> {
     auto format(mizu::Mod m, format_context &ctx) const -> format_context::iterator {
+        if (m == mizu::Mod::None)
+            return formatter<string_view>::format("None", ctx);
+
         std::string buf;
-        if (is_flag_set(m, mizu::Mod::Num)) buf.append("Num");
-        if (is_flag_set(m, mizu::Mod::Caps)) buf.append(fmt::format("{}Caps", buf.empty() ? "" : " | "));
-        if (is_flag_set(m, mizu::Mod::Scroll)) buf.append(fmt::format("{}Scroll", buf.empty() ? "" : " | "));
-        if (is_flag_set(m, mizu::Mod::LShift)) buf.append(fmt::format("{}LShift", buf.empty() ? "" : " | "));
-        if (is_flag_set(m, mizu::Mod::RShift)) buf.append(fmt::format("{}RShift", buf.empty() ? "" : " | "));
-        if (is_flag_set(m, mizu::Mod::Level5)) buf.append(fmt::format("{}Level5", buf.empty() ? "" : " | "));
-        if (is_flag_set(m, mizu::Mod::LCtrl)) buf.append(fmt::format("{}LCtrl", buf.empty() ? "" : " | "));
-        if (is_flag_set(m, mizu::Mod::RCtrl)) buf.append(fmt::format("{}RCtrl", buf.empty() ? "" : " | "));
-        if (is_flag_set(m, mizu::Mod::LAlt)) buf.append(fmt::format("{}LAlt", buf.empty() ? "" : " | "));
-        if (is_flag_set(m, mizu::Mod::RAlt)) buf.append(fmt::format("{}RAlt", buf.empty() ? "" : " | "));
-        if (is_flag_set(m, mizu::Mod::LGui)) buf.append(fmt::format("{}LGui", buf.empty() ? "" : " | "));
-        if (is_flag_set(m, mizu::Mod::RGui)) buf.append(fmt::format("{}RGui", buf.empty() ? "" : " | "));
+        if (is_flag_set(m, mizu::Mod::Num))
+            buf.append("Num");
+        if (is_flag_set(m, mizu::Mod::Caps))
+            buf.append(fmt::format("{}Caps", buf.empty() ? "" : " | "));
+        if (is_flag_set(m, mizu::Mod::Scroll))
+            buf.append(fmt::format("{}Scroll", buf.empty() ? "" : " | "));
+        if (is_flag_set(m, mizu::Mod::LShift))
+            buf.append(fmt::format("{}LShift", buf.empty() ? "" : " | "));
+        if (is_flag_set(m, mizu::Mod::RShift))
+            buf.append(fmt::format("{}RShift", buf.empty() ? "" : " | "));
+        if (is_flag_set(m, mizu::Mod::Level5))
+            buf.append(fmt::format("{}Level5", buf.empty() ? "" : " | "));
+        if (is_flag_set(m, mizu::Mod::LCtrl))
+            buf.append(fmt::format("{}LCtrl", buf.empty() ? "" : " | "));
+        if (is_flag_set(m, mizu::Mod::RCtrl))
+            buf.append(fmt::format("{}RCtrl", buf.empty() ? "" : " | "));
+        if (is_flag_set(m, mizu::Mod::LAlt))
+            buf.append(fmt::format("{}LAlt", buf.empty() ? "" : " | "));
+        if (is_flag_set(m, mizu::Mod::RAlt))
+            buf.append(fmt::format("{}RAlt", buf.empty() ? "" : " | "));
+        if (is_flag_set(m, mizu::Mod::LGui))
+            buf.append(fmt::format("{}LGui", buf.empty() ? "" : " | "));
+        if (is_flag_set(m, mizu::Mod::RGui))
+            buf.append(fmt::format("{}RGui", buf.empty() ? "" : " | "));
         return formatter<string_view>::format(buf, ctx);
     }
 };

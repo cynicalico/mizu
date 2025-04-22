@@ -80,6 +80,8 @@ CPMAddPackage(
         DOWNLOAD_ONLY TRUE
 )
 
+find_package(PNG REQUIRED)
+
 add_library(mizu_thirdparty STATIC
         ${pcg_SOURCE_DIR}/include/pcg_extras.hpp
         ${pcg_SOURCE_DIR}/include/pcg_random.hpp
@@ -117,4 +119,5 @@ target_link_libraries(mizu_thirdparty PUBLIC
         SndFile::sndfile
         OpenAL::OpenAL
         SDL3::SDL3
+        PNG::PNG
 )

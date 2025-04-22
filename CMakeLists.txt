@@ -21,6 +21,7 @@ set(${PROJECT_NAME}_headers
         include/mizu/engine.hpp
         include/mizu/enum_class_helpers.hpp
         include/mizu/g2d.hpp
+        include/mizu/image.hpp
         include/mizu/input_mgr.hpp
         include/mizu/log.hpp
         include/mizu/mizu.hpp
@@ -47,6 +48,7 @@ set(${PROJECT_NAME}_sources
         src/mizu/color.cpp
         src/mizu/engine.cpp
         src/mizu/g2d.cpp
+        src/mizu/image.cpp
         src/mizu/input_mgr.cpp
         src/mizu/window.cpp
         # [[[end]]]

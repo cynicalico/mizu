@@ -22,6 +22,9 @@ public:
     friend Rgba rgb(std::uint8_t r, std::uint8_t g, std::uint8_t b);
     friend Rgba rgba(std::uint8_t r, std::uint8_t g, std::uint8_t b, std::uint8_t a);
 
+    friend Rgba rgb_f(float r, float g, float b);
+    friend Rgba rgba_f(float r, float g, float b, float a);
+
 private:
     Rgba(std::uint8_t r, std::uint8_t g, std::uint8_t b, std::uint8_t a);
 };
@@ -31,6 +34,9 @@ Rgba rgba(std::uint64_t hex);
 
 Rgba rgb(std::uint8_t r, std::uint8_t g, std::uint8_t b);
 Rgba rgba(std::uint8_t r, std::uint8_t g, std::uint8_t b, std::uint8_t a);
+
+Rgba rgb_f(float r, float g, float b);
+Rgba rgba_f(float r, float g, float b, float a);
 } // namespace mizu
 
 #endif // MIZU_COLOR_HPP
