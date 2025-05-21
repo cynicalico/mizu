@@ -12,9 +12,7 @@ set(${PROJECT_NAME}_headers
             for f in glob.glob(p, recursive=True):
                 cog.outl(f"\t{Path(f).as_posix()}")
         ]]] ]=]
-        include/gloo/context.hpp
-        include/gloo/sdl3/gl_attr.hpp
-        include/gloo/sdl3/gl_context_flags.hpp
+        include/mizu/log.hpp
         include/mizu/application.hpp
         include/mizu/callback_mgr.hpp
         include/mizu/color.hpp
@@ -23,12 +21,15 @@ set(${PROJECT_NAME}_headers
         include/mizu/g2d.hpp
         include/mizu/image.hpp
         include/mizu/input_mgr.hpp
-        include/mizu/log.hpp
         include/mizu/mizu.hpp
         include/mizu/payloads.hpp
         include/mizu/types.hpp
         include/mizu/window.hpp
+        include/mizu/platform.hpp
         include/mizu/ds/priority_queue.hpp
+        include/gloo/context.hpp
+        include/gloo/sdl3/gl_attr.hpp
+        include/gloo/sdl3/gl_context_flags.hpp
         # [[[end]]]
 )
 
@@ -41,9 +42,6 @@ set(${PROJECT_NAME}_sources
             for f in glob.glob(p, recursive=True):
                 cog.outl(f"\t{Path(f).as_posix()}")
         ]]] ]=]
-        src/gloo/context.cpp
-        src/gloo/sdl3/gl_attr.cpp
-        src/gloo/sdl3/gl_context_flags.cpp
         src/mizu/application.cpp
         src/mizu/color.cpp
         src/mizu/engine.cpp
@@ -51,6 +49,10 @@ set(${PROJECT_NAME}_sources
         src/mizu/image.cpp
         src/mizu/input_mgr.cpp
         src/mizu/window.cpp
+        src/mizu/platform.cpp
+        src/gloo/context.cpp
+        src/gloo/sdl3/gl_attr.cpp
+        src/gloo/sdl3/gl_context_flags.cpp
         # [[[end]]]
 )
 

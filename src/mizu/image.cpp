@@ -1,11 +1,17 @@
 #include "mizu/image.hpp"
 #include <png.h>
 #include "mizu/log.hpp"
+#include "mizu/platform.hpp"
 
 namespace mizu {
 SDL_Surface *read_image_to_sdl_surface(const std::filesystem::path &path) {
+#if defined(MIZU_PLATFORM_WINDOWS)
     FILE *fp;
-    if (fopen_s(&fp, path.string().c_str(), "rb") != 0) {
+    if (!fopen_s(&fp, path.string().c_str(), "rb")) {
+#else
+    FILE *fp = fopen(path.string().c_str(), "rb");
+    if (!fp) {
+#endif
         SPDLOG_ERROR("Failed to open file: '{}'", path.string());
         return nullptr;
     }

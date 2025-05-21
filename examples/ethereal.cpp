@@ -13,8 +13,7 @@ public:
 };
 
 Ethereal::Ethereal(mizu::Engine *engine) : Application(engine), input(engine->input.get()), g2d(engine->g2d.get()) {
-    if (auto surf = mizu::read_image_to_sdl_surface("res/icon/16x16.png"))
-        engine->window->set_icon(surf);
+    engine->window->set_icon_dir("res/icon");
 }
 
 void Ethereal::update(double dt) {

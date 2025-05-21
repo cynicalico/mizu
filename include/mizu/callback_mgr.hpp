@@ -5,6 +5,7 @@
 #include <functional>
 #include <optional>
 #include <vector>
+#include "mizu/log.hpp"
 
 namespace mizu {
 class CallbackMgr {
@@ -21,12 +22,19 @@ public:
 
         template<typename... Args>
         void push(Args &&...args) {
-            if (idx == MAX_BUFFER_SIZE) return;
+            if (idx == MAX_BUFFER_SIZE) {
+                // typeid(T).name is just to give an idea of what buffer it is,
+                // this is not practically going to give a good name
+                // TODO: provide a way to give a better name to this message
+                SPDLOG_WARN("Callback buffer full {}", typeid(T).name());
+                return;
+            }
             data[idx++] = T(std::forward<Args>(args)...);
         }
 
         std::optional<T> pop() {
-            if (idx == 0) return std::nullopt;
+            if (idx == 0)
+                return std::nullopt;
             return std::make_optional(data[--idx]);
         }
     };
@@ -94,20 +102,23 @@ void CallbackMgr::unsub(std::size_t id) {
 template<typename T, typename... Args>
 void CallbackMgr::pub(Args &&...args) {
     for (auto &buffers = buffers_<T>(); auto &b: buffers)
-        if (b.active) b.push(std::forward<Args>(args)...);
+        if (b.active)
+            b.push(std::forward<Args>(args)...);
 }
 
 template<typename T, typename... Args>
 void CallbackMgr::pub_nowait(Args &&...args) {
     auto payload = T{std::forward<Args>(args)...};
     for (auto &callbacks = callbacks_<T>(); const auto &c: callbacks)
-        if (c) c(payload);
+        if (c)
+            c(payload);
 }
 
 template<typename T>
 void CallbackMgr::poll(std::size_t id) {
     auto &callbacks = callbacks_<T>();
-    if (id >= callbacks.size()) return;
+    if (id >= callbacks.size())
+        return;
     auto &callback = callbacks[id];
 
     auto &buffer = buffers_<T>()[id];

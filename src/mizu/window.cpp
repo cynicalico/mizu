@@ -1,5 +1,6 @@
 #include "mizu/window.hpp"
 #include <SDL3/SDL.h>
+#include "mizu/image.hpp"
 #include "mizu/log.hpp"
 #include "mizu/payloads.hpp"
 
@@ -57,7 +58,8 @@ void Window::make_context_current() {
 }
 
 void Window::swap() {
-    if (!SDL_GL_SwapWindow(sdl_window_)) SPDLOG_ERROR("Failed to swap window: {}", SDL_GetError());
+    if (!SDL_GL_SwapWindow(sdl_window_))
+        SPDLOG_ERROR("Failed to swap window: {}", SDL_GetError());
 }
 
 Size2d<int> Window::get_size() const {
@@ -89,6 +91,28 @@ void Window::set_icon(SDL_Surface *icon) {
         SPDLOG_ERROR("Failed to set window icon: {}", SDL_GetError());
 }
 
+void Window::set_icon_dir(const std::filesystem::path &path) {
+    SDL_Surface *icon = nullptr;
+    for (const std::filesystem::directory_iterator dir(path); auto &entry: dir) {
+        if (!entry.is_regular_file() || entry.path().extension() != ".png")
+            continue;
+
+        auto surf = mizu::read_image_to_sdl_surface(entry);
+        if (!surf)
+            continue;
+
+        if (!icon)
+            icon = surf;
+        else if (!SDL_AddSurfaceAlternateImage(icon, surf))
+            SPDLOG_ERROR("Failed to add alternate surface to window icon: {}", SDL_GetError());
+    }
+
+    if (!icon)
+        SPDLOG_ERROR("No .png images in directory {} for window icon", path.string());
+    else
+        set_icon(icon);
+}
+
 Window::Window(SDL_Window *sdl_window, CallbackMgr &callbacks) : callbacks_(callbacks), sdl_window_(sdl_window) {
     register_callbacks_();
 
@@ -118,7 +142,8 @@ WindowBuilder::WindowBuilder(const std::string &title, Size2d<int> size)
       location_(static_cast<int>(SDL_WINDOWPOS_CENTERED), static_cast<int>(SDL_WINDOWPOS_CENTERED), size.w, size.h),
       display_idx_(0) {
     props_ = SDL_CreateProperties();
-    if (props_ == 0) SPDLOG_ERROR("Failed to create SDL properties: {}", SDL_GetError());
+    if (props_ == 0)
+        SPDLOG_ERROR("Failed to create SDL properties: {}", SDL_GetError());
     this->opengl();
 }
 
@@ -242,7 +267,8 @@ WindowBuilder &WindowBuilder::display(int idx) {
 
 std::expected<Window, std::string> WindowBuilder::build(CallbackMgr &callbacks) {
     auto window_size_rect_result = get_window_size_rect();
-    if (!window_size_rect_result) return std::unexpected(window_size_rect_result.error());
+    if (!window_size_rect_result)
+        return std::unexpected(window_size_rect_result.error());
     auto window_size_rect = window_size_rect_result.value();
 
     if (!SDL_SetStringProperty(props_, SDL_PROP_WINDOW_CREATE_TITLE_STRING, title_.c_str()))
@@ -273,7 +299,8 @@ std::expected<Window, std::string> WindowBuilder::build(CallbackMgr &callbacks) 
 std::expected<SDL_DisplayID, std::string> WindowBuilder::get_display_id() {
     int display_count;
     auto displays = SDL_GetDisplays(&display_count);
-    if (!displays) return std::unexpected(std::string(SDL_GetError()));
+    if (!displays)
+        return std::unexpected(std::string(SDL_GetError()));
 
     if (display_count <= display_idx_) {
         SPDLOG_WARN("Requested display out of bounds ({} <= {}), using display 0", display_count, display_idx_);
@@ -288,13 +315,16 @@ std::expected<SDL_DisplayID, std::string> WindowBuilder::get_display_id() {
 
 std::expected<SDL_Rect, std::string> WindowBuilder::get_window_size_rect() {
     auto display_id_result = get_display_id();
-    if (!display_id_result) return std::unexpected(display_id_result.error());
+    if (!display_id_result)
+        return std::unexpected(display_id_result.error());
     auto display_id = display_id_result.value();
 
     SDL_Rect display_bounds;
-    if (!SDL_GetDisplayBounds(display_id, &display_bounds)) return std::unexpected(std::string(SDL_GetError()));
+    if (!SDL_GetDisplayBounds(display_id, &display_bounds))
+        return std::unexpected(std::string(SDL_GetError()));
 
-    if (SDL_GetBooleanProperty(props_, SDL_PROP_WINDOW_CREATE_FULLSCREEN_BOOLEAN, false)) return display_bounds;
+    if (SDL_GetBooleanProperty(props_, SDL_PROP_WINDOW_CREATE_FULLSCREEN_BOOLEAN, false))
+        return display_bounds;
 
     if (location_.x == SDL_WINDOWPOS_CENTERED && location_.y == SDL_WINDOWPOS_CENTERED) {
         location_.x = SDL_WINDOWPOS_CENTERED_DISPLAY(display_id);

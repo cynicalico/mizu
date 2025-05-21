@@ -1,5 +1,5 @@
 #include "mizu/g2d.hpp"
-
+#include <cmath>
 #include "mizu/payloads.hpp"
 
 namespace mizu {

@@ -1,9 +1,9 @@
 #include "mizu/engine.hpp"
 #include <SDL3/SDL.h>
-
 #include <utility>
 #include "gloo/sdl3/gl_attr.hpp"
 #include "mizu/log.hpp"
+#include "mizu/platform.hpp"
 
 namespace mizu {
 void gl_debug_message_callback(
@@ -17,11 +17,12 @@ void gl_debug_message_callback(
 );
 
 Engine::Engine(const std::string &window_title, Size2d<int> window_size, WindowBuildFunc f) : running_(true) {
-    register_callbacks_();
-
 #if !defined(NDEBUG)
     spdlog::set_level(spdlog::level::debug);
 #endif
+    log_platform();
+
+    register_callbacks_();
 
     if (!SDL_Init(SDL_INIT_VIDEO)) {
         SPDLOG_ERROR("Failed to initialize SDL: {}", SDL_GetError());

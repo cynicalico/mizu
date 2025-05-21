@@ -3,6 +3,7 @@
 
 #include <SDL3/SDL_video.h>
 #include <expected>
+#include <filesystem>
 #include <string>
 #include "mizu/callback_mgr.hpp"
 #include "mizu/types.hpp"
@@ -32,6 +33,7 @@ public:
     void set_pos(Pos2d<int> pos);
 
     void set_icon(SDL_Surface *icon);
+    void set_icon_dir(const std::filesystem::path &path);
 
 private:
     CallbackMgr &callbacks_;
