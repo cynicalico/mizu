@@ -2,6 +2,7 @@
 #define MIZU_G2D_HPP
 
 #include "gloo/context.hpp"
+#include "gloo/shader.hpp"
 #include "mizu/callback_mgr.hpp"
 #include "mizu/color.hpp"
 
@@ -20,6 +21,8 @@ public:
 
     void set_clear_color(const Color &c);
     Rgba clear_color() const;
+
+    gloo::ShaderBuilder shader_builder() const;
 
 private:
     gloo::GlContext &gl_;

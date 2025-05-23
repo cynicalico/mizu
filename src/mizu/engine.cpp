@@ -17,9 +17,9 @@ void gl_debug_message_callback(
 );
 
 Engine::Engine(const std::string &window_title, Size2d<int> window_size, WindowBuildFunc f) : running_(true) {
-#if !defined(NDEBUG)
-    spdlog::set_level(spdlog::level::debug);
-#endif
+    // Log levels are controlled through MIZU_SPDLOG_LEVEL, but we don't know what the user
+    // has set, so just assume trace logging to catch everything
+    spdlog::set_level(spdlog::level::trace);
     log_platform();
 
     register_callbacks_();

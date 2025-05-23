@@ -24,6 +24,10 @@ Rgba G2d::clear_color() const {
     );
 }
 
+gloo::ShaderBuilder G2d::shader_builder() const {
+    return gloo::ShaderBuilder(gl_.ctx);
+}
+
 void G2d::register_callbacks_() {
     callback_id_ = callbacks_.reg();
     callbacks_.sub<PPostDraw>(callback_id_, [&](const auto &) { draw_(); });

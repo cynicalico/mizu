@@ -12,7 +12,26 @@ public:
     void draw() override;
 };
 
-Ethereal::Ethereal(mizu::Engine *engine) : Application(engine), input(engine->input.get()), g2d(engine->g2d.get()) {}
+Ethereal::Ethereal(mizu::Engine *engine) : Application(engine), input(engine->input.get()), g2d(engine->g2d.get()) {
+    g2d->shader_builder()
+            .stage_src(gloo::ShaderType::Vertex, R"glsl(
+#version 330 core
+layout (location = 0) in vec3 aPos;
+
+void main() {
+    gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
+}
+)glsl")
+            .stage_src(gloo::ShaderType::Fragment, R"glsl(
+#version 330 core
+out vec4 FragColor;
+
+void main() {
+    FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);
+}
+)glsl")
+            .link();
+}
 
 void Ethereal::update(double dt) {
     if (input->pressed(mizu::Key::Escape)) engine->shutdown();
