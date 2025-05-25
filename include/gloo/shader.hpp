@@ -8,6 +8,8 @@
 #include <tuple>
 #include "mizu/class_helpers.hpp"
 
+#include <unordered_set>
+
 namespace gloo {
 class Shader {
     friend class ShaderBuilder;
@@ -22,10 +24,59 @@ public:
     MOVE_CONSTRUCTOR(Shader);
     MOVE_ASSIGN_OP(Shader);
 
+    void use();
+
+    void uniform(const std::string &name, float v0);
+    void uniform(const std::string &name, float v0, float v1);
+    void uniform(const std::string &name, float v0, float v1, float v2);
+    void uniform(const std::string &name, float v0, float v1, float v2, float v3);
+
+    void uniform(const std::string &name, int v0);
+    void uniform(const std::string &name, int v0, int v1);
+    void uniform(const std::string &name, int v0, int v1, int v2);
+    void uniform(const std::string &name, int v0, int v1, int v2, int v3);
+
+    void uniform(const std::string &name, unsigned int v0);
+    void uniform(const std::string &name, unsigned int v0, unsigned int v1);
+    void uniform(const std::string &name, unsigned int v0, unsigned int v1, unsigned int v2);
+    void uniform(const std::string &name, unsigned int v0, unsigned int v1, unsigned int v2, unsigned int v3);
+
+    void uniform(const std::string &name, const glm::vec1 &v);
+    void uniform(const std::string &name, const glm::vec2 &v);
+    void uniform(const std::string &name, const glm::vec3 &v);
+    void uniform(const std::string &name, const glm::vec4 &v);
+
+    void uniform(const std::string &name, const glm::ivec1 &v);
+    void uniform(const std::string &name, const glm::ivec2 &v);
+    void uniform(const std::string &name, const glm::ivec3 &v);
+    void uniform(const std::string &name, const glm::ivec4 &v);
+
+    void uniform(const std::string &name, const glm::uvec1 &v);
+    void uniform(const std::string &name, const glm::uvec2 &v);
+    void uniform(const std::string &name, const glm::uvec3 &v);
+    void uniform(const std::string &name, const glm::uvec4 &v);
+
+    void uniform(const std::string &name, const glm::mat2 &v);
+    void uniform(const std::string &name, const glm::mat3 &v);
+    void uniform(const std::string &name, const glm::mat4 &v);
+
+    void uniform(const std::string &name, const glm::mat2x3 &v);
+    void uniform(const std::string &name, const glm::mat3x2 &v);
+
+    void uniform(const std::string &name, const glm::mat2x4 &v);
+    void uniform(const std::string &name, const glm::mat4x2 &v);
+
+    void uniform(const std::string &name, const glm::mat3x4 &v);
+    void uniform(const std::string &name, const glm::mat4x3 &v);
+
 private:
     GladGLContext &gl_;
+    std::unordered_map<std::string, GLint> uniform_locs_;
+    std::unordered_set<std::string> bad_locs_{};
 
     explicit Shader(GladGLContext &gl, GLuint id);
+
+    std::optional<GLint> find_uniform_loc_(const std::string &name);
 };
 
 enum class ShaderType : GLenum {

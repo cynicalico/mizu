@@ -30,11 +30,11 @@ gloo::ShaderBuilder G2d::shader_builder() const {
 
 void G2d::register_callbacks_() {
     callback_id_ = callbacks_.reg();
-    callbacks_.sub<PPostDraw>(callback_id_, [&](const auto &) { draw_(); });
+    callbacks_.sub<PPreDraw>(callback_id_, [&](const auto &) { draw_(); });
 }
 
 void G2d::unregister_callbacks_() {
-    callbacks_.unsub<PPostDraw>(callback_id_);
+    callbacks_.unsub<PPreDraw>(callback_id_);
     callbacks_.unreg(callback_id_);
     callback_id_ = 0;
 }
