@@ -41,7 +41,7 @@ Ethereal::Ethereal(mizu::Engine *engine) : Application(engine), input(engine->in
                      .link();
     if (!shader) engine->shutdown();
 
-    vbo = g2d->buffer<float>(1024);
+    vbo = g2d->buffer<float>(90);
     vbo->push({-0.5f, -0.5f, 0.0f, /* */ 0.5f, -0.5f, 0.0f, /* */ 0.0f, 0.5f, 0.0f});
 
     engine->gl.ctx.GenVertexArrays(1, &vao);
@@ -56,15 +56,28 @@ Ethereal::Ethereal(mizu::Engine *engine) : Application(engine), input(engine->in
 void Ethereal::update(double dt) {
     if (input->pressed(mizu::Key::Escape)) engine->shutdown();
 
-    vbo->sync_gl(gloo::BufferTarget::Array);
+    if (input->pressed(mizu::MouseButton::Left)) {
+        if (!vbo->is_full()) {
+            float x0 = mizu::rng::get<float>(-1.0, 1.0);
+            float y0 = mizu::rng::get<float>(-1.0, 1.0);
+            float x1 = mizu::rng::get<float>(-1.0, 1.0);
+            float y1 = mizu::rng::get<float>(-1.0, 1.0);
+            float x2 = mizu::rng::get<float>(-1.0, 1.0);
+            float y2 = mizu::rng::get<float>(-1.0, 1.0);
+            vbo->push({x0, y0, 0.0f, x1, y1, 0.0f, x2, y2, 0.0f});
+        } else {
+            SPDLOG_INFO("Buffer is full");
+        }
+    }
 }
 
 void Ethereal::draw() {
     g2d->clear(mizu::colorscheme::campbell::BLACK, mizu::ClearBit::Color | mizu::ClearBit::Depth);
 
+    vbo->sync_gl(gloo::BufferTarget::Array);
     shader->use();
     engine->gl.ctx.BindVertexArray(vao);
-    engine->gl.ctx.DrawArrays(GL_TRIANGLES, 0, 3);
+    engine->gl.ctx.DrawArrays(GL_TRIANGLES, vbo->front() / 3, vbo->size() / 3);
     engine->gl.ctx.BindVertexArray(0);
 }
 

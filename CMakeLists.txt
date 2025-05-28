@@ -30,6 +30,7 @@ set(${PROJECT_NAME}_headers
         include/mizu/mizu.hpp
         include/mizu/payloads.hpp
         include/mizu/platform.hpp
+        include/mizu/rng.hpp
         include/mizu/types.hpp
         include/mizu/window.hpp
         include/mizu/ds/priority_queue.hpp
@@ -56,6 +57,7 @@ set(${PROJECT_NAME}_sources
         src/mizu/image.cpp
         src/mizu/input_mgr.cpp
         src/mizu/platform.cpp
+        src/mizu/rng.cpp
         src/mizu/window.cpp
         # [[[end]]]
 )

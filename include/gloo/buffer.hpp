@@ -37,6 +37,10 @@ public:
     MOVE_CONSTRUCTOR(Buffer);
     MOVE_ASSIGN_OP(Buffer);
 
+    std::size_t front() const { return 0; }
+    std::size_t size() const { return data_pos_; }
+    std::size_t is_full() const { return data_pos_ == data_capacity_; }
+
     void push(std::initializer_list<T> vs);
 
     void sync_gl(BufferTarget target);
@@ -67,7 +71,7 @@ Buffer<T>::~Buffer() {
         gl_.DeleteBuffers(1, &id);
         SPDLOG_TRACE("Deleted buffer id={}", id);
     }
-    // delete[] data_;
+    delete[] data_;
 }
 
 template<typename T>
@@ -125,7 +129,9 @@ void Buffer<T>::sync_gl(BufferTarget target) {
         gl_buf_capacity_ = data_capacity_;
         SPDLOG_TRACE("Initialized GL buffer id={}", id);
     } else {
-        gl_.BufferSubData(unwrap(target), gl_buf_pos_ * sizeof(T), (data_pos_ - gl_buf_pos_) * sizeof(T), data_);
+        gl_.BufferSubData(
+                unwrap(target), gl_buf_pos_ * sizeof(T), (data_pos_ - gl_buf_pos_) * sizeof(T), data_ + gl_buf_pos_
+        );
     }
     gl_buf_pos_ = data_pos_;
 

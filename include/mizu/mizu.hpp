@@ -10,6 +10,7 @@
 #include "mizu/input_mgr.hpp"
 #include "mizu/log.hpp"
 #include "mizu/payloads.hpp"
+#include "mizu/rng.hpp"
 #include "mizu/types.hpp"
 #include "mizu/window.hpp"
 
