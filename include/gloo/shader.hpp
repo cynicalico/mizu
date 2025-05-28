@@ -3,12 +3,12 @@
 
 #include <glad/gl.h>
 #include <glm/glm.hpp>
+#include <memory>
 #include <optional>
 #include <string>
 #include <tuple>
-#include "mizu/class_helpers.hpp"
-
 #include <unordered_set>
+#include "mizu/class_helpers.hpp"
 
 namespace gloo {
 class Shader {
@@ -101,7 +101,7 @@ public:
 
     ShaderBuilder &stage_src(ShaderType type, const std::string &src);
 
-    std::optional<Shader> link();
+    std::unique_ptr<Shader> link();
 
 private:
     GladGLContext &gl_;

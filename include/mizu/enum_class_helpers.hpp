@@ -15,6 +15,14 @@ constexpr inline auto enum_range = [](auto front, auto back) {
            std::views::transform([](auto e) { return decltype(front)(e); });
 };
 
+/* Easy cast to underlying
+ */
+
+template<typename Enum>
+std::underlying_type_t<Enum> unwrap(Enum e) {
+    return static_cast<std::underlying_type_t<Enum>>(e);
+}
+
 /* Enum class bitmask operations
  */
 
@@ -45,12 +53,6 @@ template<typename Enum>
 std::enable_if_t<MizuEnableBitops<Enum>::enable, Enum> &operator&=(Enum &lhs, Enum rhs) {
     using underlying = std::underlying_type_t<Enum>;
     return lhs = static_cast<Enum>(static_cast<underlying>(lhs) & static_cast<underlying>(rhs));
-}
-
-template<typename Enum>
-std::enable_if_t<MizuEnableBitops<Enum>::enable, std::underlying_type_t<Enum>> unwrap(Enum e) {
-    using underlying = std::underlying_type_t<Enum>;
-    return static_cast<underlying>(e);
 }
 
 template<typename Enum>

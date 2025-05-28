@@ -11,7 +11,8 @@ Shader::~Shader() {
 }
 
 MOVE_CONSTRUCTOR_IMPL(Shader)
-    : id(other.id), gl_(other.gl_), uniform_locs_(other.uniform_locs_), bad_locs_(other.bad_locs_) {
+    : id(other.id), gl_(other.gl_), uniform_locs_(std::move(other.uniform_locs_)),
+      bad_locs_(std::move(other.bad_locs_)) {
     other.id = 0;
     other.uniform_locs_.clear();
     other.bad_locs_.clear();
@@ -24,10 +25,10 @@ MOVE_ASSIGN_OP_IMPL(Shader) {
 
         gl_ = other.gl_;
 
-        uniform_locs_ = other.uniform_locs_;
+        std::swap(uniform_locs_, other.uniform_locs_);
         other.uniform_locs_.clear();
 
-        bad_locs_ = other.bad_locs_;
+        std::swap(bad_locs_, other.bad_locs_);
         other.bad_locs_.clear();
     }
     return *this;
@@ -197,7 +198,7 @@ ShaderBuilder &ShaderBuilder::stage_src(ShaderType type, const std::string &src)
     return *this;
 }
 
-std::optional<Shader> ShaderBuilder::link() {
+std::unique_ptr<Shader> ShaderBuilder::link() {
     GLuint program_id = gl_.CreateProgram();
     SPDLOG_TRACE("Created shader program id={}", program_id);
 
@@ -216,11 +217,11 @@ std::optional<Shader> ShaderBuilder::link() {
         gl_.DeleteProgram(program_id);
         SPDLOG_TRACE("Deleted shader program id={}", program_id);
 
-        return std::nullopt;
+        return nullptr;
     }
 
     delete_stages_();
-    return Shader(gl_, program_id);
+    return std::unique_ptr<Shader>(new Shader(gl_, program_id));
 }
 
 bool ShaderBuilder::try_compile_(GLuint id, ShaderType type, const std::string &src) const {

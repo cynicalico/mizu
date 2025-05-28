@@ -12,6 +12,7 @@ set(${PROJECT_NAME}_headers
             for f in glob.glob(p, recursive=True):
                 cog.outl(f"\t{Path(f).as_posix()}")
         ]]] ]=]
+        include/gloo/buffer.hpp
         include/gloo/context.hpp
         include/gloo/shader.hpp
         include/gloo/sdl3/gl_attr.hpp
@@ -67,10 +68,6 @@ target_include_directories(${PROJECT_NAME} PUBLIC include)
 
 if (WIN32)
     target_compile_definitions(mizu PRIVATE WIN32_LEAN_AND_MEAN NOMINMAX)
-endif ()
-
-if (MIZU_SPDLOG_LEVEL)
-    target_compile_definitions(mizu PRIVATE SPDLOG_ACTIVE_LEVEL=${MIZU_SPDLOG_LEVEL})
 endif ()
 
 add_subdirectory(thirdparty)

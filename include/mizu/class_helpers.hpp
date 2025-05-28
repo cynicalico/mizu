@@ -13,9 +13,11 @@
 
 #define MOVE_CONSTRUCTOR(x) x(x &&other) noexcept
 #define MOVE_CONSTRUCTOR_IMPL(x) x::x(x &&other) noexcept
+#define MOVE_CONSTRUCTOR_IMPL_TEMPLATE(x, T) x<T>::x(x &&other) noexcept
 
 #define MOVE_ASSIGN_OP(x) x &operator=(x &&other) noexcept
 #define MOVE_ASSIGN_OP_IMPL(x) x &x::operator=(x &&other) noexcept
+#define MOVE_ASSIGN_OP_IMPL_TEMPLATE(x, T) x<T> &x<T>::operator=(x<T> &&other) noexcept
 
 #define NO_MOVE(x)                                                                                                     \
     MOVE_CONSTRUCTOR(x) = delete;                                                                                      \
