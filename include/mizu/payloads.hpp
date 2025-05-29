@@ -23,7 +23,11 @@ struct PPostUpdate {
 
 struct PPreDraw {};
 
+struct PPreDrawOverlay {};
+
 struct PDraw {};
+
+struct PDrawOverlay {};
 
 struct PPostDraw {};
 

@@ -3,7 +3,8 @@
 #include "mizu/payloads.hpp"
 
 namespace mizu {
-Application::Application(Engine *engine) : engine(engine) {
+Application::Application(Engine *engine)
+    : engine(engine) {
     register_callbacks_();
 }
 

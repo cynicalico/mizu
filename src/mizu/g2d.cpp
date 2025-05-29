@@ -1,7 +1,8 @@
 #include "mizu/g2d.hpp"
 
 namespace mizu {
-G2d::G2d(gloo::GlContext &gl, CallbackMgr &callbacks) : gl_(gl), callbacks_(callbacks) {
+G2d::G2d(gloo::GlContext &gl, CallbackMgr &callbacks)
+    : gl_(gl), callbacks_(callbacks) {
     register_callbacks_();
 }
 

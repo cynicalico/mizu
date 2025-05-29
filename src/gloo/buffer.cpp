@@ -1,7 +1,8 @@
 #include "gloo/buffer.hpp"
 
 namespace gloo {
-Buffer::Buffer(GladGLContext &gl) : gl_(gl) {
+Buffer::Buffer(GladGLContext &gl)
+    : gl_(gl) {
     gl_.GenBuffers(1, &id);
     SPDLOG_TRACE("Created buffer id={}", id);
 }
@@ -13,7 +14,8 @@ Buffer::~Buffer() {
     }
 }
 
-Buffer::MOVE_CONSTRUCTOR_IMPL(Buffer) : id(other.id), gl_(other.gl_) {
+Buffer::MOVE_CONSTRUCTOR_IMPL(Buffer)
+    : id(other.id), gl_(other.gl_) {
     other.id = 0;
 }
 

@@ -11,8 +11,11 @@ Shader::~Shader() {
 }
 
 MOVE_CONSTRUCTOR_IMPL(Shader)
-    : id(other.id), gl_(other.gl_), uniform_locs_(std::move(other.uniform_locs_)),
-      bad_uniform_locs_(std::move(other.bad_uniform_locs_)), attrib_locs_(std::move(other.attrib_locs_)),
+    : id(other.id),
+      gl_(other.gl_),
+      uniform_locs_(std::move(other.uniform_locs_)),
+      bad_uniform_locs_(std::move(other.bad_uniform_locs_)),
+      attrib_locs_(std::move(other.attrib_locs_)),
       bad_attrib_locs_(std::move(other.bad_attrib_locs_)) {
     other.id = 0;
     other.uniform_locs_.clear();
@@ -195,7 +198,8 @@ void Shader::uniform(const std::string &name, const glm::mat4x3 &v) {
     if (const auto loc = find_uniform_loc_(name); loc) gl_.UniformMatrix4x3fv(*loc, 1, GL_FALSE, value_ptr(v));
 }
 
-Shader::Shader(GladGLContext &gl, GLuint id) : id(id), gl_(gl) {}
+Shader::Shader(GladGLContext &gl, GLuint id)
+    : id(id), gl_(gl) {}
 
 std::optional<GLint> Shader::find_uniform_loc_(const std::string &name) {
     auto it = uniform_locs_.find(name);
@@ -213,7 +217,8 @@ std::optional<GLint> Shader::find_uniform_loc_(const std::string &name) {
     return it->second;
 }
 
-ShaderBuilder::ShaderBuilder(GladGLContext &gl) : gl_(gl) {}
+ShaderBuilder::ShaderBuilder(GladGLContext &gl)
+    : gl_(gl) {}
 
 ShaderBuilder &ShaderBuilder::stage_src(ShaderType type, const std::string &src) {
     GLuint id = gl_.CreateShader(static_cast<GLenum>(type));

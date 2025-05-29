@@ -60,22 +60,18 @@ SDL_Surface *read_image_to_sdl_surface(const std::filesystem::path &path) {
 #endif
     }
 
-    if (color_type == PNG_COLOR_TYPE_PALETTE)
-        png_set_palette_to_rgb(png);
+    if (color_type == PNG_COLOR_TYPE_PALETTE) png_set_palette_to_rgb(png);
 
-    if (color_type == PNG_COLOR_TYPE_GRAY && bit_depth < 8)
-        png_set_expand_gray_1_2_4_to_8(png);
+    if (color_type == PNG_COLOR_TYPE_GRAY && bit_depth < 8) png_set_expand_gray_1_2_4_to_8(png);
 
-    if (png_get_valid(png, info, PNG_INFO_tRNS))
-        png_set_tRNS_to_alpha(png);
+    if (png_get_valid(png, info, PNG_INFO_tRNS)) png_set_tRNS_to_alpha(png);
 
     if (color_type == PNG_COLOR_TYPE_RGB || color_type == PNG_COLOR_TYPE_GRAY || color_type == PNG_COLOR_TYPE_PALETTE) {
         png_set_filler(png, 0xffff, PNG_FILLER_AFTER);
         png_set_add_alpha(png, 0xff, PNG_FILLER_AFTER);
     }
 
-    if (color_type == PNG_COLOR_TYPE_GRAY || color_type == PNG_COLOR_TYPE_GRAY_ALPHA)
-        png_set_gray_to_rgb(png);
+    if (color_type == PNG_COLOR_TYPE_GRAY || color_type == PNG_COLOR_TYPE_GRAY_ALPHA) png_set_gray_to_rgb(png);
 
     png_read_update_info(png, info);
 
@@ -95,7 +91,8 @@ SDL_Surface *read_image_to_sdl_surface(const std::filesystem::path &path) {
     }
 
     std::vector<png_bytep> row_pointers(height);
-    for (int y = 0; y < height; y++) row_pointers[y] = static_cast<png_bytep>(surface->pixels) + y * stride;
+    for (int y = 0; y < height; y++)
+        row_pointers[y] = static_cast<png_bytep>(surface->pixels) + y * stride;
     png_read_image(png, row_pointers.data());
 
     fclose(fp);

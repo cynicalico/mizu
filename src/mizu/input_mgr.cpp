@@ -3,7 +3,8 @@
 #include "mizu/log.hpp"
 
 namespace mizu {
-InputMgr::InputMgr(CallbackMgr &callbacks) : callbacks_(callbacks) {
+InputMgr::InputMgr(CallbackMgr &callbacks)
+    : callbacks_(callbacks) {
     register_callbacks_();
 }
 
@@ -111,19 +112,21 @@ void InputMgr::unregister_callbacks_() {
     callbacks_.unsub<PEventMouseButtonUp>(callback_id_);
     callbacks_.unsub<PEventMouseButtonDown>(callback_id_);
     callbacks_.unsub<PEventMouseMotion>(callback_id_);
-    callbacks_.unsub<PPreUpdate>(callback_id_);
-    callbacks_.unsub<PEventKeyDown>(callback_id_);
     callbacks_.unsub<PEventKeyUp>(callback_id_);
+    callbacks_.unsub<PEventKeyDown>(callback_id_);
+    callbacks_.unsub<PPreUpdate>(callback_id_);
     callbacks_.unreg(callback_id_);
     callback_id_ = 0;
 }
 
 void InputMgr::update_(double dt) {
     prev_key_state_.clear();
-    for (auto &p: key_state_) prev_key_state_[p.first] = p.second;
+    for (auto &p: key_state_)
+        prev_key_state_[p.first] = p.second;
 
     prev_mouse_button_state_.clear();
-    for (auto &p: mouse_button_state_) prev_mouse_button_state_[p.first] = p.second;
+    for (auto &p: mouse_button_state_)
+        prev_mouse_button_state_[p.first] = p.second;
 
     prev_mouse_pos_.x = mouse_pos_.x;
     prev_mouse_pos_.y = mouse_pos_.y;

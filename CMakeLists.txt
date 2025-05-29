@@ -22,6 +22,7 @@ set(${PROJECT_NAME}_headers
         include/mizu/callback_mgr.hpp
         include/mizu/class_helpers.hpp
         include/mizu/color.hpp
+        include/mizu/dear.hpp
         include/mizu/engine.hpp
         include/mizu/enum_class_helpers.hpp
         include/mizu/g2d.hpp
@@ -56,6 +57,7 @@ set(${PROJECT_NAME}_sources
         src/gloo/sdl3/gl_context_flags.cpp
         src/mizu/application.cpp
         src/mizu/color.cpp
+        src/mizu/dear.cpp
         src/mizu/engine.cpp
         src/mizu/g2d.cpp
         src/mizu/image.cpp

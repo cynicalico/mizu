@@ -60,6 +60,8 @@ public:
 
     void push(std::initializer_list<T> vs);
 
+    void clear();
+
     void sync_gl(BufferTarget target);
 
 private:
@@ -84,8 +86,12 @@ StaticSizeBuffer<T>::~StaticSizeBuffer() {
 
 template<typename T>
 MOVE_CONSTRUCTOR_IMPL_TEMPLATE(StaticSizeBuffer, T)
-    : Buffer(std::move(other)), gl_buf_capacity_(other.gl_buf_capacity_), gl_buf_pos_(other.gl_buf_pos_),
-      data_(other.data_), data_capacity_(other.data_capacity_), data_pos_(other.data_pos_) {
+    : Buffer(std::move(other)),
+      gl_buf_capacity_(other.gl_buf_capacity_),
+      gl_buf_pos_(other.gl_buf_pos_),
+      data_(other.data_),
+      data_capacity_(other.data_capacity_),
+      data_pos_(other.data_pos_) {
     other.gl_buf_capacity_ = 0;
     other.gl_buf_pos_ = 0;
     other.data_ = nullptr;
@@ -121,6 +127,12 @@ void StaticSizeBuffer<T>::push(std::initializer_list<T> vs) {
     assert(data_pos_ + vs.size() <= data_capacity_);
     for (const auto v: vs)
         data_[data_pos_++] = v;
+}
+
+template<typename T>
+void StaticSizeBuffer<T>::clear() {
+    gl_buf_pos_ = 0;
+    data_pos_ = 0;
 }
 
 template<typename T>

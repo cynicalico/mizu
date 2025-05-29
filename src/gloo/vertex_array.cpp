@@ -8,7 +8,8 @@ VertexArray::~VertexArray() {
     }
 }
 
-MOVE_CONSTRUCTOR_IMPL(VertexArray) : id(other.id), gl_(other.gl_) {
+MOVE_CONSTRUCTOR_IMPL(VertexArray)
+    : id(other.id), gl_(other.gl_) {
     other.id = 0;
 }
 
@@ -36,9 +37,11 @@ void VertexArray::draw_arrays(DrawMode mode, std::size_t first, std::size_t coun
     unbind();
 }
 
-VertexArray::VertexArray(GladGLContext &gl, GLuint id) : id(id), gl_(gl) {}
+VertexArray::VertexArray(GladGLContext &gl, GLuint id)
+    : id(id), gl_(gl) {}
 
-VertexArrayBuilder::VertexArrayBuilder(GladGLContext &gl) : gl_(gl) {
+VertexArrayBuilder::VertexArrayBuilder(GladGLContext &gl)
+    : gl_(gl) {
     gl_.GenVertexArrays(1, &id_);
     SPDLOG_TRACE("Created vertex array id={}", id_);
 

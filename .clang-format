@@ -19,6 +19,7 @@ AlignTrailingComments: false
 AlwaysBreakTemplateDeclarations: Yes
 BinPackArguments: false
 BinPackParameters: OnePerLine
+PackConstructorInitializers: NextLineOnly
 BraceWrapping:
   AfterCaseLabel: false
   AfterClass: false

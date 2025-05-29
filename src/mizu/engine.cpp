@@ -16,7 +16,8 @@ void gl_debug_message_callback(
         const void *userParam
 );
 
-Engine::Engine(const std::string &window_title, Size2d<int> window_size, WindowBuildFunc f) : running_(true) {
+Engine::Engine(const std::string &window_title, Size2d<int> window_size, WindowBuildFunc f)
+    : running_(true) {
     // Log levels are controlled through MIZU_SPDLOG_LEVEL, but we don't know what the user
     // has set, so just assume trace logging to catch everything
     spdlog::set_level(spdlog::level::trace);
@@ -81,13 +82,17 @@ Engine::Engine(const std::string &window_title, Size2d<int> window_size, WindowB
     input = std::make_unique<InputMgr>(callbacks);
 
     g2d = std::make_unique<G2d>(gl, callbacks);
+
+    dear = std::make_unique<Dear>(callbacks, window.get());
 }
 
-Engine::Engine(const std::string &window_title, WindowBuildFunc f) : Engine(window_title, Size2d(0, 0), std::move(f)) {}
+Engine::Engine(const std::string &window_title, WindowBuildFunc f)
+    : Engine(window_title, Size2d(0, 0), std::move(f)) {}
 
 Engine::~Engine() {
     unregister_callbacks_();
 
+    dear.reset();
     g2d.reset();
     input.reset();
     window.reset();
@@ -103,42 +108,59 @@ void Engine::shutdown() {
 void Engine::poll_events_() {
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
+        dear->process_sdl3_event(event);
+
         switch (event.type) {
         case SDL_EVENT_KEY_DOWN:
-            callbacks.pub<PEventKeyDown>(
-                    event.key.timestamp, event.key.scancode, event.key.key, event.key.mod, event.key.repeat
-            );
+            if (!dear->ignore_keyboard_inputs()) {
+                callbacks.pub<PEventKeyDown>(
+                        event.key.timestamp, event.key.scancode, event.key.key, event.key.mod, event.key.repeat
+                );
+            }
             break;
         case SDL_EVENT_KEY_UP:
-            callbacks.pub<PEventKeyUp>(event.key.timestamp, event.key.scancode, event.key.key, event.key.mod);
+            if (!dear->ignore_keyboard_inputs())
+                callbacks.pub<PEventKeyUp>(event.key.timestamp, event.key.scancode, event.key.key, event.key.mod);
             break;
         case SDL_EVENT_MOUSE_MOTION:
-            callbacks.pub<PEventMouseMotion>(
-                    event.motion.timestamp, event.motion.x, event.motion.y, event.motion.xrel, event.motion.yrel
-            );
+            if (!dear->ignore_mouse_inputs()) {
+                callbacks.pub<PEventMouseMotion>(
+                        event.motion.timestamp, event.motion.x, event.motion.y, event.motion.xrel, event.motion.yrel
+                );
+            }
             break;
         case SDL_EVENT_MOUSE_BUTTON_DOWN:
-            callbacks.pub<PEventMouseButtonDown>(
-                    event.button.timestamp, event.button.button, event.button.clicks, event.button.x, event.button.y
-            );
+            if (!dear->ignore_mouse_inputs()) {
+                callbacks.pub<PEventMouseButtonDown>(
+                        event.button.timestamp, event.button.button, event.button.clicks, event.button.x, event.button.y
+                );
+            }
             break;
         case SDL_EVENT_MOUSE_BUTTON_UP:
-            callbacks.pub<PEventMouseButtonUp>(
-                    event.button.timestamp, event.button.button, event.button.x, event.button.y
-            );
+            if (!dear->ignore_mouse_inputs()) {
+                callbacks.pub<PEventMouseButtonUp>(
+                        event.button.timestamp, event.button.button, event.button.x, event.button.y
+                );
+            }
             break;
         case SDL_EVENT_MOUSE_WHEEL:
-            callbacks.pub<PEventMouseWheel>(
-                    event.wheel.timestamp,
-                    event.wheel.direction == SDL_MOUSEWHEEL_FLIPPED,
-                    event.wheel.x,
-                    event.wheel.y,
-                    event.wheel.mouse_x,
-                    event.wheel.mouse_y
-            );
+            if (!dear->ignore_mouse_inputs()) {
+                callbacks.pub<PEventMouseWheel>(
+                        event.wheel.timestamp,
+                        event.wheel.direction == SDL_MOUSEWHEEL_FLIPPED,
+                        event.wheel.x,
+                        event.wheel.y,
+                        event.wheel.mouse_x,
+                        event.wheel.mouse_y
+                );
+            }
             break;
-        case SDL_EVENT_WINDOW_MOUSE_ENTER: callbacks.pub<PEventMouseEnter>(event.window.timestamp); break;
-        case SDL_EVENT_WINDOW_MOUSE_LEAVE: callbacks.pub<PEventMouseLeave>(event.window.timestamp); break;
+        case SDL_EVENT_WINDOW_MOUSE_ENTER:
+            if (!dear->ignore_mouse_inputs()) callbacks.pub<PEventMouseEnter>(event.window.timestamp);
+            break;
+        case SDL_EVENT_WINDOW_MOUSE_LEAVE:
+            if (!dear->ignore_mouse_inputs()) callbacks.pub<PEventMouseLeave>(event.window.timestamp);
+            break;
         case SDL_EVENT_WINDOW_RESIZED:
             callbacks.pub<PEventWindowResized>(event.window.timestamp, event.window.data1, event.window.data2);
             break;
