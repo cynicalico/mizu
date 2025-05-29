@@ -12,10 +12,13 @@ Shader::~Shader() {
 
 MOVE_CONSTRUCTOR_IMPL(Shader)
     : id(other.id), gl_(other.gl_), uniform_locs_(std::move(other.uniform_locs_)),
-      bad_locs_(std::move(other.bad_locs_)) {
+      bad_uniform_locs_(std::move(other.bad_uniform_locs_)), attrib_locs_(std::move(other.attrib_locs_)),
+      bad_attrib_locs_(std::move(other.bad_attrib_locs_)) {
     other.id = 0;
     other.uniform_locs_.clear();
-    other.bad_locs_.clear();
+    other.bad_uniform_locs_.clear();
+    other.attrib_locs_.clear();
+    other.bad_attrib_locs_.clear();
 }
 
 MOVE_ASSIGN_OP_IMPL(Shader) {
@@ -28,14 +31,36 @@ MOVE_ASSIGN_OP_IMPL(Shader) {
         std::swap(uniform_locs_, other.uniform_locs_);
         other.uniform_locs_.clear();
 
-        std::swap(bad_locs_, other.bad_locs_);
-        other.bad_locs_.clear();
+        std::swap(bad_uniform_locs_, other.bad_uniform_locs_);
+        other.bad_uniform_locs_.clear();
+
+        std::swap(attrib_locs_, other.attrib_locs_);
+        other.attrib_locs_.clear();
+
+        std::swap(bad_attrib_locs_, other.bad_attrib_locs_);
+        other.bad_attrib_locs_.clear();
     }
     return *this;
 }
 
 void Shader::use() {
     gl_.UseProgram(id);
+}
+
+std::optional<GLuint> Shader::attrib_location(const std::string &name) {
+    auto it = attrib_locs_.find(name);
+    if (it == attrib_locs_.end()) {
+        GLint loc = gl_.GetAttribLocation(id, name.c_str());
+        if (loc == -1) {
+            if (auto it2 = bad_attrib_locs_.find(name); it2 == bad_attrib_locs_.end()) {
+                SPDLOG_ERROR("Attrib \"{}\" not found", name);
+                bad_attrib_locs_.insert(it2, name);
+            }
+            return std::nullopt;
+        }
+        it = attrib_locs_.emplace_hint(it, name, loc);
+    }
+    return it->second;
 }
 
 void Shader::uniform(const std::string &name, float v0) {
@@ -177,9 +202,9 @@ std::optional<GLint> Shader::find_uniform_loc_(const std::string &name) {
     if (it == uniform_locs_.end()) {
         GLint loc = gl_.GetUniformLocation(id, name.c_str());
         if (loc == -1) {
-            if (auto it2 = bad_locs_.find(name); it2 == bad_locs_.end()) {
+            if (auto it2 = bad_uniform_locs_.find(name); it2 == bad_uniform_locs_.end()) {
                 SPDLOG_ERROR("Uniform \"{}\" not found", name);
-                bad_locs_.insert(it2, name);
+                bad_uniform_locs_.insert(it2, name);
             }
             return std::nullopt;
         }

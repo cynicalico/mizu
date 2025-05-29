@@ -15,6 +15,7 @@ set(${PROJECT_NAME}_headers
         include/gloo/buffer.hpp
         include/gloo/context.hpp
         include/gloo/shader.hpp
+        include/gloo/vertex_array.hpp
         include/gloo/sdl3/gl_attr.hpp
         include/gloo/sdl3/gl_context_flags.hpp
         include/mizu/application.hpp
@@ -26,6 +27,7 @@ set(${PROJECT_NAME}_headers
         include/mizu/g2d.hpp
         include/mizu/image.hpp
         include/mizu/input_mgr.hpp
+        include/mizu/is_any_of.hpp
         include/mizu/log.hpp
         include/mizu/mizu.hpp
         include/mizu/payloads.hpp
@@ -46,8 +48,10 @@ set(${PROJECT_NAME}_sources
             for f in glob.glob(p, recursive=True):
                 cog.outl(f"\t{Path(f).as_posix()}")
         ]]] ]=]
+        src/gloo/buffer.cpp
         src/gloo/context.cpp
         src/gloo/shader.cpp
+        src/gloo/vertex_array.cpp
         src/gloo/sdl3/gl_attr.cpp
         src/gloo/sdl3/gl_context_flags.cpp
         src/mizu/application.cpp

@@ -24,18 +24,35 @@ enum class BufferTarget : GLenum {
     Uniform = GL_UNIFORM_BUFFER,
 };
 
-template<typename T>
 class Buffer {
 public:
     GLuint id{0};
 
-    Buffer(GladGLContext &gl, std::size_t capacity);
+    Buffer(GladGLContext &gl);
     ~Buffer();
 
     NO_COPY(Buffer)
 
     MOVE_CONSTRUCTOR(Buffer);
     MOVE_ASSIGN_OP(Buffer);
+
+    void bind(BufferTarget target);
+    void unbind(BufferTarget target);
+
+protected:
+    GladGLContext &gl_;
+};
+
+template<typename T>
+class StaticSizeBuffer : public Buffer {
+public:
+    StaticSizeBuffer(GladGLContext &gl, std::size_t capacity);
+    ~StaticSizeBuffer();
+
+    NO_COPY(StaticSizeBuffer)
+
+    MOVE_CONSTRUCTOR(StaticSizeBuffer);
+    MOVE_ASSIGN_OP(StaticSizeBuffer);
 
     std::size_t front() const { return 0; }
     std::size_t size() const { return data_pos_; }
@@ -44,11 +61,8 @@ public:
     void push(std::initializer_list<T> vs);
 
     void sync_gl(BufferTarget target);
-    void bind(BufferTarget target);
-    void unbind(BufferTarget target);
 
 private:
-    GladGLContext &gl_;
     std::size_t gl_buf_capacity_;
     std::size_t gl_buf_pos_;
 
@@ -58,27 +72,20 @@ private:
 };
 
 template<typename T>
-Buffer<T>::Buffer(GladGLContext &gl, std::size_t capacity)
-    : gl_(gl), gl_buf_capacity_(0), gl_buf_pos_(0), data_(), data_capacity_(capacity), data_pos_(0) {
+StaticSizeBuffer<T>::StaticSizeBuffer(GladGLContext &gl, std::size_t capacity)
+    : Buffer(gl), gl_buf_capacity_(0), gl_buf_pos_(0), data_(), data_capacity_(capacity), data_pos_(0) {
     data_ = new T[capacity];
-    gl_.GenBuffers(1, &id);
-    SPDLOG_TRACE("Created buffer id={}", id);
 }
 
 template<typename T>
-Buffer<T>::~Buffer() {
-    if (id != 0) {
-        gl_.DeleteBuffers(1, &id);
-        SPDLOG_TRACE("Deleted buffer id={}", id);
-    }
+StaticSizeBuffer<T>::~StaticSizeBuffer() {
     delete[] data_;
 }
 
 template<typename T>
-MOVE_CONSTRUCTOR_IMPL_TEMPLATE(Buffer, T)
-    : id(other.id), gl_(other.gl_), gl_buf_capacity_(other.gl_buf_capacity_), gl_buf_pos_(other.gl_buf_pos_),
+MOVE_CONSTRUCTOR_IMPL_TEMPLATE(StaticSizeBuffer, T)
+    : Buffer(std::move(other)), gl_buf_capacity_(other.gl_buf_capacity_), gl_buf_pos_(other.gl_buf_pos_),
       data_(other.data_), data_capacity_(other.data_capacity_), data_pos_(other.data_pos_) {
-    other.id = 0;
     other.gl_buf_capacity_ = 0;
     other.gl_buf_pos_ = 0;
     other.data_ = nullptr;
@@ -87,12 +94,9 @@ MOVE_CONSTRUCTOR_IMPL_TEMPLATE(Buffer, T)
 }
 
 template<typename T>
-MOVE_ASSIGN_OP_IMPL_TEMPLATE(Buffer, T) {
+MOVE_ASSIGN_OP_IMPL_TEMPLATE(StaticSizeBuffer, T) {
     if (this != &other) {
-        id = other.id;
-        other.id = 0;
-
-        gl_ = other.gl_;
+        Buffer::operator=(other);
 
         gl_buf_capacity_ = other.gl_buf_capacity_;
         other.gl_buf_capacity_ = 0;
@@ -113,14 +117,14 @@ MOVE_ASSIGN_OP_IMPL_TEMPLATE(Buffer, T) {
 }
 
 template<typename T>
-void Buffer<T>::push(std::initializer_list<T> vs) {
+void StaticSizeBuffer<T>::push(std::initializer_list<T> vs) {
     assert(data_pos_ + vs.size() <= data_capacity_);
     for (const auto v: vs)
         data_[data_pos_++] = v;
 }
 
 template<typename T>
-void Buffer<T>::sync_gl(BufferTarget target) {
+void StaticSizeBuffer<T>::sync_gl(BufferTarget target) {
     if (gl_buf_pos_ == data_pos_) return;
     bind(target);
 
@@ -136,16 +140,6 @@ void Buffer<T>::sync_gl(BufferTarget target) {
     gl_buf_pos_ = data_pos_;
 
     unbind(target);
-}
-
-template<typename T>
-void Buffer<T>::bind(BufferTarget target) {
-    gl_.BindBuffer(unwrap(target), id);
-}
-
-template<typename T>
-void Buffer<T>::unbind(BufferTarget target) {
-    gl_.BindBuffer(unwrap(target), 0);
 }
 } // namespace gloo
 

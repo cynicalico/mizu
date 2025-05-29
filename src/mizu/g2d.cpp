@@ -19,6 +19,10 @@ gloo::ShaderBuilder G2d::shader_builder() const {
     return gloo::ShaderBuilder(gl_.ctx);
 }
 
+gloo::VertexArrayBuilder G2d::vertex_array_builder() const {
+    return gloo::VertexArrayBuilder(gl_.ctx);
+}
+
 void G2d::register_callbacks_() {
     callback_id_ = callbacks_.reg();
 }

@@ -2,19 +2,25 @@
 
 const auto VERT_SRC = R"glsl(
 #version 330 core
-layout (location = 0) in vec3 aPos;
+in vec3 in_pos;
+in vec3 in_color;
+
+out vec3 color;
 
 void main() {
-    gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
+    color = in_color;
+    gl_Position = vec4(in_pos, 1.0);
 }
 )glsl";
 
 const auto FRAG_SRC = R"glsl(
 #version 330 core
+in vec3 color;
+
 out vec4 FragColor;
 
 void main() {
-    FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);
+    FragColor = vec4(color, 1.0f);
 }
 )glsl";
 
@@ -24,8 +30,8 @@ public:
     mizu::G2d *g2d;
 
     std::unique_ptr<gloo::Shader> shader;
-    std::unique_ptr<gloo::Buffer<float>> vbo;
-    GLuint vao;
+    std::unique_ptr<gloo::StaticSizeBuffer<float>> vbo;
+    std::unique_ptr<gloo::VertexArray> vao;
 
     explicit Ethereal(mizu::Engine *engine);
 
@@ -41,16 +47,22 @@ Ethereal::Ethereal(mizu::Engine *engine) : Application(engine), input(engine->in
                      .link();
     if (!shader) engine->shutdown();
 
-    vbo = g2d->buffer<float>(90);
-    vbo->push({-0.5f, -0.5f, 0.0f, /* */ 0.5f, -0.5f, 0.0f, /* */ 0.0f, 0.5f, 0.0f});
+    vbo = g2d->buffer<float>(18 * 10);
+    // clang-format off
+    vbo->push({
+        -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,
+         0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f,
+         0.0f,  0.5f, 0.0f, 0.0f, 0.0f, 1.0f
+    });
+    // clang-format on
 
-    engine->gl.ctx.GenVertexArrays(1, &vao);
-    engine->gl.ctx.BindVertexArray(vao);
-    vbo->bind(gloo::BufferTarget::Array);
-    engine->gl.ctx.VertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), static_cast<void *>(0));
-    engine->gl.ctx.EnableVertexAttribArray(0);
-    vbo->unbind(gloo::BufferTarget::Array);
-    engine->gl.ctx.BindVertexArray(0);
+    vao = g2d->vertex_array_builder()
+                  .from(shader.get())
+                  .from(vbo.get(), gloo::BufferTarget::Array)
+                  .vec("in_pos", 3)
+                  .vec("in_color", 3)
+                  .build();
+    if (!vao) engine->shutdown();
 }
 
 void Ethereal::update(double dt) {
@@ -64,7 +76,16 @@ void Ethereal::update(double dt) {
             float y1 = mizu::rng::get<float>(-1.0, 1.0);
             float x2 = mizu::rng::get<float>(-1.0, 1.0);
             float y2 = mizu::rng::get<float>(-1.0, 1.0);
-            vbo->push({x0, y0, 0.0f, x1, y1, 0.0f, x2, y2, 0.0f});
+            float r = mizu::rng::get<float>();
+            float g = mizu::rng::get<float>();
+            float b = mizu::rng::get<float>();
+            // clang-format off
+            vbo->push({
+                x0, y0, 0.0f, r, g, b,
+                x1, y1, 0.0f, r, g, b,
+                x2, y2, 0.0f, r, g, b
+            });
+            // clang-format on
         } else {
             SPDLOG_INFO("Buffer is full");
         }
@@ -76,9 +97,7 @@ void Ethereal::draw() {
 
     vbo->sync_gl(gloo::BufferTarget::Array);
     shader->use();
-    engine->gl.ctx.BindVertexArray(vao);
-    engine->gl.ctx.DrawArrays(GL_TRIANGLES, vbo->front() / 3, vbo->size() / 3);
-    engine->gl.ctx.BindVertexArray(0);
+    vao->draw_arrays(gloo::DrawMode::Triangles, vbo->front() / 6, vbo->size() / 6);
 }
 
 int main(int, char *[]) {

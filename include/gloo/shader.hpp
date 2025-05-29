@@ -26,6 +26,8 @@ public:
 
     void use();
 
+    std::optional<GLuint> attrib_location(const std::string &name);
+
     void uniform(const std::string &name, float v0);
     void uniform(const std::string &name, float v0, float v1);
     void uniform(const std::string &name, float v0, float v1, float v2);
@@ -71,8 +73,10 @@ public:
 
 private:
     GladGLContext &gl_;
-    std::unordered_map<std::string, GLint> uniform_locs_;
-    std::unordered_set<std::string> bad_locs_{};
+    std::unordered_map<std::string, GLint> uniform_locs_{};
+    std::unordered_set<std::string> bad_uniform_locs_{};
+    std::unordered_map<std::string, GLint> attrib_locs_{};
+    std::unordered_set<std::string> bad_attrib_locs_{};
 
     explicit Shader(GladGLContext &gl, GLuint id);
 

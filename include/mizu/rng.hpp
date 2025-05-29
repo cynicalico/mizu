@@ -3,10 +3,10 @@
 
 #include "pcg_random.hpp"
 // #include "uuid.h"
-#include <concepts>
 #include <cstdint>
 #include <random>
 #include <string>
+#include "mizu/is_any_of.hpp"
 
 namespace mizu::rng {
 
@@ -25,13 +25,6 @@ void seed128(std::uint64_t seed_hi, std::uint64_t seed_lo, std::uint64_t stream_
 void seed(std::uint64_t seed, std::uint64_t stream = 0);
 
 void debug_show_seed();
-
-/******************
- * HELPER CONCEPTS
- */
-
-template<typename T, typename... U>
-concept IsAnyOf = (std::same_as<T, U> || ...);
 
 /***********
  * INTEGERS

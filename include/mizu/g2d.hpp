@@ -4,6 +4,7 @@
 #include "gloo/buffer.hpp"
 #include "gloo/context.hpp"
 #include "gloo/shader.hpp"
+#include "gloo/vertex_array.hpp"
 #include "mizu/callback_mgr.hpp"
 #include "mizu/color.hpp"
 #include "mizu/enum_class_helpers.hpp"
@@ -32,7 +33,9 @@ public:
     gloo::ShaderBuilder shader_builder() const;
 
     template<typename T>
-    std::unique_ptr<gloo::Buffer<T>> buffer(std::size_t capacity) const;
+    std::unique_ptr<gloo::StaticSizeBuffer<T>> buffer(std::size_t capacity) const;
+
+    gloo::VertexArrayBuilder vertex_array_builder() const;
 
 private:
     gloo::GlContext &gl_;
@@ -45,8 +48,8 @@ private:
 };
 
 template<typename T>
-std::unique_ptr<gloo::Buffer<T>> G2d::buffer(std::size_t capacity) const {
-    return std::make_unique<gloo::Buffer<T>>(gl_.ctx, capacity);
+std::unique_ptr<gloo::StaticSizeBuffer<T>> G2d::buffer(std::size_t capacity) const {
+    return std::make_unique<gloo::StaticSizeBuffer<T>>(gl_.ctx, capacity);
 }
 } // namespace mizu
 
