@@ -137,7 +137,8 @@ void StaticSizeBuffer<T>::clear() {
 
 template<typename T>
 void StaticSizeBuffer<T>::sync_gl(BufferTarget target) {
-    if (gl_buf_pos_ == data_pos_) return;
+    if (gl_buf_pos_ == data_pos_)
+        return;
     bind(target);
 
     if (gl_buf_capacity_ == 0) {

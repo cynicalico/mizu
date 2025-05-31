@@ -5,7 +5,7 @@
 #include "mizu/enum_class_helpers.hpp"
 
 namespace gloo::sdl3 {
-enum class GlContextFlags : int {
+enum class ContextFlags : int {
     None = 0,
     Debug = SDL_GL_CONTEXT_DEBUG_FLAG,
     ForwardCompatible = SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG,
@@ -13,22 +13,22 @@ enum class GlContextFlags : int {
     ResetIsolation = SDL_GL_CONTEXT_RESET_ISOLATION_FLAG
 };
 
-class GlContextFlagsBuilder {
+class ContextFlagsBuilder {
 public:
-    GlContextFlagsBuilder();
+    ContextFlagsBuilder();
 
-    GlContextFlagsBuilder &debug();
-    GlContextFlagsBuilder &forward_compatible();
-    GlContextFlagsBuilder &robust_access();
-    GlContextFlagsBuilder &reset_isolation();
+    ContextFlagsBuilder &debug();
+    ContextFlagsBuilder &forward_compatible();
+    ContextFlagsBuilder &robust_access();
+    ContextFlagsBuilder &reset_isolation();
 
     void set();
 
 private:
-    GlContextFlags flags_;
+    ContextFlags flags_;
 };
 } // namespace gloo::sdl3
 
-ENUM_CLASS_ENABLE_BITOPS(gloo::sdl3::GlContextFlags);
+ENUM_CLASS_ENABLE_BITOPS(gloo::sdl3::ContextFlags);
 
 #endif // GLOO_SDL3_GL_CONTEXT_FLAGS_HPP

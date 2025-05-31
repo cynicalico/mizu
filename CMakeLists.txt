@@ -16,8 +16,8 @@ set(${PROJECT_NAME}_headers
         include/gloo/context.hpp
         include/gloo/shader.hpp
         include/gloo/vertex_array.hpp
-        include/gloo/sdl3/gl_attr.hpp
-        include/gloo/sdl3/gl_context_flags.hpp
+        include/gloo/sdl3/attr.hpp
+        include/gloo/sdl3/context_flags.hpp
         include/mizu/application.hpp
         include/mizu/callback_mgr.hpp
         include/mizu/class_helpers.hpp
@@ -27,6 +27,7 @@ set(${PROJECT_NAME}_headers
         include/mizu/enum_class_helpers.hpp
         include/mizu/g2d.hpp
         include/mizu/image.hpp
+        include/mizu/imconfig.hpp
         include/mizu/input_mgr.hpp
         include/mizu/is_any_of.hpp
         include/mizu/log.hpp
@@ -53,8 +54,8 @@ set(${PROJECT_NAME}_sources
         src/gloo/context.cpp
         src/gloo/shader.cpp
         src/gloo/vertex_array.cpp
-        src/gloo/sdl3/gl_attr.cpp
-        src/gloo/sdl3/gl_context_flags.cpp
+        src/gloo/sdl3/attr.cpp
+        src/gloo/sdl3/context_flags.cpp
         src/mizu/application.cpp
         src/mizu/color.cpp
         src/mizu/dear.cpp
@@ -77,6 +78,10 @@ target_include_directories(${PROJECT_NAME} PUBLIC include)
 if (WIN32)
     target_compile_definitions(mizu PRIVATE WIN32_LEAN_AND_MEAN NOMINMAX)
 endif ()
+
+target_compile_definitions(mizu PUBLIC
+        IMGUI_USER_CONFIG="${CMAKE_SOURCE_DIR}/include/mizu/imconfig.hpp"
+)
 
 add_subdirectory(thirdparty)
 target_link_libraries(${PROJECT_NAME} PUBLIC mizu_thirdparty)

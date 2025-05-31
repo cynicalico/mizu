@@ -81,6 +81,7 @@ CPMAddPackage(
 )
 
 find_package(PNG REQUIRED)
+find_package(Freetype REQUIRED)
 
 add_library(mizu_thirdparty STATIC
         ${pcg_SOURCE_DIR}/include/pcg_extras.hpp
@@ -95,6 +96,7 @@ add_library(mizu_thirdparty STATIC
         ${imgui_SOURCE_DIR}/imstb_truetype.h
         ${imgui_SOURCE_DIR}/backends/imgui_impl_opengl3.h
         ${imgui_SOURCE_DIR}/backends/imgui_impl_sdl3.h
+        ${imgui_SOURCE_DIR}/misc/freetype/imgui_freetype.h
 
         ${imgui_SOURCE_DIR}/imgui.cpp
         ${imgui_SOURCE_DIR}/imgui_demo.cpp
@@ -103,6 +105,11 @@ add_library(mizu_thirdparty STATIC
         ${imgui_SOURCE_DIR}/imgui_widgets.cpp
         ${imgui_SOURCE_DIR}/backends/imgui_impl_opengl3.cpp
         ${imgui_SOURCE_DIR}/backends/imgui_impl_sdl3.cpp
+        ${imgui_SOURCE_DIR}/misc/freetype/imgui_freetype.cpp
+)
+
+target_compile_definitions(mizu_thirdparty PUBLIC
+        IMGUI_USER_CONFIG="${CMAKE_SOURCE_DIR}/include/mizu/imconfig.hpp"
 )
 
 target_include_directories(mizu_thirdparty PUBLIC
@@ -120,4 +127,5 @@ target_link_libraries(mizu_thirdparty PUBLIC
         OpenAL::OpenAL
         SDL3::SDL3
         PNG::PNG
+        Freetype::Freetype
 )

@@ -5,14 +5,15 @@
 #include <optional>
 
 namespace gloo {
-struct GlContextVersion {
+struct ContextVersion {
     int major;
     int minor;
 
-    GlContextVersion(int major, int minor) : major(major), minor(minor) {}
+    ContextVersion(int major, int minor)
+        : major(major), minor(minor) {}
 };
 
-enum class GlCapability : GLenum {
+enum class Capability : GLenum {
     Blend = GL_BLEND,
     // GL_CLIP_DISTANCE 0-?
     ColorLogicOp = GL_COLOR_LOGIC_OP,
@@ -43,7 +44,7 @@ enum class GlCapability : GLenum {
     ProgramPointSize = GL_PROGRAM_POINT_SIZE,
 };
 
-enum class GlBlendFunc : GLenum {
+enum class BlendFunc : GLenum {
     Zero = GL_ZERO,
     One = GL_ONE,
     SrcColor = GL_SRC_COLOR,
@@ -63,17 +64,17 @@ enum class GlBlendFunc : GLenum {
     OneMinusSrc1Alpha = GL_ONE_MINUS_SRC_ALPHA
 };
 
-class GlContext {
+class Context {
 public:
     GladGLContext ctx;
 
-    std::optional<GlContextVersion> load(GLADloadfunc func);
+    std::optional<ContextVersion> load(GLADloadfunc func);
 
-    void enable(GlCapability cap);
-    void disable(GlCapability cap);
-    bool is_enabled(GlCapability cap) const;
+    void enable(Capability cap);
+    void disable(Capability cap);
+    bool is_enabled(Capability cap) const;
 
-    void blend_func(GlBlendFunc sfactor, GlBlendFunc dfactor);
+    void blend_func(BlendFunc sfactor, BlendFunc dfactor);
 
     void debug_message_callback(GLDEBUGPROC callback, const void *user_param);
 };

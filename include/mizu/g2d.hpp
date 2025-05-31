@@ -18,7 +18,7 @@ enum class ClearBit : GLenum {
 
 class G2d {
 public:
-    G2d(gloo::GlContext &gl, CallbackMgr &callbacks);
+    G2d(gloo::Context &gl, CallbackMgr &callbacks);
 
     ~G2d();
 
@@ -27,6 +27,9 @@ public:
 
     G2d(G2d &&other) noexcept = delete;
     G2d &operator=(G2d &&other) = delete;
+
+    bool vsync() const;
+    void set_vsync(bool enabled);
 
     void clear(const Color &color, ClearBit clear_bits);
 
@@ -38,7 +41,7 @@ public:
     gloo::VertexArrayBuilder vertex_array_builder() const;
 
 private:
-    gloo::GlContext &gl_;
+    gloo::Context &gl_;
 
     std::size_t callback_id_{0};
     CallbackMgr &callbacks_;

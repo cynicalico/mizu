@@ -19,7 +19,7 @@ class Engine {
     using WindowBuildFunc = std::function<void(WindowBuilder &)>;
 
 public:
-    gloo::GlContext gl{};
+    gloo::Context gl{};
     CallbackMgr callbacks{};
 
     std::unique_ptr<Dear> dear{nullptr};

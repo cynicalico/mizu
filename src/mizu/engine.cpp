@@ -1,7 +1,7 @@
 #include "mizu/engine.hpp"
 #include <SDL3/SDL.h>
 #include <utility>
-#include "gloo/sdl3/gl_attr.hpp"
+#include "gloo/sdl3/attr.hpp"
 #include "mizu/log.hpp"
 #include "mizu/platform.hpp"
 
@@ -38,11 +38,11 @@ Engine::Engine(const std::string &window_title, Size2d<int> window_size, WindowB
             SDL_VERSIONNUM_MICRO(sdl_version)
     );
 
-    gloo::sdl3::GlAttr::set_context_version(gloo::GlContextVersion(4, 3));
-    gloo::sdl3::GlAttr::set_context_profile(gloo::sdl3::GlProfile::Core);
+    gloo::sdl3::Attr::set_context_version(gloo::ContextVersion(4, 3));
+    gloo::sdl3::Attr::set_context_profile(gloo::sdl3::Profile::Core);
 
 #if !defined(NDEBUG)
-    gloo::sdl3::GlAttr::set_context_flags().debug().set();
+    gloo::sdl3::Attr::set_context_flags().debug().set();
 #endif
 
     auto builder = WindowBuilder(window_title, window_size);
@@ -66,8 +66,8 @@ Engine::Engine(const std::string &window_title, Size2d<int> window_size, WindowB
     }
 
 #if !defined(NDEBUG)
-    gl.enable(gloo::GlCapability::DebugOutput);
-    gl.enable(gloo::GlCapability::DebugOutputSync);
+    gl.enable(gloo::Capability::DebugOutput);
+    gl.enable(gloo::Capability::DebugOutputSync);
     gl.debug_message_callback(gl_debug_message_callback, nullptr);
 #endif
 
@@ -82,6 +82,7 @@ Engine::Engine(const std::string &window_title, Size2d<int> window_size, WindowB
     input = std::make_unique<InputMgr>(callbacks);
 
     g2d = std::make_unique<G2d>(gl, callbacks);
+    g2d->set_vsync(1);
 
     dear = std::make_unique<Dear>(callbacks, window.get());
 }
@@ -156,10 +157,12 @@ void Engine::poll_events_() {
             }
             break;
         case SDL_EVENT_WINDOW_MOUSE_ENTER:
-            if (!dear->ignore_mouse_inputs()) callbacks.pub<PEventMouseEnter>(event.window.timestamp);
+            if (!dear->ignore_mouse_inputs())
+                callbacks.pub<PEventMouseEnter>(event.window.timestamp);
             break;
         case SDL_EVENT_WINDOW_MOUSE_LEAVE:
-            if (!dear->ignore_mouse_inputs()) callbacks.pub<PEventMouseLeave>(event.window.timestamp);
+            if (!dear->ignore_mouse_inputs())
+                callbacks.pub<PEventMouseLeave>(event.window.timestamp);
             break;
         case SDL_EVENT_WINDOW_RESIZED:
             callbacks.pub<PEventWindowResized>(event.window.timestamp, event.window.data1, event.window.data2);

@@ -39,7 +39,8 @@ concept IntDistCompatible =
 
 template<IntDistCompatible T>
 T get(T low, T high) {
-    if (low > high) return IntDist<T>(high, low)(generator());
+    if (low > high)
+        return IntDist<T>(high, low)(generator());
     return IntDist<T>(low, high)(generator());
 }
 
@@ -89,7 +90,8 @@ concept RealDistCompatible = IsAnyOf<T, float, double, long double>;
 
 template<RealDistCompatible T>
 T get(T low, T high) {
-    if (low > high) return RealDist<T>(high, low)(generator());
+    if (low > high)
+        return RealDist<T>(high, low)(generator());
     return RealDist<T>(low, high)(generator());
 }
 

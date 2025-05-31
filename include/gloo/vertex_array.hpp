@@ -44,10 +44,11 @@ public:
     NO_COPY(VertexArrayBuilder)
     NO_MOVE(VertexArrayBuilder)
 
-    VertexArrayBuilder &from(Shader *shader);
+    VertexArrayBuilder &with(Shader *shader);
 
     template<typename T>
-    VertexArrayBuilder &from(StaticSizeBuffer<T> *buf, BufferTarget target);
+        requires mizu::IsAnyOf<T, float, int, unsigned int>
+    VertexArrayBuilder &with(StaticSizeBuffer<T> *buf, BufferTarget target);
 
     VertexArrayBuilder &vec(const std::string &name, GLint size, bool normalized = false);
 
@@ -74,12 +75,12 @@ private:
     void flush_();
 
     template<typename T>
-        requires mizu::IsAnyOf<T, float, int, unsigned int>
     static constexpr GLenum determine_buf_type_();
 };
 
 template<typename T>
-VertexArrayBuilder &VertexArrayBuilder::from(StaticSizeBuffer<T> *buf, BufferTarget target) {
+    requires mizu::IsAnyOf<T, float, int, unsigned int>
+VertexArrayBuilder &VertexArrayBuilder::with(StaticSizeBuffer<T> *buf, BufferTarget target) {
     flush_();
     buf->bind(target);
 
@@ -91,7 +92,6 @@ VertexArrayBuilder &VertexArrayBuilder::from(StaticSizeBuffer<T> *buf, BufferTar
 }
 
 template<typename T>
-    requires mizu::IsAnyOf<T, float, int, unsigned int>
 constexpr GLenum VertexArrayBuilder::determine_buf_type_() {
     if constexpr (std::is_same_v<T, float>)
         return GL_FLOAT;

@@ -19,7 +19,8 @@ public:
         std::size_t priority;
         T value;
 
-        Node(std::size_t key, std::size_t priority, T value) : key(key), priority(priority), value(value) {}
+        Node(std::size_t key, std::size_t priority, T value)
+            : key(key), priority(priority), value(value) {}
     };
 
     PriorityQueue() = default;

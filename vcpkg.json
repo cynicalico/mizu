@@ -26,5 +26,8 @@
   }, {
     "name" : "libpng",
     "version>=" : "1.6.46"
+  }, {
+    "name" : "freetype",
+    "version>=" : "2.13.3"
   } ]
 }

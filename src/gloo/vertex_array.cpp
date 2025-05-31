@@ -48,7 +48,7 @@ VertexArrayBuilder::VertexArrayBuilder(GladGLContext &gl)
     gl_.BindVertexArray(id_);
 }
 
-VertexArrayBuilder &VertexArrayBuilder::from(Shader *shader) {
+VertexArrayBuilder &VertexArrayBuilder::with(Shader *shader) {
     attrib_lookup_ = shader;
 
     return *this;
@@ -73,7 +73,8 @@ std::unique_ptr<VertexArray> VertexArrayBuilder::build() {
 }
 
 void VertexArrayBuilder::flush_() {
-    if (attrib_info_buf_.empty()) return;
+    if (attrib_info_buf_.empty())
+        return;
 
     GLsizei stride = 0;
     for (const auto &attrib_info: attrib_info_buf_)
@@ -102,6 +103,7 @@ void VertexArrayBuilder::flush_() {
     }
 
     attrib_info_buf_.clear();
-    if (current_target_) gl_.BindBuffer(unwrap(*current_target_), 0);
+    if (current_target_)
+        gl_.BindBuffer(unwrap(*current_target_), 0);
 }
 } // namespace gloo

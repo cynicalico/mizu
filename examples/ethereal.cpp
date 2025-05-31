@@ -7,6 +7,7 @@ const auto VERT_SRC = R"glsl(
 #version 330 core
 in vec3 in_pos;
 in vec3 in_color;
+in vec3 in_rot;
 
 out vec3 color;
 
@@ -14,7 +15,20 @@ uniform mat4 proj;
 
 void main() {
     color = in_color;
-    gl_Position = proj * vec4(in_pos, 1.0);
+
+    float c = cos(in_rot.z);
+    float s = sin(in_rot.z);
+    float xtr = -in_rot.x * c + in_rot.y * s + in_rot.x;
+    float ytr = -in_rot.x * s - in_rot.y * c + in_rot.y;
+
+    mat4 rot = mat4(
+        vec4(c,   s,   0.0, 0.0),
+        vec4(-s,  c,   0.0, 0.0),
+        vec4(0.0, 0.0, 1.0, 0.0),
+        vec4(xtr, ytr, 0.0, 1.0)
+    );
+
+    gl_Position = proj * rot * vec4(in_pos, 1.0);
 }
 )glsl";
 
@@ -58,23 +72,31 @@ Ethereal::Ethereal(mizu::Engine *engine)
                      .stage_src(gloo::ShaderType::Vertex, VERT_SRC)
                      .stage_src(gloo::ShaderType::Fragment, FRAG_SRC)
                      .link();
-    if (!shader) engine->shutdown();
+    if (!shader)
+        engine->shutdown();
 
-    vbo = g2d->buffer<float>(18 * 100);
+    vbo = g2d->buffer<float>(27 * 100);
 
     vao = g2d->vertex_array_builder()
-                  .from(shader.get())
-                  .from(vbo.get(), gloo::BufferTarget::Array)
+                  .with(shader.get())
+                  .with(vbo.get(), gloo::BufferTarget::Array)
                   .vec("in_pos", 3)
                   .vec("in_color", 3)
+                  .vec("in_rot", 3)
                   .build();
-    if (!vao) engine->shutdown();
+    if (!vao)
+        engine->shutdown();
 }
 
 void Ethereal::update(double dt) {
-    if (input->pressed(mizu::Key::Escape)) engine->shutdown();
+    if (input->pressed(mizu::Key::Escape))
+        engine->shutdown();
 
-    if (input->pressed(mizu::Key::R)) vbo->clear();
+    if (input->pressed(mizu::Key::F1))
+        g2d->set_vsync(!g2d->vsync());
+
+    if (input->pressed(mizu::Key::R))
+        vbo->clear();
 
     if (input->pressed(mizu::MouseButton::Left)) {
         if (!vbo->is_full()) {
@@ -89,7 +111,14 @@ void Ethereal::update(double dt) {
             auto r = mizu::rng::get<float>();
             auto g = mizu::rng::get<float>();
             auto b = mizu::rng::get<float>();
-            vbo->push({x0, y0, 0.0f, r, g, b, x1, y1, 0.0f, r, g, b, x2, y2, 0.0f, r, g, b});
+            auto theta = mizu::rng::get<float>(0, 2 * std::numbers::pi);
+            // clang-format off
+            vbo->push({
+                x0, y0, 0.0f, r, g, b, cx, cy, theta,
+                x1, y1, 0.0f, r, g, b, cx, cy, theta,
+                x2, y2, 0.0f, r, g, b, cx, cy, theta
+            });
+            // clang-format on
         } else {
             SPDLOG_INFO("Buffer is full");
         }
@@ -99,6 +128,12 @@ void Ethereal::update(double dt) {
 }
 
 void Ethereal::draw() {
+    ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
+    mizu::dear::begin("FPS", nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoDecoration) && [&] {
+        auto fps_str = fmt::format("FPS: {:.2f}{}", ImGui::GetIO().Framerate, g2d->vsync() ? " (vsync)" : "");
+        ImGui::Text("%s", fps_str.c_str());
+    };
+
     g2d->clear(mizu::colorscheme::campbell::BLACK, mizu::ClearBit::Color | mizu::ClearBit::Depth);
 
     vbo->sync_gl(gloo::BufferTarget::Array);
@@ -106,11 +141,7 @@ void Ethereal::draw() {
     shader->use();
     shader->uniform("proj", proj);
 
-    vao->draw_arrays(gloo::DrawMode::Triangles, vbo->front() / 6, vbo->size() / 6);
-
-    ImGui::Begin("FPS");
-    ImGui::Text("FPS: %.2f", ImGui::GetIO().Framerate);
-    ImGui::End();
+    vao->draw_arrays(gloo::DrawMode::Triangles, vbo->front() / 9, vbo->size() / 9);
 }
 
 int main(int, char *[]) {

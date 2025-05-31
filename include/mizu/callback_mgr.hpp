@@ -34,7 +34,8 @@ public:
         }
 
         std::optional<T> pop() {
-            if (idx == 0) return std::nullopt;
+            if (idx == 0)
+                return std::nullopt;
             return std::make_optional(data[--idx]);
         }
     };
@@ -102,20 +103,23 @@ void CallbackMgr::unsub(std::size_t id) {
 template<typename T, typename... Args>
 void CallbackMgr::pub(Args &&...args) {
     for (auto &buffers = buffers_<T>(); auto &b: buffers)
-        if (b.active) b.push(std::forward<Args>(args)...);
+        if (b.active)
+            b.push(std::forward<Args>(args)...);
 }
 
 template<typename T, typename... Args>
 void CallbackMgr::pub_nowait(Args &&...args) {
     auto payload = T{std::forward<Args>(args)...};
     for (auto &callbacks = callbacks_<T>(); const auto &c: callbacks)
-        if (c) c(payload);
+        if (c)
+            c(payload);
 }
 
 template<typename T>
 void CallbackMgr::poll(std::size_t id) {
     auto &callbacks = callbacks_<T>();
-    if (id >= callbacks.size()) return;
+    if (id >= callbacks.size())
+        return;
     auto &callback = callbacks[id];
 
     auto &buffer = buffers_<T>()[id];
