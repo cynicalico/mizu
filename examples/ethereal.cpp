@@ -52,8 +52,9 @@ public:
     std::unique_ptr<gloo::Shader> shader;
     std::unique_ptr<gloo::StaticSizeBuffer<float>> vbo;
     std::unique_ptr<gloo::VertexArray> vao;
-
     glm::mat4 proj;
+
+    mizu::Ticker<> ticker;
 
     explicit Ethereal(mizu::Engine *engine);
 
@@ -67,15 +68,14 @@ Ethereal::Ethereal(mizu::Engine *engine)
       window(engine->window.get()),
       input(engine->input.get()),
       g2d(engine->g2d.get()),
-      proj(glm::identity<glm::mat4>()) {
+      proj(glm::identity<glm::mat4>()),
+      ticker(std::chrono::milliseconds(1)) {
     shader = g2d->shader_builder()
                      .stage_src(gloo::ShaderType::Vertex, VERT_SRC)
                      .stage_src(gloo::ShaderType::Fragment, FRAG_SRC)
                      .link();
-    if (!shader)
-        engine->shutdown();
 
-    vbo = g2d->buffer<float>(27 * 100);
+    vbo = g2d->buffer<float>(27 * 100'000);
 
     vao = g2d->vertex_array_builder()
                   .with(shader.get())
@@ -84,8 +84,6 @@ Ethereal::Ethereal(mizu::Engine *engine)
                   .vec("in_color", 3)
                   .vec("in_rot", 3)
                   .build();
-    if (!vao)
-        engine->shutdown();
 }
 
 void Ethereal::update(double dt) {
@@ -98,10 +96,10 @@ void Ethereal::update(double dt) {
     if (input->pressed(mizu::Key::R))
         vbo->clear();
 
-    if (input->pressed(mizu::MouseButton::Left)) {
+    if (ticker.tick() > 0) {
         if (!vbo->is_full()) {
-            float cx = input->mouse_x();
-            float cy = input->mouse_y();
+            float cx = mizu::rng::get<float>(10.0f, static_cast<float>(window->get_size().w) - 10.0f);
+            float cy = mizu::rng::get<float>(10.0f, static_cast<float>(window->get_size().h) - 10.0f);
             float x0 = cx + 20.0f * std::cosf(std::numbers::pi / 2.0f);
             float y0 = cy - 20.0f * std::sinf(std::numbers::pi / 2.0f);
             float x1 = cx + 20.0f * std::cosf(7.0f * std::numbers::pi / 6.0f);
@@ -124,13 +122,13 @@ void Ethereal::update(double dt) {
         }
     }
 
-    proj = glm::ortho(0.0, (double)window->get_size().w, (double)window->get_size().h, 0.0);
+    proj = glm::ortho(0.0, static_cast<double>(window->get_size().w), static_cast<double>(window->get_size().h), 0.0);
 }
 
 void Ethereal::draw() {
     ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
     mizu::dear::begin("FPS", nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoDecoration) && [&] {
-        auto fps_str = fmt::format("FPS: {:.2f}{}", ImGui::GetIO().Framerate, g2d->vsync() ? " (vsync)" : "");
+        auto fps_str = fmt::format("FPS: {:.2f}{}", engine->frame_counter.fps(), g2d->vsync() ? " (vsync)" : "");
         ImGui::Text("%s", fps_str.c_str());
     };
 

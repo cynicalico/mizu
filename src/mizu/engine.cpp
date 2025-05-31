@@ -85,6 +85,8 @@ Engine::Engine(const std::string &window_title, Size2d<int> window_size, WindowB
     g2d->set_vsync(1);
 
     dear = std::make_unique<Dear>(callbacks, window.get());
+
+    frame_counter = FrameCounter();
 }
 
 Engine::Engine(const std::string &window_title, WindowBuildFunc f)

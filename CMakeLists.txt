@@ -19,6 +19,7 @@ set(${PROJECT_NAME}_headers
         include/gloo/sdl3/attr.hpp
         include/gloo/sdl3/context_flags.hpp
         include/mizu/application.hpp
+        include/mizu/averagers.hpp
         include/mizu/callback_mgr.hpp
         include/mizu/class_helpers.hpp
         include/mizu/color.hpp
@@ -35,6 +36,7 @@ set(${PROJECT_NAME}_headers
         include/mizu/payloads.hpp
         include/mizu/platform.hpp
         include/mizu/rng.hpp
+        include/mizu/time.hpp
         include/mizu/types.hpp
         include/mizu/window.hpp
         include/mizu/ds/priority_queue.hpp
@@ -57,6 +59,7 @@ set(${PROJECT_NAME}_sources
         src/gloo/sdl3/attr.cpp
         src/gloo/sdl3/context_flags.cpp
         src/mizu/application.cpp
+        src/mizu/averagers.cpp
         src/mizu/color.cpp
         src/mizu/dear.cpp
         src/mizu/engine.cpp
