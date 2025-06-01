@@ -45,16 +45,18 @@ void main() {
 
 class Ethereal final : public mizu::Application {
 public:
-    mizu::Window *window;
-    mizu::InputMgr *input;
+    mizu::AudioMgr *audio;
     mizu::G2d *g2d;
+    mizu::InputMgr *input;
+    mizu::Window *window;
 
     std::unique_ptr<gloo::Shader> shader;
     std::unique_ptr<gloo::StaticSizeBuffer<float>> vbo;
     std::unique_ptr<gloo::VertexArray> vao;
     glm::mat4 proj;
 
-    mizu::Ticker<> ticker;
+    mizu::Sound music;
+    mizu::Sound click;
 
     explicit Ethereal(mizu::Engine *engine);
 
@@ -65,17 +67,17 @@ public:
 
 Ethereal::Ethereal(mizu::Engine *engine)
     : Application(engine),
-      window(engine->window.get()),
-      input(engine->input.get()),
+      audio(engine->audio.get()),
       g2d(engine->g2d.get()),
-      proj(glm::identity<glm::mat4>()),
-      ticker(std::chrono::milliseconds(1)) {
+      input(engine->input.get()),
+      window(engine->window.get()),
+      proj(glm::identity<glm::mat4>()) {
     shader = g2d->shader_builder()
                      .stage_src(gloo::ShaderType::Vertex, VERT_SRC)
                      .stage_src(gloo::ShaderType::Fragment, FRAG_SRC)
                      .link();
 
-    vbo = g2d->buffer<float>(27 * 100'000);
+    vbo = g2d->buffer<float>(27 * 1000);
 
     vao = g2d->vertex_array_builder()
                   .with(shader.get())
@@ -84,6 +86,11 @@ Ethereal::Ethereal(mizu::Engine *engine)
                   .vec("in_color", 3)
                   .vec("in_rot", 3)
                   .build();
+
+    music = audio->load_sound("res/music/adventure.wav");
+    click = audio->load_sound("res/sfx/pickup_1.wav");
+
+    audio->play_sound(music, {.looping = true});
 }
 
 void Ethereal::update(double dt) {
@@ -96,30 +103,28 @@ void Ethereal::update(double dt) {
     if (input->pressed(mizu::Key::R))
         vbo->clear();
 
-    if (ticker.tick() > 0) {
-        if (!vbo->is_full()) {
-            float cx = mizu::rng::get<float>(10.0f, static_cast<float>(window->get_size().w) - 10.0f);
-            float cy = mizu::rng::get<float>(10.0f, static_cast<float>(window->get_size().h) - 10.0f);
-            float x0 = cx + 20.0f * std::cosf(std::numbers::pi / 2.0f);
-            float y0 = cy - 20.0f * std::sinf(std::numbers::pi / 2.0f);
-            float x1 = cx + 20.0f * std::cosf(7.0f * std::numbers::pi / 6.0f);
-            float y1 = cy - 20.0f * std::sinf(7.0f * std::numbers::pi / 6.0f);
-            float x2 = cx + 20.0f * std::cosf(11.0f * std::numbers::pi / 6.0f);
-            float y2 = cy - 20.0f * std::sinf(11.0f * std::numbers::pi / 6.0f);
-            auto r = mizu::rng::get<float>();
-            auto g = mizu::rng::get<float>();
-            auto b = mizu::rng::get<float>();
-            auto theta = mizu::rng::get<float>(0, 2 * std::numbers::pi);
-            // clang-format off
-            vbo->push({
-                x0, y0, 0.0f, r, g, b, cx, cy, theta,
-                x1, y1, 0.0f, r, g, b, cx, cy, theta,
-                x2, y2, 0.0f, r, g, b, cx, cy, theta
-            });
-            // clang-format on
-        } else {
-            SPDLOG_INFO("Buffer is full");
-        }
+    if (input->pressed(mizu::MouseButton::Left) && !vbo->is_full()) {
+        float cx = input->mouse_x();
+        float cy = input->mouse_y();
+        float x0 = cx + 20.0f * std::cosf(std::numbers::pi / 2.0f);
+        float y0 = cy - 20.0f * std::sinf(std::numbers::pi / 2.0f);
+        float x1 = cx + 20.0f * std::cosf(7.0f * std::numbers::pi / 6.0f);
+        float y1 = cy - 20.0f * std::sinf(7.0f * std::numbers::pi / 6.0f);
+        float x2 = cx + 20.0f * std::cosf(11.0f * std::numbers::pi / 6.0f);
+        float y2 = cy - 20.0f * std::sinf(11.0f * std::numbers::pi / 6.0f);
+        auto r = mizu::rng::get<float>();
+        auto g = mizu::rng::get<float>();
+        auto b = mizu::rng::get<float>();
+        auto theta = mizu::rng::get<float>(0, 2 * std::numbers::pi);
+        // clang-format off
+        vbo->push({
+            x0, y0, 0.0f, r, g, b, cx, cy, theta,
+            x1, y1, 0.0f, r, g, b, cx, cy, theta,
+            x2, y2, 0.0f, r, g, b, cx, cy, theta
+        });
+        // clang-format on
+
+        audio->play_sound(click);
     }
 
     proj = glm::ortho(0.0, static_cast<double>(window->get_size().w), static_cast<double>(window->get_size().h), 0.0);
@@ -130,6 +135,11 @@ void Ethereal::draw() {
     mizu::dear::begin("FPS", nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoDecoration) && [&] {
         auto fps_str = fmt::format("FPS: {:.2f}{}", engine->frame_counter.fps(), g2d->vsync() ? " (vsync)" : "");
         ImGui::Text("%s", fps_str.c_str());
+    };
+
+    mizu::dear::begin("Info", nullptr, ImGuiWindowFlags_AlwaysAutoResize) && [&] {
+        auto buffer_status = fmt::format("Buffer is {}full", vbo->is_full() ? "" : "not ");
+        ImGui::Text("%s", buffer_status.c_str());
     };
 
     g2d->clear(mizu::colorscheme::campbell::BLACK, mizu::ClearBit::Color | mizu::ClearBit::Depth);

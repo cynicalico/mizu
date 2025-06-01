@@ -28,7 +28,7 @@ double EMA::value() const {
 }
 
 SMA::SMA(std::size_t sample_count)
-    : sample_count(sample_count) {}
+    : sample_count(sample_count), value_(0) {}
 
 void SMA::update(double v) {
     samples_.push_back(v);

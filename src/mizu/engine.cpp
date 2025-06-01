@@ -86,6 +86,8 @@ Engine::Engine(const std::string &window_title, Size2d<int> window_size, WindowB
 
     dear = std::make_unique<Dear>(callbacks, window.get());
 
+    audio = std::make_unique<AudioMgr>(callbacks);
+
     frame_counter = FrameCounter();
 }
 
@@ -95,6 +97,7 @@ Engine::Engine(const std::string &window_title, WindowBuildFunc f)
 Engine::~Engine() {
     unregister_callbacks_();
 
+    audio.reset();
     dear.reset();
     g2d.reset();
     input.reset();

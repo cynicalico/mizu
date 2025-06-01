@@ -6,6 +6,7 @@
 #include <string>
 #include "gloo/context.hpp"
 #include "mizu/application.hpp"
+#include "mizu/audio_mgr.hpp"
 #include "mizu/callback_mgr.hpp"
 #include "mizu/dear.hpp"
 #include "mizu/g2d.hpp"
@@ -23,6 +24,7 @@ public:
     gloo::Context gl{};
     CallbackMgr callbacks{};
 
+    std::unique_ptr<AudioMgr> audio{nullptr};
     std::unique_ptr<Dear> dear{nullptr};
     std::unique_ptr<G2d> g2d{nullptr};
     std::unique_ptr<InputMgr> input{nullptr};

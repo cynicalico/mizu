@@ -19,6 +19,7 @@ set(${PROJECT_NAME}_headers
         include/gloo/sdl3/attr.hpp
         include/gloo/sdl3/context_flags.hpp
         include/mizu/application.hpp
+        include/mizu/audio_mgr.hpp
         include/mizu/averagers.hpp
         include/mizu/callback_mgr.hpp
         include/mizu/class_helpers.hpp
@@ -59,6 +60,7 @@ set(${PROJECT_NAME}_sources
         src/gloo/sdl3/attr.cpp
         src/gloo/sdl3/context_flags.cpp
         src/mizu/application.cpp
+        src/mizu/audio_mgr.cpp
         src/mizu/averagers.cpp
         src/mizu/color.cpp
         src/mizu/dear.cpp
