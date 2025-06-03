@@ -3,6 +3,7 @@
 
 #include <SDL3/SDL_keycode.h>
 #include <SDL3/SDL_scancode.h>
+#include <alc.h>
 
 namespace mizu {
 /*****************
@@ -128,6 +129,31 @@ struct PEventWindowFocusLost {
 // https://wiki.libsdl.org/SDL3/SDL_QuitEvent
 struct PEventQuit {
     std::uint64_t timestamp;
+};
+
+/*****************
+ * OpenAL EVENTS *
+ *****************/
+
+struct PDefaultDeviceChanged {
+    ALCenum event_type;
+    ALCenum device_type;
+    ALCdevice *device;
+    std::string message;
+};
+
+struct PDeviceAdded {
+    ALCenum event_type;
+    ALCenum device_type;
+    ALCdevice *device;
+    std::string message;
+};
+
+struct PDeviceRemoved {
+    ALCenum event_type;
+    ALCenum device_type;
+    ALCdevice *device;
+    std::string message;
 };
 
 } // namespace mizu

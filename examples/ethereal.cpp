@@ -55,6 +55,8 @@ public:
     std::unique_ptr<gloo::VertexArray> vao;
     glm::mat4 proj;
 
+    mizu::Sound music;
+
     explicit Ethereal(mizu::Engine *engine);
 
     void update(double dt) override;
@@ -83,6 +85,9 @@ Ethereal::Ethereal(mizu::Engine *engine)
                   .vec("in_color", 3)
                   .vec("in_rot", 3)
                   .build();
+
+    music = audio->load_sound(L"res/music/【水音ラル】Ghost Rule【UTAUカバー】.mp3");
+    audio->play_sound(music, {.looping = true});
 }
 
 void Ethereal::update(double dt) {

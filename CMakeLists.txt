@@ -3,6 +3,10 @@ project(mizu LANGUAGES C CXX)
 
 option(BUILD_SHARED_LIBS "Build using shared libraries" OFF)
 
+if (MSVC)
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+endif ()
+
 set(${PROJECT_NAME}_headers
         #[=[ [[[cog
         import cog, glob
@@ -82,6 +86,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC include)
 
 if (WIN32)
     target_compile_definitions(mizu PRIVATE WIN32_LEAN_AND_MEAN NOMINMAX)
+    target_compile_options(mizu PUBLIC /utf-8 /W4)
 endif ()
 
 target_compile_definitions(mizu PUBLIC

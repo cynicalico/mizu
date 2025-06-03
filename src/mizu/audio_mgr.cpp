@@ -45,11 +45,12 @@ AudioMgr::AudioMgr(CallbackMgr &callbacks)
         MIZU_LOG_ERROR("Failed to make OpenAL context current");
         return;
     }
-
-    auto version = alGetString(AL_VERSION);
-    auto vendor = alGetString(AL_VENDOR);
-    auto renderer = alGetString(AL_RENDERER);
-    MIZU_LOG_DEBUG("Initialized OpenAL v{}, vendor: {}, renderer: {}", version, vendor, renderer);
+    MIZU_LOG_DEBUG(
+            "Initialized OpenAL v{}, vendor: {}, renderer: {}",
+            alGetString(AL_VERSION),
+            alGetString(AL_VENDOR),
+            alGetString(AL_RENDERER)
+    );
 
     if (alIsExtensionPresent("AL_SOFT_events")) {
         alEventControlSOFT = static_cast<LPALEVENTCONTROLSOFT>(alGetProcAddress("alEventControlSOFT"));
@@ -61,7 +62,7 @@ AudioMgr::AudioMgr(CallbackMgr &callbacks)
                 AL_EVENT_TYPE_DISCONNECTED_SOFT
         };
         alEventControlSOFT(sizeof(types) / sizeof(ALenum), types, AL_TRUE);
-        alEventCallbackSOFT(al_event_callback_, this);
+        alEventCallbackSOFT(al_event_callback_, static_cast<void *>(&callbacks_));
     } else {
         MIZU_LOG_WARN("AL_SOFT_events not supported");
     }
@@ -82,10 +83,15 @@ AudioMgr::AudioMgr(CallbackMgr &callbacks)
                 it = types.erase(it);
 
         alcEventControlSOFT(types.size(), &types[0], AL_TRUE);
-        alcEventCallbackSOFT(alc_event_callback_, this);
+        alcEventCallbackSOFT(alc_event_callback_, static_cast<void *>(&callbacks_));
     } else {
         MIZU_LOG_WARN("ALC_SOFT_system_events not supported");
     }
+
+    if (alcIsExtensionPresent(device_, "ALC_SOFT_reopen_device"))
+        alcReopenDeviceSOFT = static_cast<LPALCREOPENDEVICESOFT>(alcGetProcAddress(device_, "alcReopenDeviceSOFT"));
+    else
+        MIZU_LOG_WARN("ALC_SOFT_reopen_device not supported");
 
     const ALCchar *name{};
     if (alcIsExtensionPresent(device_, "ALC_ENUMERATE_ALL_EXT"))
@@ -140,7 +146,7 @@ Sound AudioMgr::load_sound(const std::filesystem::path &path) {
         frames -= m * (60 * sound.sfinfo.samplerate);
         sf_count_t s = frames / sound.sfinfo.samplerate;
         frames -= s * sound.sfinfo.samplerate;
-        sf_count_t ms = static_cast<sf_count_t>(1000 * (static_cast<double>(frames) / sound.sfinfo.samplerate));
+        auto ms = static_cast<sf_count_t>(1000 * (static_cast<double>(frames) / sound.sfinfo.samplerate));
 
         MIZU_LOG_DEBUG(
                 "Loaded: {} ({}, {}hz, {})",
@@ -175,15 +181,19 @@ void AudioMgr::play_sound(const Sound &sound, const PlayOptions &options) {
 void AudioMgr::register_callbacks_() {
     callback_id_ = callbacks_.reg();
     callbacks_.sub<PUpdate>(callback_id_, [&](const auto &p) { update_(p.dt); });
+    callbacks_.sub<PDefaultDeviceChanged>(callback_id_, [&](const auto &p) { default_device_changed_(p.device); });
 }
 
 void AudioMgr::unregister_callbacks_() {
+    callbacks_.unsub<PDefaultDeviceChanged>(callback_id_);
     callbacks_.unsub<PUpdate>(callback_id_);
     callbacks_.unreg(callback_id_);
     callback_id_ = 0;
 }
 
 void AudioMgr::update_(double) {
+    callbacks_.poll<PDefaultDeviceChanged>(callback_id_);
+
     for (auto s_it = sources_.begin(); s_it != sources_.end();) {
         auto &l = s_it->second;
 
@@ -202,6 +212,21 @@ void AudioMgr::update_(double) {
         }
 
         ++s_it;
+    }
+}
+
+void AudioMgr::default_device_changed_(ALCdevice *device) {
+    if (alcReopenDeviceSOFT) {
+        const ALCchar *name{};
+        if (alcIsExtensionPresent(device, "ALC_ENUMERATE_ALL_EXT"))
+            name = alcGetString(device, ALC_ALL_DEVICES_SPECIFIER);
+        if (!name || !check_alc_errors_(device))
+            name = alcGetString(device, ALC_DEVICE_SPECIFIER);
+
+        if (alcReopenDeviceSOFT(device_, name, nullptr) == AL_TRUE)
+            device_specifier_ = name;
+        else
+            check_alc_errors_(device_);
     }
 }
 
@@ -257,8 +282,8 @@ void al_event_callback_(
 #undef STRINGIFY
     MIZU_LOG_DEBUG("OpenAL: type={} msg={}", eventType_string, message);
 
-    auto *audio_mgr = static_cast<AudioMgr *>(userParam);
-    static_cast<void *>(audio_mgr);
+    auto callbacks = reinterpret_cast<CallbackMgr &>(userParam);
+    (void)callbacks;
 }
 
 void alc_event_callback_(
@@ -289,8 +314,19 @@ void alc_event_callback_(
 #undef STRINGIFY
     MIZU_LOG_DEBUG("OpenAL: type={} device_type={} msg={}", eventType_string, deviceType_string, message);
 
-    auto *audio_mgr = static_cast<AudioMgr *>(userParam);
-    static_cast<void *>(audio_mgr);
+    auto *callbacks = static_cast<CallbackMgr *>(userParam);
+    switch (eventType) {
+    case ALC_EVENT_TYPE_DEFAULT_DEVICE_CHANGED_SOFT:
+        callbacks->pub<PDefaultDeviceChanged>(eventType, deviceType, device, std::string(message, length));
+        break;
+    case ALC_EVENT_TYPE_DEVICE_ADDED_SOFT:
+        callbacks->pub<PDeviceAdded>(eventType, deviceType, device, std::string(message, length));
+        break;
+    case ALC_EVENT_TYPE_DEVICE_REMOVED_SOFT:
+        callbacks->pub<PDeviceRemoved>(eventType, deviceType, device, std::string(message, length));
+        break;
+    default: MIZU_LOG_WARN("Unhandled event type: {}", eventType_string); break;
+    }
 }
 
 enum FormatType { Int16, Float, IMA4, MSADPCM };

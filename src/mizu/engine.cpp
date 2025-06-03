@@ -5,6 +5,10 @@
 #include "mizu/log.hpp"
 #include "mizu/platform.hpp"
 
+#if defined(MIZU_PLATFORM_WINDOWS)
+#include "windows.h"
+#endif
+
 namespace mizu {
 void gl_debug_message_callback(
         GLenum source,
@@ -21,6 +25,9 @@ Engine::Engine(const std::string &window_title, Size2d<int> window_size, WindowB
     // Log levels are controlled through MIZU_SPDLOG_LEVEL, but we don't know what the user
     // has set, so just assume trace logging to catch everything
     spdlog::set_level(spdlog::level::trace);
+#if defined(MIZU_PLATFORM_WINDOWS)
+    SetConsoleOutputCP(CP_UTF8);
+#endif
     log_platform();
 
     register_callbacks_();

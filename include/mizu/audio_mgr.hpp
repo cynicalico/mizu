@@ -10,13 +10,12 @@
 #include "mizu/class_helpers.hpp"
 
 namespace mizu {
-inline LPALCREOPENDEVICESOFT alcReopenDeviceSOFT;
 inline LPALEVENTCONTROLSOFT alEventControlSOFT;
 inline LPALEVENTCALLBACKSOFT alEventCallbackSOFT;
-
 inline LPALCEVENTISSUPPORTEDSOFT alcEventIsSupportedSOFT;
 inline LPALCEVENTCONTROLSOFT alcEventControlSOFT;
 inline LPALCEVENTCALLBACKSOFT alcEventCallbackSOFT;
+inline LPALCREOPENDEVICESOFT alcReopenDeviceSOFT;
 
 struct Sound {
     ALuint buffer{0}; // 0 if empty
@@ -58,6 +57,7 @@ private:
     void unregister_callbacks_();
 
     void update_(double dt);
+    void default_device_changed_(ALCdevice *device);
 };
 } // namespace mizu
 
