@@ -26,7 +26,7 @@ AudioMgr::AudioMgr(CallbackMgr &callbacks)
 
     device_ = alcOpenDevice(nullptr);
     if (!device_ || !check_alc_errors_(device_)) {
-        SPDLOG_ERROR("Failed to open OpenAL device!");
+        MIZU_LOG_ERROR("Failed to open OpenAL device!");
         return;
     }
 
@@ -34,7 +34,7 @@ AudioMgr::AudioMgr(CallbackMgr &callbacks)
     if (!ctx_ || !check_alc_errors_(device_)) {
         if (ctx_)
             alcDestroyContext(ctx_);
-        SPDLOG_ERROR("Failed to create OpenAL context");
+        MIZU_LOG_ERROR("Failed to create OpenAL context");
         return;
     }
 
@@ -42,14 +42,14 @@ AudioMgr::AudioMgr(CallbackMgr &callbacks)
     if (!context_current_ok || !check_alc_errors_(device_)) {
         alcDestroyContext(ctx_);
         alcCloseDevice(device_);
-        SPDLOG_ERROR("Failed to make OpenAL context current");
+        MIZU_LOG_ERROR("Failed to make OpenAL context current");
         return;
     }
 
     auto version = alGetString(AL_VERSION);
     auto vendor = alGetString(AL_VENDOR);
     auto renderer = alGetString(AL_RENDERER);
-    SPDLOG_DEBUG("Initialized OpenAL v{}, vendor: {}, renderer: {}", version, vendor, renderer);
+    MIZU_LOG_DEBUG("Initialized OpenAL v{}, vendor: {}, renderer: {}", version, vendor, renderer);
 
     if (alIsExtensionPresent("AL_SOFT_events")) {
         alEventControlSOFT = static_cast<LPALEVENTCONTROLSOFT>(alGetProcAddress("alEventControlSOFT"));
@@ -63,7 +63,7 @@ AudioMgr::AudioMgr(CallbackMgr &callbacks)
         alEventControlSOFT(sizeof(types) / sizeof(ALenum), types, AL_TRUE);
         alEventCallbackSOFT(al_event_callback_, this);
     } else {
-        SPDLOG_WARN("AL_SOFT_events not supported");
+        MIZU_LOG_WARN("AL_SOFT_events not supported");
     }
 
     if (alcIsExtensionPresent(device_, "ALC_SOFT_system_events")) {
@@ -84,7 +84,7 @@ AudioMgr::AudioMgr(CallbackMgr &callbacks)
         alcEventControlSOFT(types.size(), &types[0], AL_TRUE);
         alcEventCallbackSOFT(alc_event_callback_, this);
     } else {
-        SPDLOG_WARN("ALC_SOFT_system_events not supported");
+        MIZU_LOG_WARN("ALC_SOFT_system_events not supported");
     }
 
     const ALCchar *name{};
@@ -94,7 +94,7 @@ AudioMgr::AudioMgr(CallbackMgr &callbacks)
         name = alcGetString(device_, ALC_DEVICE_SPECIFIER);
     device_specifier_ = name;
 
-    SPDLOG_DEBUG("Opened \"{}\"", device_specifier_);
+    MIZU_LOG_DEBUG("Opened \"{}\"", device_specifier_);
 }
 
 AudioMgr::~AudioMgr() {
@@ -116,16 +116,16 @@ AudioMgr::~AudioMgr() {
     }
 
     if (!alcMakeContextCurrent(nullptr) || !check_alc_errors_(device_))
-        SPDLOG_ERROR("Failed to clear OpenAL context!");
+        MIZU_LOG_ERROR("Failed to clear OpenAL context!");
 
     alcDestroyContext(ctx_);
     if (!check_alc_errors_(device_))
-        SPDLOG_ERROR("Failed to destroy OpenAL context!");
+        MIZU_LOG_ERROR("Failed to destroy OpenAL context!");
 
     if (!alcCloseDevice(device_) || !check_alc_errors_(device_))
-        SPDLOG_ERROR("Failed to close OpenAL device!");
+        MIZU_LOG_ERROR("Failed to close OpenAL device!");
 
-    SPDLOG_DEBUG("Shutdown OpenAL");
+    MIZU_LOG_DEBUG("Shutdown OpenAL");
 }
 
 Sound AudioMgr::load_sound(const std::filesystem::path &path) {
@@ -142,7 +142,7 @@ Sound AudioMgr::load_sound(const std::filesystem::path &path) {
         frames -= s * sound.sfinfo.samplerate;
         sf_count_t ms = static_cast<sf_count_t>(1000 * (static_cast<double>(frames) / sound.sfinfo.samplerate));
 
-        SPDLOG_DEBUG(
+        MIZU_LOG_DEBUG(
                 "Loaded: {} ({}, {}hz, {})",
                 sound.path,
                 FormatName(sound.format),
@@ -207,7 +207,7 @@ void AudioMgr::update_(double) {
 
 bool check_al_errors_() {
     if (ALenum error = alGetError(); error != AL_NO_ERROR) {
-        SPDLOG_ERROR(std::invoke([error] {
+        MIZU_LOG_ERROR(std::invoke([error] {
             switch (error) {
             case AL_INVALID_NAME: return "AL_INVALID_NAME: a bad name (ID) was passed to an OpenAL function";
             case AL_INVALID_ENUM: return "AL_INVALID_ENUM: an invalid enum value was passed to an OpenAL function";
@@ -225,7 +225,7 @@ bool check_al_errors_() {
 
 bool check_alc_errors_(ALCdevice *device) {
     if (ALCenum error = alcGetError(device); error != ALC_NO_ERROR) {
-        SPDLOG_ERROR(std::invoke([error] {
+        MIZU_LOG_ERROR(std::invoke([error] {
             switch (error) {
             case ALC_INVALID_VALUE: return "ALC_INVALID_VALUE: an invalid value was passed to an OpenAL function";
             case ALC_INVALID_DEVICE: return "ALC_INVALID_DEVICE: a bad device was passed to an OpenAL function";
@@ -255,7 +255,7 @@ void al_event_callback_(
         }
     });
 #undef STRINGIFY
-    SPDLOG_DEBUG("OpenAL: type={} msg={}", eventType_string, message);
+    MIZU_LOG_DEBUG("OpenAL: type={} msg={}", eventType_string, message);
 
     auto *audio_mgr = static_cast<AudioMgr *>(userParam);
     static_cast<void *>(audio_mgr);
@@ -287,7 +287,7 @@ void alc_event_callback_(
         }
     });
 #undef STRINGIFY
-    SPDLOG_DEBUG("OpenAL: type={} device_type={} msg={}", eventType_string, deviceType_string, message);
+    MIZU_LOG_DEBUG("OpenAL: type={} device_type={} msg={}", eventType_string, deviceType_string, message);
 
     auto *audio_mgr = static_cast<AudioMgr *>(userParam);
     static_cast<void *>(audio_mgr);
@@ -352,11 +352,11 @@ Sound load_sound_impl(const std::filesystem::path &path) {
     SF_INFO sfinfo;
     SNDFILE *sndfile = sf_wchar_open(path.c_str(), SFM_READ, &sfinfo);
     if (!sndfile) {
-        SPDLOG_ERROR("Failed to open audio file '{}': {}", path, sf_strerror(sndfile));
+        MIZU_LOG_ERROR("Failed to open audio file '{}': {}", path, sf_strerror(sndfile));
         return {};
     }
     if (sfinfo.frames < 1) {
-        SPDLOG_ERROR("Bad sample count ({}) in audio file: '{}'", sfinfo.frames, path);
+        MIZU_LOG_ERROR("Bad sample count ({}) in audio file: '{}'", sfinfo.frames, path);
         return {};
     }
 
@@ -482,13 +482,13 @@ Sound load_sound_impl(const std::filesystem::path &path) {
     }
 
     if (!format) {
-        SPDLOG_ERROR("Unsupported channel count ({}) in audio file: '{}'", sfinfo.channels, path);
+        MIZU_LOG_ERROR("Unsupported channel count ({}) in audio file: '{}'", sfinfo.channels, path);
         sf_close(sndfile);
         return {};
     }
 
     if (sfinfo.frames / splblockalign > static_cast<sf_count_t>(INT_MAX / byteblockalign)) {
-        SPDLOG_ERROR("Too many samples ({}) in audio file: '{}'", sfinfo.frames, path);
+        MIZU_LOG_ERROR("Too many samples ({}) in audio file: '{}'", sfinfo.frames, path);
         sf_close(sndfile);
         return {};
     }
@@ -510,7 +510,7 @@ Sound load_sound_impl(const std::filesystem::path &path) {
     if (num_frames < 1) {
         free(membuf);
         sf_close(sndfile);
-        SPDLOG_ERROR("Failed to read samples ({}) in audio file: '{}'", num_frames, path);
+        MIZU_LOG_ERROR("Failed to read samples ({}) in audio file: '{}'", num_frames, path);
         return {};
     }
     const auto num_bytes = static_cast<ALsizei>(num_frames / splblockalign * byteblockalign);
@@ -526,7 +526,7 @@ Sound load_sound_impl(const std::filesystem::path &path) {
     free(membuf);
 
     if (sf_close(sndfile) != 0)
-        SPDLOG_ERROR("Failed to close audio file '{}': {}", path, sf_strerror(sndfile));
+        MIZU_LOG_ERROR("Failed to close audio file '{}': {}", path, sf_strerror(sndfile));
 
     /* Check if an error occurred, and clean up if so. */
     if (!check_al_errors_()) {

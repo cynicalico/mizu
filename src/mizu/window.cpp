@@ -10,15 +10,15 @@ Window::~Window() {
 
     if (gl_context_) {
         if (!SDL_GL_DestroyContext(gl_context_))
-            SPDLOG_ERROR("Failed to destroy GL context: {}", SDL_GetError());
+            MIZU_LOG_ERROR("Failed to destroy GL context: {}", SDL_GetError());
         else
-            SPDLOG_DEBUG("Destroyed GL context");
+            MIZU_LOG_DEBUG("Destroyed GL context");
         gl_context_ = nullptr;
     }
 
     if (sdl_window_) {
         SDL_DestroyWindow(sdl_window_);
-        SPDLOG_DEBUG("Destroyed SDL window");
+        MIZU_LOG_DEBUG("Destroyed SDL window");
         sdl_window_ = nullptr;
     }
 }
@@ -58,41 +58,41 @@ SDL_GLContext Window::gl_context() const {
 
 void Window::make_context_current() {
     if (!SDL_GL_MakeCurrent(sdl_window_, gl_context_))
-        SPDLOG_ERROR("Failed to make GL context current: {}", SDL_GetError());
+        MIZU_LOG_ERROR("Failed to make GL context current: {}", SDL_GetError());
 }
 
 void Window::swap() {
     if (!SDL_GL_SwapWindow(sdl_window_))
-        SPDLOG_ERROR("Failed to swap window: {}", SDL_GetError());
+        MIZU_LOG_ERROR("Failed to swap window: {}", SDL_GetError());
 }
 
 Size2d<int> Window::get_size() const {
     Size2d<int> size;
     if (!SDL_GetWindowSize(sdl_window_, &size.w, &size.h))
-        SPDLOG_ERROR("Failed to get size of window: {}", SDL_GetError());
+        MIZU_LOG_ERROR("Failed to get size of window: {}", SDL_GetError());
     return size;
 }
 
 void Window::set_size(Size2d<int> size) {
     if (!SDL_SetWindowSize(sdl_window_, size.w, size.h))
-        SPDLOG_ERROR("Failed to set size of window: {}", SDL_GetError());
+        MIZU_LOG_ERROR("Failed to set size of window: {}", SDL_GetError());
 }
 
 Pos2d<int> Window::get_pos() const {
     Pos2d<int> pos;
     if (!SDL_GetWindowPosition(sdl_window_, &pos.x, &pos.y))
-        SPDLOG_ERROR("Failed to get pos of window: {}", SDL_GetError());
+        MIZU_LOG_ERROR("Failed to get pos of window: {}", SDL_GetError());
     return pos;
 }
 
 void Window::set_pos(Pos2d<int> pos) {
     if (!SDL_SetWindowPosition(sdl_window_, pos.x, pos.y))
-        SPDLOG_ERROR("Failed to set pos of window: {}", SDL_GetError());
+        MIZU_LOG_ERROR("Failed to set pos of window: {}", SDL_GetError());
 }
 
 void Window::set_icon(SDL_Surface *icon) {
     if (!SDL_SetWindowIcon(sdl_window_, icon))
-        SPDLOG_ERROR("Failed to set window icon: {}", SDL_GetError());
+        MIZU_LOG_ERROR("Failed to set window icon: {}", SDL_GetError());
 }
 
 void Window::set_icon_dir(const std::filesystem::path &path) {
@@ -108,11 +108,11 @@ void Window::set_icon_dir(const std::filesystem::path &path) {
         if (!icon)
             icon = surf;
         else if (!SDL_AddSurfaceAlternateImage(icon, surf))
-            SPDLOG_ERROR("Failed to add alternate surface to window icon: {}", SDL_GetError());
+            MIZU_LOG_ERROR("Failed to add alternate surface to window icon: {}", SDL_GetError());
     }
 
     if (!icon)
-        SPDLOG_ERROR("No .png images in directory {} for window icon", path.string());
+        MIZU_LOG_ERROR("No .png images in directory {} for window icon", path.string());
     else
         set_icon(icon);
 }
@@ -123,10 +123,10 @@ Window::Window(SDL_Window *sdl_window, CallbackMgr &callbacks)
 
     gl_context_ = SDL_GL_CreateContext(sdl_window);
     if (!gl_context_) {
-        SPDLOG_ERROR("Failed to create GL context: {}", SDL_GetError());
+        MIZU_LOG_ERROR("Failed to create GL context: {}", SDL_GetError());
         std::exit(EXIT_FAILURE);
     }
-    SPDLOG_DEBUG("Created GL context");
+    MIZU_LOG_DEBUG("Created GL context");
 }
 
 void Window::register_callbacks_() {
@@ -149,55 +149,55 @@ WindowBuilder::WindowBuilder(const std::string &title, Size2d<int> size)
       display_idx_(0) {
     props_ = SDL_CreateProperties();
     if (props_ == 0)
-        SPDLOG_ERROR("Failed to create SDL properties: {}", SDL_GetError());
+        MIZU_LOG_ERROR("Failed to create SDL properties: {}", SDL_GetError());
     this->opengl();
 }
 
 WindowBuilder &WindowBuilder::fullscreen() {
     if (!SDL_SetBooleanProperty(props_, SDL_PROP_WINDOW_CREATE_FULLSCREEN_BOOLEAN, true))
-        SPDLOG_ERROR("Failed to set SDL property, window fullscreen: {}", SDL_GetError());
+        MIZU_LOG_ERROR("Failed to set SDL property, window fullscreen: {}", SDL_GetError());
     return *this;
 }
 
 WindowBuilder &WindowBuilder::opengl() {
     if (!SDL_SetBooleanProperty(props_, SDL_PROP_WINDOW_CREATE_OPENGL_BOOLEAN, true))
-        SPDLOG_ERROR("Failed to set SDL property, window opengl: {}", SDL_GetError());
+        MIZU_LOG_ERROR("Failed to set SDL property, window opengl: {}", SDL_GetError());
     return *this;
 }
 
 WindowBuilder &WindowBuilder::hidden() {
     if (!SDL_SetBooleanProperty(props_, SDL_PROP_WINDOW_CREATE_HIDDEN_BOOLEAN, true))
-        SPDLOG_ERROR("Failed to set SDL property, window hidden: {}", SDL_GetError());
+        MIZU_LOG_ERROR("Failed to set SDL property, window hidden: {}", SDL_GetError());
     return *this;
 }
 
 WindowBuilder &WindowBuilder::borderless() {
     if (!SDL_SetBooleanProperty(props_, SDL_PROP_WINDOW_CREATE_BORDERLESS_BOOLEAN, true))
-        SPDLOG_ERROR("Failed to set SDL property, window borderless: {}", SDL_GetError());
+        MIZU_LOG_ERROR("Failed to set SDL property, window borderless: {}", SDL_GetError());
     return *this;
 }
 
 WindowBuilder &WindowBuilder::resizable() {
     if (!SDL_SetBooleanProperty(props_, SDL_PROP_WINDOW_CREATE_RESIZABLE_BOOLEAN, true))
-        SPDLOG_ERROR("Failed to set SDL property, window resizable: {}", SDL_GetError());
+        MIZU_LOG_ERROR("Failed to set SDL property, window resizable: {}", SDL_GetError());
     return *this;
 }
 
 WindowBuilder &WindowBuilder::minimized() {
     if (!SDL_SetBooleanProperty(props_, SDL_PROP_WINDOW_CREATE_MINIMIZED_BOOLEAN, true))
-        SPDLOG_ERROR("Failed to set SDL property, window minimized: {}", SDL_GetError());
+        MIZU_LOG_ERROR("Failed to set SDL property, window minimized: {}", SDL_GetError());
     return *this;
 }
 
 WindowBuilder &WindowBuilder::maximized() {
     if (!SDL_SetBooleanProperty(props_, SDL_PROP_WINDOW_CREATE_MAXIMIZED_BOOLEAN, true))
-        SPDLOG_ERROR("Failed to set SDL property, window maximized: {}", SDL_GetError());
+        MIZU_LOG_ERROR("Failed to set SDL property, window maximized: {}", SDL_GetError());
     return *this;
 }
 
 WindowBuilder &WindowBuilder::mouse_grabbed() {
     if (!SDL_SetBooleanProperty(props_, SDL_PROP_WINDOW_CREATE_MOUSE_GRABBED_BOOLEAN, true))
-        SPDLOG_ERROR("Failed to set SDL property, window mouse grabbed: {}", SDL_GetError());
+        MIZU_LOG_ERROR("Failed to set SDL property, window mouse grabbed: {}", SDL_GetError());
     return *this;
 }
 
@@ -213,13 +213,13 @@ WindowBuilder &WindowBuilder::mouse_grabbed() {
 
 WindowBuilder &WindowBuilder::high_pixel_density() {
     if (!SDL_SetBooleanProperty(props_, SDL_PROP_WINDOW_CREATE_HIGH_PIXEL_DENSITY_BOOLEAN, true))
-        SPDLOG_ERROR("Failed to set SDL property, window high pixel density: {}", SDL_GetError());
+        MIZU_LOG_ERROR("Failed to set SDL property, window high pixel density: {}", SDL_GetError());
     return *this;
 }
 
 WindowBuilder &WindowBuilder::always_on_top() {
     if (!SDL_SetBooleanProperty(props_, SDL_PROP_WINDOW_CREATE_ALWAYS_ON_TOP_BOOLEAN, true))
-        SPDLOG_ERROR("Failed to set SDL property, window always on top: {}", SDL_GetError());
+        MIZU_LOG_ERROR("Failed to set SDL property, window always on top: {}", SDL_GetError());
     return *this;
 }
 
@@ -250,13 +250,13 @@ WindowBuilder &WindowBuilder::always_on_top() {
 
 WindowBuilder &WindowBuilder::transparent() {
     if (!SDL_SetBooleanProperty(props_, SDL_PROP_WINDOW_CREATE_TRANSPARENT_BOOLEAN, true))
-        SPDLOG_ERROR("Failed to set SDL property, window transparent: {}", SDL_GetError());
+        MIZU_LOG_ERROR("Failed to set SDL property, window transparent: {}", SDL_GetError());
     return *this;
 }
 
 WindowBuilder &WindowBuilder::not_focusable() {
     if (!SDL_SetBooleanProperty(props_, SDL_PROP_WINDOW_CREATE_FOCUSABLE_BOOLEAN, false))
-        SPDLOG_ERROR("Failed to set SDL property, window not focusable: {}", SDL_GetError());
+        MIZU_LOG_ERROR("Failed to set SDL property, window not focusable: {}", SDL_GetError());
     return *this;
 }
 
@@ -278,26 +278,26 @@ std::expected<Window, std::string> WindowBuilder::build(CallbackMgr &callbacks) 
     auto window_size_rect = window_size_rect_result.value();
 
     if (!SDL_SetStringProperty(props_, SDL_PROP_WINDOW_CREATE_TITLE_STRING, title_.c_str()))
-        SPDLOG_ERROR("Failed to set SDL property, window create title: {}", SDL_GetError());
+        MIZU_LOG_ERROR("Failed to set SDL property, window create title: {}", SDL_GetError());
 
     if (!SDL_SetNumberProperty(props_, SDL_PROP_WINDOW_CREATE_X_NUMBER, window_size_rect.x))
-        SPDLOG_ERROR("Failed to set SDL property, window create x number: {}", SDL_GetError());
+        MIZU_LOG_ERROR("Failed to set SDL property, window create x number: {}", SDL_GetError());
 
     if (!SDL_SetNumberProperty(props_, SDL_PROP_WINDOW_CREATE_Y_NUMBER, window_size_rect.y))
-        SPDLOG_ERROR("Failed to set SDL property, window create y number: {}", SDL_GetError());
+        MIZU_LOG_ERROR("Failed to set SDL property, window create y number: {}", SDL_GetError());
 
     if (!SDL_SetNumberProperty(props_, SDL_PROP_WINDOW_CREATE_WIDTH_NUMBER, window_size_rect.w))
-        SPDLOG_ERROR("Failed to set SDL property, window create width: {}", SDL_GetError());
+        MIZU_LOG_ERROR("Failed to set SDL property, window create width: {}", SDL_GetError());
 
     if (!SDL_SetNumberProperty(props_, SDL_PROP_WINDOW_CREATE_HEIGHT_NUMBER, window_size_rect.h))
-        SPDLOG_ERROR("Failed to set SDL property, window create height: {}", SDL_GetError());
+        MIZU_LOG_ERROR("Failed to set SDL property, window create height: {}", SDL_GetError());
 
     auto sdl_window = SDL_CreateWindowWithProperties(props_);
     if (!sdl_window) {
-        SPDLOG_ERROR("Failed to create SDL window: {}", SDL_GetError());
+        MIZU_LOG_ERROR("Failed to create SDL window: {}", SDL_GetError());
         return std::unexpected(std::string(SDL_GetError()));
     }
-    SPDLOG_DEBUG("Created SDL window");
+    MIZU_LOG_DEBUG("Created SDL window");
 
     return Window(sdl_window, callbacks);
 }
@@ -309,7 +309,7 @@ std::expected<SDL_DisplayID, std::string> WindowBuilder::get_display_id() {
         return std::unexpected(std::string(SDL_GetError()));
 
     if (display_count <= display_idx_) {
-        SPDLOG_WARN("Requested display out of bounds ({} <= {}), using display 0", display_count, display_idx_);
+        MIZU_LOG_WARN("Requested display out of bounds ({} <= {}), using display 0", display_count, display_idx_);
         display_idx_ = 0;
     }
 

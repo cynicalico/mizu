@@ -4,13 +4,13 @@ namespace gloo {
 Buffer::Buffer(GladGLContext &gl)
     : gl_(gl) {
     gl_.GenBuffers(1, &id);
-    SPDLOG_TRACE("Created buffer id={}", id);
+    MIZU_LOG_TRACE("Created buffer id={}", id);
 }
 
 Buffer::~Buffer() {
     if (id != 0) {
         gl_.DeleteBuffers(1, &id);
-        SPDLOG_TRACE("Deleted buffer id={}", id);
+        MIZU_LOG_TRACE("Deleted buffer id={}", id);
     }
 }
 

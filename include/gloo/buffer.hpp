@@ -144,7 +144,7 @@ void StaticSizeBuffer<T>::sync_gl(BufferTarget target) {
     if (gl_buf_capacity_ == 0) {
         gl_.BufferData(unwrap(target), data_capacity_ * sizeof(T), data_, GL_STATIC_DRAW);
         gl_buf_capacity_ = data_capacity_;
-        SPDLOG_TRACE("Initialized GL buffer id={}", id);
+        MIZU_LOG_TRACE("Initialized GL buffer id={}", id);
     } else {
         gl_.BufferSubData(
                 unwrap(target), gl_buf_pos_ * sizeof(T), (data_pos_ - gl_buf_pos_) * sizeof(T), data_ + gl_buf_pos_

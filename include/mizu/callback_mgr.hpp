@@ -27,7 +27,7 @@ public:
                 // typeid(T).name is just to give an idea of what buffer it is,
                 // this is not practically going to give a good name
                 // TODO: provide a way to give a better name to this message
-                SPDLOG_WARN("Callback buffer full {}", typeid(T).name());
+                MIZU_LOG_WARN("Callback buffer full {}", typeid(T).name());
                 return;
             }
             data[idx++] = T(std::forward<Args>(args)...);

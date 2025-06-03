@@ -36,7 +36,7 @@ void log_platform() {
 #if defined(MIZU_PLATFORM_POSIX)
     detected_platforms.push_back(STRINGIFY(MIZU_PLATFORM_POSIX));
 #endif
-    SPDLOG_DEBUG("Platform(s) detected: {}", fmt::join(detected_platforms, ", "));
+    MIZU_LOG_DEBUG("Platform(s) detected: {}", fmt::join(detected_platforms, ", "));
 #undef STRINGIFY
 }
 } // namespace mizu

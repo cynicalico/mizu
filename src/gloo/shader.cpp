@@ -6,7 +6,7 @@ namespace gloo {
 Shader::~Shader() {
     if (id != 0) {
         gl_.DeleteProgram(id);
-        SPDLOG_TRACE("Deleted shader program id={}", id);
+        MIZU_LOG_TRACE("Deleted shader program id={}", id);
     }
 }
 
@@ -56,7 +56,7 @@ std::optional<GLuint> Shader::attrib_location(const std::string &name) {
         GLint loc = gl_.GetAttribLocation(id, name.c_str());
         if (loc == -1) {
             if (auto it2 = bad_attrib_locs_.find(name); it2 == bad_attrib_locs_.end()) {
-                SPDLOG_ERROR("Attrib \"{}\" not found", name);
+                MIZU_LOG_ERROR("Attrib \"{}\" not found", name);
                 bad_attrib_locs_.insert(it2, name);
             }
             return std::nullopt;
@@ -240,7 +240,7 @@ std::optional<GLint> Shader::find_uniform_loc_(const std::string &name) {
         GLint loc = gl_.GetUniformLocation(id, name.c_str());
         if (loc == -1) {
             if (auto it2 = bad_uniform_locs_.find(name); it2 == bad_uniform_locs_.end()) {
-                SPDLOG_ERROR("Uniform \"{}\" not found", name);
+                MIZU_LOG_ERROR("Uniform \"{}\" not found", name);
                 bad_uniform_locs_.insert(it2, name);
             }
             return std::nullopt;
@@ -255,7 +255,7 @@ ShaderBuilder::ShaderBuilder(GladGLContext &gl)
 
 ShaderBuilder &ShaderBuilder::stage_src(ShaderType type, const std::string &src) {
     GLuint id = gl_.CreateShader(static_cast<GLenum>(type));
-    SPDLOG_TRACE("Created {} shader id={}", shader_type_str(type), id);
+    MIZU_LOG_TRACE("Created {} shader id={}", shader_type_str(type), id);
     stages_.emplace_back(id, type, src);
 
     return *this;
@@ -263,7 +263,7 @@ ShaderBuilder &ShaderBuilder::stage_src(ShaderType type, const std::string &src)
 
 std::unique_ptr<Shader> ShaderBuilder::link() {
     GLuint program_id = gl_.CreateProgram();
-    SPDLOG_TRACE("Created shader program id={}", program_id);
+    MIZU_LOG_TRACE("Created shader program id={}", program_id);
 
     bool had_compile_error = false;
     for (auto &[id, type, src]: stages_) {
@@ -278,7 +278,7 @@ std::unique_ptr<Shader> ShaderBuilder::link() {
     if (had_compile_error || !try_link_(program_id)) {
         delete_stages_();
         gl_.DeleteProgram(program_id);
-        SPDLOG_TRACE("Deleted shader program id={}", program_id);
+        MIZU_LOG_TRACE("Deleted shader program id={}", program_id);
 
         return nullptr;
     }
@@ -303,11 +303,11 @@ bool ShaderBuilder::try_compile_(GLuint id, ShaderType type, const std::string &
         gl_.GetShaderInfoLog(id, info_log_length, nullptr, &info_log[0]);
         std::string info_log_str = std::string(&info_log[0]);
 
-        SPDLOG_ERROR("Failed to compile {} shader id={}: {}", shader_type_str(type), id, info_log_str);
+        MIZU_LOG_ERROR("Failed to compile {} shader id={}: {}", shader_type_str(type), id, info_log_str);
         return false;
     }
 
-    SPDLOG_TRACE("Successfully compiled {} shader id={}", shader_type_str(type), id);
+    MIZU_LOG_TRACE("Successfully compiled {} shader id={}", shader_type_str(type), id);
     return true;
 }
 
@@ -325,18 +325,18 @@ bool ShaderBuilder::try_link_(GLuint id) const {
         gl_.GetProgramInfoLog(id, info_log_length, nullptr, &info_log[0]);
         std::string info_log_str = std::string(&info_log[0]);
 
-        SPDLOG_ERROR("Failed to link shader program id={}: {}", id, info_log_str);
+        MIZU_LOG_ERROR("Failed to link shader program id={}: {}", id, info_log_str);
         return false;
     }
 
-    SPDLOG_TRACE("Successfully linked shader program id={}", id);
+    MIZU_LOG_TRACE("Successfully linked shader program id={}", id);
     return true;
 }
 
 void ShaderBuilder::delete_stages_() {
     for (auto &[id, type, src]: stages_) {
         gl_.DeleteShader(id);
-        SPDLOG_TRACE("Deleted {} shader id={}", shader_type_str(type), id);
+        MIZU_LOG_TRACE("Deleted {} shader id={}", shader_type_str(type), id);
     }
 }
 } // namespace gloo

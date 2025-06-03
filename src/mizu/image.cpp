@@ -12,27 +12,27 @@ SDL_Surface *read_image_to_sdl_surface(const std::filesystem::path &path) {
     FILE *fp = fopen(path.string().c_str(), "rb");
     if (!fp) {
 #endif
-        SPDLOG_ERROR("Failed to open file: '{}'", path.string());
+        MIZU_LOG_ERROR("Failed to open file: '{}'", path.string());
         return nullptr;
     }
 
     unsigned char header[8];
     fread(header, 1, 8, fp);
     if (png_sig_cmp(header, 0, 8) != 0) {
-        SPDLOG_ERROR("Header signature is not correct");
+        MIZU_LOG_ERROR("Header signature is not correct");
         fclose(fp);
         return nullptr;
     }
 
     auto png = png_create_read_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
     if (!png) {
-        SPDLOG_ERROR("Failed to create png read struct");
+        MIZU_LOG_ERROR("Failed to create png read struct");
         return nullptr;
     }
 
     auto info = png_create_info_struct(png);
     if (!info) {
-        SPDLOG_ERROR("Failed to create png info struct");
+        MIZU_LOG_ERROR("Failed to create png info struct");
         png_destroy_read_struct(&png, nullptr, nullptr);
         return nullptr;
     }
@@ -82,14 +82,14 @@ SDL_Surface *read_image_to_sdl_surface(const std::filesystem::path &path) {
     std::size_t stride = png_get_rowbytes(png, info);
 
     if (height > PNG_SIZE_MAX / stride) {
-        SPDLOG_ERROR("Image buffer would be too large");
+        MIZU_LOG_ERROR("Image buffer would be too large");
         png_destroy_read_struct(&png, &info, nullptr);
         return nullptr;
     }
 
     auto surface = SDL_CreateSurface(width, height, SDL_PIXELFORMAT_RGBA32);
     if (!surface) {
-        SPDLOG_ERROR("Failed to create SDL surface: {}", SDL_GetError());
+        MIZU_LOG_ERROR("Failed to create SDL surface: {}", SDL_GetError());
         png_destroy_read_struct(&png, &info, nullptr);
         return nullptr;
     }

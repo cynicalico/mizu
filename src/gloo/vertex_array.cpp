@@ -4,7 +4,7 @@ namespace gloo {
 VertexArray::~VertexArray() {
     if (id != 0) {
         gl_.DeleteVertexArrays(1, &id);
-        SPDLOG_TRACE("Deleted vertex array id={}", id);
+        MIZU_LOG_TRACE("Deleted vertex array id={}", id);
     }
 }
 
@@ -43,7 +43,7 @@ VertexArray::VertexArray(GladGLContext &gl, GLuint id)
 VertexArrayBuilder::VertexArrayBuilder(GladGLContext &gl)
     : gl_(gl) {
     gl_.GenVertexArrays(1, &id_);
-    SPDLOG_TRACE("Created vertex array id={}", id_);
+    MIZU_LOG_TRACE("Created vertex array id={}", id_);
 
     gl_.BindVertexArray(id_);
 }
@@ -81,7 +81,7 @@ void VertexArrayBuilder::flush_() {
         stride += attrib_info.size;
 
     for (const auto &attrib_info: attrib_info_buf_) {
-        SPDLOG_TRACE(
+        MIZU_LOG_TRACE(
                 "VertexAttribPointer: index={} size={} type={} normalized={} stride={} offset={}",
                 attrib_info.index,
                 attrib_info.size,

@@ -11,7 +11,7 @@ Dear::Dear(CallbackMgr &callbacks, Window *window)
 
     IMGUI_CHECKVERSION();
     ctx_ = ImGui::CreateContext();
-    SPDLOG_DEBUG("Created Dear ImGui context");
+    MIZU_LOG_DEBUG("Created Dear ImGui context");
     io_ = &ImGui::GetIO();
     io_->IniFilename = nullptr;
 
@@ -19,7 +19,7 @@ Dear::Dear(CallbackMgr &callbacks, Window *window)
     const char *glsl_version = "#version 130";
     ImGui_ImplOpenGL3_Init(glsl_version);
 
-    SPDLOG_DEBUG("Initialized Dear ImGui");
+    MIZU_LOG_DEBUG("Initialized Dear ImGui");
 }
 
 Dear::~Dear() {
@@ -27,11 +27,11 @@ Dear::~Dear() {
 
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplSDL3_Shutdown();
-    SPDLOG_DEBUG("Shutdown Dear ImGui");
+    MIZU_LOG_DEBUG("Shutdown Dear ImGui");
 
     if (ctx_) {
         ImGui::DestroyContext(ctx_);
-        SPDLOG_DEBUG("Destroyed Dear ImGui context");
+        MIZU_LOG_DEBUG("Destroyed Dear ImGui context");
     }
 }
 

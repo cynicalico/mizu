@@ -26,12 +26,12 @@ Engine::Engine(const std::string &window_title, Size2d<int> window_size, WindowB
     register_callbacks_();
 
     if (!SDL_Init(SDL_INIT_VIDEO)) {
-        SPDLOG_ERROR("Failed to initialize SDL: {}", SDL_GetError());
+        MIZU_LOG_ERROR("Failed to initialize SDL: {}", SDL_GetError());
         std::exit(EXIT_FAILURE);
     }
 
     int sdl_version = SDL_GetVersion();
-    SPDLOG_DEBUG(
+    MIZU_LOG_DEBUG(
             "Initialized SDL v{}.{}.{}",
             SDL_VERSIONNUM_MAJOR(sdl_version),
             SDL_VERSIONNUM_MINOR(sdl_version),
@@ -50,7 +50,7 @@ Engine::Engine(const std::string &window_title, Size2d<int> window_size, WindowB
 
     auto window_result = builder.build(callbacks);
     if (!window_result) {
-        SPDLOG_ERROR("Failed to build window: {}", window_result.error());
+        MIZU_LOG_ERROR("Failed to build window: {}", window_result.error());
         SDL_Quit();
         std::exit(EXIT_FAILURE);
     }
@@ -60,7 +60,7 @@ Engine::Engine(const std::string &window_title, Size2d<int> window_size, WindowB
     window->make_context_current();
     auto glad_version_opt = gl.load(SDL_GL_GetProcAddress);
     if (!glad_version_opt) {
-        SPDLOG_ERROR("Failed to initialize OpenGL context");
+        MIZU_LOG_ERROR("Failed to initialize OpenGL context");
         SDL_Quit();
         std::exit(EXIT_FAILURE);
     }
@@ -71,7 +71,7 @@ Engine::Engine(const std::string &window_title, Size2d<int> window_size, WindowB
     gl.debug_message_callback(gl_debug_message_callback, nullptr);
 #endif
 
-    SPDLOG_DEBUG(
+    MIZU_LOG_DEBUG(
             "Loaded OpenGL v{}.{}, vendor: {}, renderer: {}",
             glad_version_opt->major,
             glad_version_opt->minor,
@@ -104,7 +104,7 @@ Engine::~Engine() {
     window.reset();
 
     SDL_Quit();
-    SPDLOG_DEBUG("Quit SDL");
+    MIZU_LOG_DEBUG("Quit SDL");
 }
 
 void Engine::shutdown() {
@@ -234,16 +234,16 @@ void gl_debug_message_callback(
 
     switch (severity) {
     case GL_DEBUG_SEVERITY_HIGH:
-        SPDLOG_ERROR("OpenGL: source={} type={} id={} msg={}", source_str.substr(9), type_str.substr(9), id, message);
+        MIZU_LOG_ERROR("OpenGL: source={} type={} id={} msg={}", source_str.substr(9), type_str.substr(9), id, message);
         break;
     case GL_DEBUG_SEVERITY_MEDIUM:
-        SPDLOG_WARN("OpenGL: source={} type={} id={} msg={}", source_str.substr(9), type_str.substr(9), id, message);
+        MIZU_LOG_WARN("OpenGL: source={} type={} id={} msg={}", source_str.substr(9), type_str.substr(9), id, message);
         break;
     case GL_DEBUG_SEVERITY_LOW:
-        SPDLOG_DEBUG("OpenGL: source={} type={} id={} msg={}", source_str.substr(9), type_str.substr(9), id, message);
+        MIZU_LOG_DEBUG("OpenGL: source={} type={} id={} msg={}", source_str.substr(9), type_str.substr(9), id, message);
         break;
     case GL_DEBUG_SEVERITY_NOTIFICATION:
-        SPDLOG_TRACE("OpenGL: source={} type={} id={} msg={}", source_str.substr(9), type_str.substr(9), id, message);
+        MIZU_LOG_TRACE("OpenGL: source={} type={} id={} msg={}", source_str.substr(9), type_str.substr(9), id, message);
         break;
     default: break; // won't happen
     }

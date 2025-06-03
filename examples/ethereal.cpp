@@ -55,9 +55,6 @@ public:
     std::unique_ptr<gloo::VertexArray> vao;
     glm::mat4 proj;
 
-    mizu::Sound music;
-    mizu::Sound click;
-
     explicit Ethereal(mizu::Engine *engine);
 
     void update(double dt) override;
@@ -86,11 +83,6 @@ Ethereal::Ethereal(mizu::Engine *engine)
                   .vec("in_color", 3)
                   .vec("in_rot", 3)
                   .build();
-
-    music = audio->load_sound("res/music/adventure.wav");
-    click = audio->load_sound("res/sfx/pickup_1.wav");
-
-    audio->play_sound(music, {.looping = true});
 }
 
 void Ethereal::update(double dt) {
@@ -123,8 +115,6 @@ void Ethereal::update(double dt) {
             x2, y2, 0.0f, r, g, b, cx, cy, theta
         });
         // clang-format on
-
-        audio->play_sound(click);
     }
 
     proj = glm::ortho(0.0, static_cast<double>(window->get_size().w), static_cast<double>(window->get_size().h), 0.0);

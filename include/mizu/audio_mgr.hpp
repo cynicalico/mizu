@@ -33,7 +33,7 @@ struct PlayOptions {
 
 class AudioMgr {
 public:
-    AudioMgr(CallbackMgr &callbacks);
+    explicit AudioMgr(CallbackMgr &callbacks);
     ~AudioMgr();
 
     NO_COPY(AudioMgr)

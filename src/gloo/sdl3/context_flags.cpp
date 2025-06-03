@@ -27,6 +27,6 @@ ContextFlagsBuilder &ContextFlagsBuilder::reset_isolation() {
 
 void ContextFlagsBuilder::set() {
     if (!SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, unwrap(flags_)))
-        SPDLOG_ERROR("Failed to set context flags: {}", SDL_GetError());
+        MIZU_LOG_ERROR("Failed to set context flags: {}", SDL_GetError());
 }
 } // namespace gloo::sdl3
