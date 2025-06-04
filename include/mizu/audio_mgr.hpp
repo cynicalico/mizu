@@ -44,11 +44,12 @@ public:
     void play_sound(const Sound &sound, const PlayOptions &options = {});
 
 private:
-    std::string device_specifier_{};
     ALCdevice *device_{nullptr};
     ALCcontext *ctx_{nullptr};
 
     std::unordered_map<ALuint, std::vector<ALuint>> sources_{};
+
+    static const ALCchar *device_specifier_(ALCdevice *device);
 
     std::size_t callback_id_{0};
     CallbackMgr &callbacks_;
@@ -58,6 +59,7 @@ private:
 
     void update_(double dt);
     void default_device_changed_(ALCdevice *device);
+    void device_removed_(ALCdevice *device);
 };
 } // namespace mizu
 

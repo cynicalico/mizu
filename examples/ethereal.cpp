@@ -86,7 +86,7 @@ Ethereal::Ethereal(mizu::Engine *engine)
                   .vec("in_rot", 3)
                   .build();
 
-    music = audio->load_sound(L"res/music/【水音ラル】Ghost Rule【UTAUカバー】.mp3");
+    music = audio->load_sound(u8"res/music/【水音ラル】Ghost Rule【UTAUカバー】.mp3");
     audio->play_sound(music, {.looping = true});
 }
 
@@ -103,16 +103,16 @@ void Ethereal::update(double dt) {
     if (input->pressed(mizu::MouseButton::Left) && !vbo->is_full()) {
         float cx = input->mouse_x();
         float cy = input->mouse_y();
-        float x0 = cx + 20.0f * std::cosf(std::numbers::pi / 2.0f);
-        float y0 = cy - 20.0f * std::sinf(std::numbers::pi / 2.0f);
-        float x1 = cx + 20.0f * std::cosf(7.0f * std::numbers::pi / 6.0f);
-        float y1 = cy - 20.0f * std::sinf(7.0f * std::numbers::pi / 6.0f);
-        float x2 = cx + 20.0f * std::cosf(11.0f * std::numbers::pi / 6.0f);
-        float y2 = cy - 20.0f * std::sinf(11.0f * std::numbers::pi / 6.0f);
+        float x0 = cx + 20.0f * std::cosf(std::numbers::pi_v<float> / 2.0f);
+        float y0 = cy - 20.0f * std::sinf(std::numbers::pi_v<float> / 2.0f);
+        float x1 = cx + 20.0f * std::cosf(7.0f * std::numbers::pi_v<float> / 6.0f);
+        float y1 = cy - 20.0f * std::sinf(7.0f * std::numbers::pi_v<float> / 6.0f);
+        float x2 = cx + 20.0f * std::cosf(11.0f * std::numbers::pi_v<float> / 6.0f);
+        float y2 = cy - 20.0f * std::sinf(11.0f * std::numbers::pi_v<float> / 6.0f);
         auto r = mizu::rng::get<float>();
         auto g = mizu::rng::get<float>();
         auto b = mizu::rng::get<float>();
-        auto theta = mizu::rng::get<float>(0, 2 * std::numbers::pi);
+        auto theta = mizu::rng::get<float>(0.0f, 2.0f * std::numbers::pi_v<float>);
         // clang-format off
         vbo->push({
             x0, y0, 0.0f, r, g, b, cx, cy, theta,

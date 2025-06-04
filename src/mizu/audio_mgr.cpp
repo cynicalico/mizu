@@ -2,6 +2,11 @@
 #include "mizu/log.hpp"
 #include "mizu/payloads.hpp"
 
+#ifndef AL_SOFT_hold_on_disconnect
+#define AL_SOFT_hold_on_disconnect
+#define AL_STOP_SOURCES_ON_DISCONNECT_SOFT 0x19AB
+#endif
+
 namespace mizu {
 bool check_al_errors_();
 bool check_alc_errors_(ALCdevice *device);
@@ -52,6 +57,9 @@ AudioMgr::AudioMgr(CallbackMgr &callbacks)
             alGetString(AL_RENDERER)
     );
 
+    alDisable(AL_STOP_SOURCES_ON_DISCONNECT_SOFT);
+    check_al_errors_();
+
     if (alIsExtensionPresent("AL_SOFT_events")) {
         alEventControlSOFT = static_cast<LPALEVENTCONTROLSOFT>(alGetProcAddress("alEventControlSOFT"));
         alEventCallbackSOFT = static_cast<LPALEVENTCALLBACKSOFT>(alGetProcAddress("alEventCallbackSOFT"));
@@ -93,14 +101,8 @@ AudioMgr::AudioMgr(CallbackMgr &callbacks)
     else
         MIZU_LOG_WARN("ALC_SOFT_reopen_device not supported");
 
-    const ALCchar *name{};
-    if (alcIsExtensionPresent(device_, "ALC_ENUMERATE_ALL_EXT"))
-        name = alcGetString(device_, ALC_ALL_DEVICES_SPECIFIER);
-    if (!name || !check_alc_errors_(device_))
-        name = alcGetString(device_, ALC_DEVICE_SPECIFIER);
-    device_specifier_ = name;
-
-    MIZU_LOG_DEBUG("Opened \"{}\"", device_specifier_);
+    const ALCchar *name = device_specifier_(device_);
+    MIZU_LOG_DEBUG("Opened \"{}\"", name);
 }
 
 AudioMgr::~AudioMgr() {
@@ -178,13 +180,35 @@ void AudioMgr::play_sound(const Sound &sound, const PlayOptions &options) {
     check_al_errors_();
 }
 
+const ALCchar *AudioMgr::device_specifier_(ALCdevice *device) {
+    const ALCchar *name{};
+    if (device) {
+        if (alcIsExtensionPresent(device, "ALC_ENUMERATE_ALL_EXT"))
+            name = alcGetString(device, ALC_ALL_DEVICES_SPECIFIER);
+        if (!name || !check_alc_errors_(device)) {
+            name = alcGetString(device, ALC_DEVICE_SPECIFIER);
+            check_alc_errors_(device);
+        }
+    } else {
+        if (alcIsExtensionPresent(device, "ALC_ENUMERATE_ALL_EXT"))
+            name = alcGetString(device, ALC_DEFAULT_ALL_DEVICES_SPECIFIER);
+        if (!name || !check_alc_errors_(device)) {
+            name = alcGetString(device, ALC_DEFAULT_DEVICE_SPECIFIER);
+            check_alc_errors_(device);
+        }
+    }
+    return name;
+}
+
 void AudioMgr::register_callbacks_() {
     callback_id_ = callbacks_.reg();
     callbacks_.sub<PUpdate>(callback_id_, [&](const auto &p) { update_(p.dt); });
     callbacks_.sub<PDefaultDeviceChanged>(callback_id_, [&](const auto &p) { default_device_changed_(p.device); });
+    callbacks_.sub<PDeviceRemoved>(callback_id_, [&](const auto &p) { device_removed_(p.device); });
 }
 
 void AudioMgr::unregister_callbacks_() {
+    callbacks_.unsub<PDeviceRemoved>(callback_id_);
     callbacks_.unsub<PDefaultDeviceChanged>(callback_id_);
     callbacks_.unsub<PUpdate>(callback_id_);
     callbacks_.unreg(callback_id_);
@@ -217,16 +241,18 @@ void AudioMgr::update_(double) {
 
 void AudioMgr::default_device_changed_(ALCdevice *device) {
     if (alcReopenDeviceSOFT) {
-        const ALCchar *name{};
-        if (alcIsExtensionPresent(device, "ALC_ENUMERATE_ALL_EXT"))
-            name = alcGetString(device, ALC_ALL_DEVICES_SPECIFIER);
-        if (!name || !check_alc_errors_(device))
-            name = alcGetString(device, ALC_DEVICE_SPECIFIER);
+        alcReopenDeviceSOFT(device_, nullptr, nullptr);
+        check_alc_errors_(device_);
+    }
+}
 
-        if (alcReopenDeviceSOFT(device_, name, nullptr) == AL_TRUE)
-            device_specifier_ = name;
-        else
-            check_alc_errors_(device_);
+void AudioMgr::device_removed_(ALCdevice *device) {
+    // FIXME: Can't find a way to determine if the disconnected device is the current
+    //        device, so we always reopen. This leads to an extremely tiny glitch in the
+    //        sound when the device hasn't actually changed.
+    if (alcReopenDeviceSOFT) {
+        alcReopenDeviceSOFT(device_, nullptr, nullptr);
+        check_alc_errors_(device_);
     }
 }
 
@@ -281,9 +307,6 @@ void al_event_callback_(
     });
 #undef STRINGIFY
     MIZU_LOG_DEBUG("OpenAL: type={} msg={}", eventType_string, message);
-
-    auto callbacks = reinterpret_cast<CallbackMgr &>(userParam);
-    (void)callbacks;
 }
 
 void alc_event_callback_(
@@ -320,10 +343,12 @@ void alc_event_callback_(
         callbacks->pub<PDefaultDeviceChanged>(eventType, deviceType, device, std::string(message, length));
         break;
     case ALC_EVENT_TYPE_DEVICE_ADDED_SOFT:
-        callbacks->pub<PDeviceAdded>(eventType, deviceType, device, std::string(message, length));
+        // if (deviceType == ALC_PLAYBACK_DEVICE_SOFT)
+        //     callbacks->pub<PDeviceAdded>(eventType, deviceType, device, std::string(message, length));
         break;
     case ALC_EVENT_TYPE_DEVICE_REMOVED_SOFT:
-        callbacks->pub<PDeviceRemoved>(eventType, deviceType, device, std::string(message, length));
+        if (deviceType == ALC_PLAYBACK_DEVICE_SOFT)
+            callbacks->pub_nowait<PDeviceRemoved>(eventType, deviceType, device, std::string(message, length));
         break;
     default: MIZU_LOG_WARN("Unhandled event type: {}", eventType_string); break;
     }
