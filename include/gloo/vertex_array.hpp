@@ -10,6 +10,8 @@
 
 namespace gloo {
 enum class DrawMode : GLenum {
+    Points = GL_POINTS,
+    Lines = GL_LINES,
     Triangles = GL_TRIANGLES,
 };
 

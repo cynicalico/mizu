@@ -13,16 +13,14 @@ InputMgr::~InputMgr() {
 }
 
 bool InputMgr::down(Key key, Mod mods) {
-    if (auto it = key_state_.find(key); it != key_state_.end())
+    if (const auto it = key_state_.find(key); it != key_state_.end())
         return it->second.pressed && is_flag_set(it->second.mods, mods);
     return false;
 }
 
 bool InputMgr::pressed(Key key, Mod mods) {
-    auto it = key_state_.find(key);
-    if (it != key_state_.end()) {
-        auto it2 = prev_key_state_.find(key);
-        if (it2 != prev_key_state_.end())
+    if (const auto it = key_state_.find(key); it != key_state_.end()) {
+        if (const auto it2 = prev_key_state_.find(key); it2 != prev_key_state_.end())
             return it->second.pressed && is_flag_set(it->second.mods, mods) && !it2->second.pressed;
         return it->second.pressed && is_flag_set(it->second.mods, mods);
     }
@@ -30,10 +28,8 @@ bool InputMgr::pressed(Key key, Mod mods) {
 }
 
 bool InputMgr::released(Key key, Mod mods) {
-    auto it = key_state_.find(key);
-    if (it != key_state_.end()) {
-        auto it2 = prev_key_state_.find(key);
-        if (it2 != prev_key_state_.end())
+    if (const auto it = key_state_.find(key); it != key_state_.end()) {
+        if (const auto it2 = prev_key_state_.find(key); it2 != prev_key_state_.end())
             return !it->second.pressed && is_flag_set(it2->second.mods, mods) && it2->second.pressed;
         return false;
     }
@@ -41,16 +37,14 @@ bool InputMgr::released(Key key, Mod mods) {
 }
 
 bool InputMgr::down(MouseButton button, Mod mods) {
-    if (auto it = mouse_button_state_.find(button); it != mouse_button_state_.end())
+    if (const auto it = mouse_button_state_.find(button); it != mouse_button_state_.end())
         return it->second.pressed && is_flag_set(it->second.mods, mods);
     return false;
 }
 
 bool InputMgr::pressed(MouseButton button, Mod mods) {
-    auto it = mouse_button_state_.find(button);
-    if (it != mouse_button_state_.end()) {
-        auto it2 = prev_mouse_button_state_.find(button);
-        if (it2 != prev_mouse_button_state_.end())
+    if (const auto it = mouse_button_state_.find(button); it != mouse_button_state_.end()) {
+        if (const auto it2 = prev_mouse_button_state_.find(button); it2 != prev_mouse_button_state_.end())
             return it->second.pressed && is_flag_set(it->second.mods, mods) && !it2->second.pressed;
         return it->second.pressed && is_flag_set(it->second.mods, mods);
     }
@@ -58,10 +52,8 @@ bool InputMgr::pressed(MouseButton button, Mod mods) {
 }
 
 bool InputMgr::released(MouseButton button, Mod mods) {
-    auto it = mouse_button_state_.find(button);
-    if (it != mouse_button_state_.end()) {
-        auto it2 = prev_mouse_button_state_.find(button);
-        if (it2 != prev_mouse_button_state_.end())
+    if (const auto it = mouse_button_state_.find(button); it != mouse_button_state_.end()) {
+        if (const auto it2 = prev_mouse_button_state_.find(button); it2 != prev_mouse_button_state_.end())
             return !it->second.pressed && is_flag_set(it2->second.mods, mods) && it2->second.pressed;
         return false;
     }

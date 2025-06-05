@@ -4,6 +4,7 @@
 #include <SDL3/SDL_video.h>
 #include <expected>
 #include <filesystem>
+#include <glm/mat4x4.hpp>
 #include <string>
 #include "mizu/callback_mgr.hpp"
 #include "mizu/types.hpp"
@@ -20,6 +21,8 @@ public:
 
     Window(Window &&other) noexcept;
     Window &operator=(Window &&other) noexcept;
+
+    glm::mat4 projection() const;
 
     SDL_Window *underlying() const;
     SDL_GLContext gl_context() const;

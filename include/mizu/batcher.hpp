@@ -1,0 +1,57 @@
+#ifndef MIZU_BATCHER_HPP
+#define MIZU_BATCHER_HPP
+
+#include <glad/gl.h>
+#include "gloo/buffer.hpp"
+#include "gloo/context.hpp"
+#include "gloo/vertex_array.hpp"
+
+namespace mizu {
+enum class BatchType : std::size_t { Point = 0, Line = 1, Triangle = 2 };
+
+struct Batch {
+    std::size_t vertex_size;
+    std::size_t vertices_per_obj;
+
+    std::unique_ptr<gloo::StaticSizeBuffer<float>> vbo;
+    std::unique_ptr<gloo::VertexArray> vao;
+
+    Batch(GladGLContext &gl, BatchType type, gloo::Shader *shader, std::size_t capacity);
+};
+
+struct BatchList {
+    GladGLContext &gl;
+    BatchType type;
+    gloo::Shader *shader;
+    std::size_t capacity;
+    std::vector<Batch> batches;
+
+    void add(std::initializer_list<float> vertex_data);
+
+    void draw(const glm::mat4 &projection) const;
+
+    void clear();
+};
+
+class Batcher {
+public:
+    Batcher(gloo::Context &ctx);
+
+    NO_COPY(Batcher)
+    NO_MOVE(Batcher)
+
+    void add(BatchType type, std::initializer_list<float> vertex_data);
+
+    void draw(glm::mat4 projection) const;
+
+    void clear();
+
+private:
+    gloo::Context &ctx_;
+
+    std::unique_ptr<gloo::Shader> shaders_[3];
+    BatchList batch_lists_[3];
+};
+} // namespace mizu
+
+#endif // MIZU_BATCHER_HPP

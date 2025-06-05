@@ -88,7 +88,7 @@ Engine::Engine(const std::string &window_title, Size2d<int> window_size, WindowB
 
     input = std::make_unique<InputMgr>(callbacks);
 
-    g2d = std::make_unique<G2d>(gl, callbacks);
+    g2d = std::make_unique<G2d>(callbacks, gl, window.get());
     g2d->set_vsync(1);
 
     dear = std::make_unique<Dear>(callbacks, window.get());

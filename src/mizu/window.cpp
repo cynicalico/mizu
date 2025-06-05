@@ -1,5 +1,6 @@
 #include "mizu/window.hpp"
 #include <SDL3/SDL.h>
+#include <glm/ext/matrix_clip_space.hpp>
 #include "mizu/image.hpp"
 #include "mizu/log.hpp"
 #include "mizu/payloads.hpp"
@@ -46,6 +47,10 @@ Window &Window::operator=(Window &&other) noexcept {
         other.gl_context_ = nullptr;
     }
     return *this;
+}
+
+glm::mat4 Window::projection() const {
+    return glm::ortho(0.0f, static_cast<float>(get_size().w), static_cast<float>(get_size().h), 0.0f, -1.0f, 1.0f);
 }
 
 SDL_Window *Window::underlying() const {

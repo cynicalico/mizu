@@ -74,7 +74,15 @@ void Engine::mainloop() {
 
         callbacks.pub_nowait<PPreDraw>();
         callbacks.pub_nowait<PPreDrawOverlay>();
+
         callbacks.pub_nowait<PDraw>();
+
+        ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
+        dear::begin("FPS", nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoDecoration) && [&] {
+            auto fps_str = fmt::format("FPS: {:.2f}{}", frame_counter.fps(), g2d->vsync() ? " (vsync)" : "");
+            ImGui::Text("%s", fps_str.c_str());
+        };
+
         callbacks.pub_nowait<PDrawOverlay>();
         callbacks.pub_nowait<PPostDraw>();
 

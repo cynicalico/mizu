@@ -25,6 +25,7 @@ set(${PROJECT_NAME}_headers
         include/mizu/application.hpp
         include/mizu/audio_mgr.hpp
         include/mizu/averagers.hpp
+        include/mizu/batcher.hpp
         include/mizu/callback_mgr.hpp
         include/mizu/class_helpers.hpp
         include/mizu/color.hpp
@@ -35,12 +36,14 @@ set(${PROJECT_NAME}_headers
         include/mizu/image.hpp
         include/mizu/imconfig.hpp
         include/mizu/input_mgr.hpp
+        include/mizu/io.hpp
         include/mizu/is_any_of.hpp
         include/mizu/log.hpp
         include/mizu/mizu.hpp
         include/mizu/payloads.hpp
         include/mizu/platform.hpp
         include/mizu/rng.hpp
+        include/mizu/shapes.hpp
         include/mizu/time.hpp
         include/mizu/types.hpp
         include/mizu/window.hpp
@@ -66,12 +69,14 @@ set(${PROJECT_NAME}_sources
         src/mizu/application.cpp
         src/mizu/audio_mgr.cpp
         src/mizu/averagers.cpp
+        src/mizu/batcher.cpp
         src/mizu/color.cpp
         src/mizu/dear.cpp
         src/mizu/engine.cpp
         src/mizu/g2d.cpp
         src/mizu/image.cpp
         src/mizu/input_mgr.cpp
+        src/mizu/io.cpp
         src/mizu/platform.cpp
         src/mizu/rng.cpp
         src/mizu/window.cpp

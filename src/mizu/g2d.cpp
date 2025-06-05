@@ -1,9 +1,10 @@
 #include "mizu/g2d.hpp"
 #include <SDL3/SDL_video.h>
+#include "mizu/payloads.hpp"
 
 namespace mizu {
-G2d::G2d(gloo::Context &gl, CallbackMgr &callbacks)
-    : gl_(gl), callbacks_(callbacks) {
+G2d::G2d(CallbackMgr &callbacks, gloo::Context &gl, Window *window)
+    : gl_(gl), window_(window), batcher_(gl_), callbacks_(callbacks) {
     register_callbacks_();
 }
 
@@ -28,20 +29,31 @@ void G2d::clear(const Color &color, ClearBit clear_bits) {
     gl_.ctx.Clear(unwrap(clear_bits));
 }
 
-gloo::ShaderBuilder G2d::shader_builder() const {
-    return gloo::ShaderBuilder(gl_.ctx);
-}
-
-gloo::VertexArrayBuilder G2d::vertex_array_builder() const {
-    return gloo::VertexArrayBuilder(gl_.ctx);
+void G2d::triangle(glm::vec2 p0, glm::vec2 p1, glm::vec2 p2, const Color &color) {
+    auto gl_color = color.gl_color();
+    batcher_.add(
+            BatchType::Triangle,
+            {
+                    p0.x, p0.y, 0.0, gl_color.r, gl_color.g, gl_color.b, 0.0, 0.0, 0.0,
+                    p1.x, p1.y, 0.0, gl_color.r, gl_color.g, gl_color.b, 0.0, 0.0, 0.0,
+                    p2.x, p2.y, 0.0, gl_color.r, gl_color.g, gl_color.b, 0.0, 0.0, 0.0,
+            }
+    );
 }
 
 void G2d::register_callbacks_() {
     callback_id_ = callbacks_.reg();
+    callbacks_.sub<PPostDraw>(callback_id_, [&](const auto &) { post_draw_(); });
 }
 
 void G2d::unregister_callbacks_() {
+    callbacks_.unsub<PPostDraw>(callback_id_);
     callbacks_.unreg(callback_id_);
     callback_id_ = 0;
+}
+
+void G2d::post_draw_() {
+    batcher_.draw(window_->projection());
+    batcher_.clear();
 }
 } // namespace mizu

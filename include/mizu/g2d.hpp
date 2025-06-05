@@ -1,13 +1,15 @@
 #ifndef MIZU_G2D_HPP
 #define MIZU_G2D_HPP
 
-#include "gloo/buffer.hpp"
+#include <glm/vec2.hpp>
 #include "gloo/context.hpp"
-#include "gloo/shader.hpp"
-#include "gloo/vertex_array.hpp"
+#include "mizu/batcher.hpp"
 #include "mizu/callback_mgr.hpp"
+#include "mizu/class_helpers.hpp"
 #include "mizu/color.hpp"
 #include "mizu/enum_class_helpers.hpp"
+#include "mizu/shapes.hpp"
+#include "mizu/window.hpp"
 
 namespace mizu {
 enum class ClearBit : GLenum {
@@ -18,41 +20,48 @@ enum class ClearBit : GLenum {
 
 class G2d {
 public:
-    G2d(gloo::Context &gl, CallbackMgr &callbacks);
+    G2d(CallbackMgr &callbacks, gloo::Context &gl, Window *window);
 
     ~G2d();
 
-    G2d(const G2d &) = delete;
-    G2d &operator=(const G2d &) = delete;
-
-    G2d(G2d &&other) noexcept = delete;
-    G2d &operator=(G2d &&other) = delete;
+    NO_COPY(G2d)
+    NO_MOVE(G2d)
 
     bool vsync() const;
     void set_vsync(bool enabled);
 
     void clear(const Color &color, ClearBit clear_bits);
 
-    gloo::ShaderBuilder shader_builder() const;
+    void triangle(glm::vec2 p0, glm::vec2 p1, glm::vec2 p2, const Color &color);
 
-    template<typename T>
-    std::unique_ptr<gloo::StaticSizeBuffer<T>> buffer(std::size_t capacity) const;
-
-    gloo::VertexArrayBuilder vertex_array_builder() const;
+    template<typename T, typename Color>
+        requires std::derived_from<Color, mizu::Color>
+    void triangle(const Triangle<T, Color> &t);
 
 private:
     gloo::Context &gl_;
+    Window *window_;
+
+    Batcher batcher_;
 
     std::size_t callback_id_{0};
     CallbackMgr &callbacks_;
 
     void register_callbacks_();
     void unregister_callbacks_();
+
+    void post_draw_();
 };
 
-template<typename T>
-std::unique_ptr<gloo::StaticSizeBuffer<T>> G2d::buffer(std::size_t capacity) const {
-    return std::make_unique<gloo::StaticSizeBuffer<T>>(gl_.ctx, capacity);
+template<typename T, typename Color>
+    requires std::derived_from<Color, mizu::Color>
+void G2d::triangle(const Triangle<T, Color> &t) {
+    triangle(
+            {static_cast<float>(t.v0.x), static_cast<float>(t.v0.y)},
+            {static_cast<float>(t.v1.x), static_cast<float>(t.v1.y)},
+            {static_cast<float>(t.v2.x), static_cast<float>(t.v2.y)},
+            t.color
+    );
 }
 } // namespace mizu
 

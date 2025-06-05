@@ -47,8 +47,8 @@ SDL_Surface *read_image_to_sdl_surface(const std::filesystem::path &path) {
     png_set_sig_bytes(png, 8); // we already read the 8 signature bytes
     png_read_info(png, info);
 
-    int width = png_get_image_width(png, info);
-    int height = png_get_image_height(png, info);
+    auto width = png_get_image_width(png, info);
+    auto height = png_get_image_height(png, info);
     auto color_type = png_get_color_type(png, info);
     auto bit_depth = png_get_bit_depth(png, info);
 
@@ -95,7 +95,7 @@ SDL_Surface *read_image_to_sdl_surface(const std::filesystem::path &path) {
     }
 
     std::vector<png_bytep> row_pointers(height);
-    for (int y = 0; y < height; y++)
+    for (std::size_t y = 0; y < height; y++)
         row_pointers[y] = static_cast<png_bytep>(surface->pixels) + y * stride;
     png_read_image(png, row_pointers.data());
 
