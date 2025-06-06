@@ -21,10 +21,13 @@ struct Batch {
 
 struct BatchList {
     GladGLContext &gl;
+
     BatchType type;
     gloo::Shader *shader;
-    std::size_t capacity;
-    std::vector<Batch> batches;
+    std::size_t batch_capacity;
+
+    std::size_t active_idx{0};
+    std::vector<Batch> batches{};
 
     void add(std::initializer_list<float> vertex_data);
 

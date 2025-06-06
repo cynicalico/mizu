@@ -79,6 +79,7 @@ void Engine::mainloop() {
         callbacks.pub_nowait<PDraw>();
 
         ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
         dear::begin("FPS", nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoDecoration) && [&] {
             auto fps_str = fmt::format(
                     std::locale("en_US.UTF-8"),
@@ -89,6 +90,7 @@ void Engine::mainloop() {
             );
             ImGui::Text("%s", fps_str.c_str());
         };
+        ImGui::PopStyleVar();
 
         callbacks.pub_nowait<PDrawOverlay>();
         callbacks.pub_nowait<PPostDraw>();

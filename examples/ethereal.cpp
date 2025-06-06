@@ -31,6 +31,9 @@ void Ethereal::update(double dt) {
     if (input->pressed(mizu::Key::F1))
         g2d->set_vsync(!g2d->vsync());
 
+    if (input->pressed(mizu::Key::R))
+        triangles.clear();
+
     if (input->pressed(mizu::MouseButton::Left)) {
         float cx = input->mouse_x();
         float cy = input->mouse_y();
