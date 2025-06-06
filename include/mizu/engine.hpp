@@ -11,6 +11,7 @@
 #include "mizu/dear.hpp"
 #include "mizu/g2d.hpp"
 #include "mizu/input_mgr.hpp"
+#include "mizu/memusage.hpp"
 #include "mizu/payloads.hpp"
 #include "mizu/time.hpp"
 #include "mizu/types.hpp"
@@ -79,7 +80,13 @@ void Engine::mainloop() {
 
         ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
         dear::begin("FPS", nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoDecoration) && [&] {
-            auto fps_str = fmt::format("FPS: {:.2f}{}", frame_counter.fps(), g2d->vsync() ? " (vsync)" : "");
+            auto fps_str = fmt::format(
+                    std::locale("en_US.UTF-8"),
+                    "FPS: {:.2Lf}{} | Mem: {:.2Lf} MB",
+                    frame_counter.fps(),
+                    g2d->vsync() ? " (vsync)" : "",
+                    memusage()
+            );
             ImGui::Text("%s", fps_str.c_str());
         };
 

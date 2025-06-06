@@ -39,6 +39,7 @@ set(${PROJECT_NAME}_headers
         include/mizu/io.hpp
         include/mizu/is_any_of.hpp
         include/mizu/log.hpp
+        include/mizu/memusage.hpp
         include/mizu/mizu.hpp
         include/mizu/payloads.hpp
         include/mizu/platform.hpp
@@ -77,6 +78,7 @@ set(${PROJECT_NAME}_sources
         src/mizu/image.cpp
         src/mizu/input_mgr.cpp
         src/mizu/io.cpp
+        src/mizu/memusage.cpp
         src/mizu/platform.cpp
         src/mizu/rng.cpp
         src/mizu/window.cpp
