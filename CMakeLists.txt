@@ -47,7 +47,6 @@ set(${PROJECT_NAME}_headers
         include/mizu/rng.hpp
         include/mizu/shapes.hpp
         include/mizu/time.hpp
-        include/mizu/types.hpp
         include/mizu/window.hpp
         include/mizu/ds/priority_queue.hpp
         # [[[end]]]

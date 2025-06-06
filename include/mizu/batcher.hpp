@@ -7,7 +7,7 @@
 #include "gloo/vertex_array.hpp"
 
 namespace mizu {
-enum class BatchType : std::size_t { Point = 0, Line = 1, Triangle = 2 };
+enum class BatchType : std::size_t { Points = 0, Lines = 1, Triangles = 2 };
 
 struct Batch {
     std::size_t vertex_size;
@@ -38,7 +38,7 @@ struct BatchList {
 
 class Batcher {
 public:
-    Batcher(gloo::Context &ctx);
+    explicit Batcher(gloo::Context &ctx);
 
     NO_COPY(Batcher)
     NO_MOVE(Batcher)

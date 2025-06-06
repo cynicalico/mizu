@@ -3,10 +3,10 @@
 
 #include <SDL3/SDL_mouse.h>
 #include <fmt/format.h>
+#include <glm/vec2.hpp>
 #include "mizu/callback_mgr.hpp"
 #include "mizu/enum_class_helpers.hpp"
 #include "mizu/payloads.hpp"
-#include "mizu/types.hpp"
 
 namespace mizu {
 enum class Key : int {
@@ -341,9 +341,10 @@ private:
 
     std::unordered_map<MouseButton, MouseButtonState> mouse_button_state_{};
     std::unordered_map<MouseButton, MouseButtonState> prev_mouse_button_state_{};
-    Pos2d<float> mouse_pos_{};
-    Pos2d<float> prev_mouse_pos_{};
-    Pos2d<float> mouse_relative_{};
+
+    glm::vec2 mouse_pos_{};
+    glm::vec2 prev_mouse_pos_{};
+    glm::vec2 mouse_relative_{};
 
     std::size_t callback_id_{0};
     CallbackMgr &callbacks_;

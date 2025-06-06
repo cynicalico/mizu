@@ -12,7 +12,6 @@
 #include "mizu/payloads.hpp"
 #include "mizu/rng.hpp"
 #include "mizu/time.hpp"
-#include "mizu/types.hpp"
 #include "mizu/window.hpp"
 
 #endif // MIZU_MIZU_HPP

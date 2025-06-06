@@ -20,7 +20,7 @@ void gl_debug_message_callback(
         const void *userParam
 );
 
-Engine::Engine(const std::string &window_title, Size2d<int> window_size, WindowBuildFunc f)
+Engine::Engine(const std::string &window_title, glm::ivec2 window_size, WindowBuildFunc f)
     : running_(true) {
     // Log levels are controlled through MIZU_SPDLOG_LEVEL, but we don't know what the user
     // has set, so just assume trace logging to catch everything
@@ -99,7 +99,7 @@ Engine::Engine(const std::string &window_title, Size2d<int> window_size, WindowB
 }
 
 Engine::Engine(const std::string &window_title, WindowBuildFunc f)
-    : Engine(window_title, Size2d(0, 0), std::move(f)) {}
+    : Engine(window_title, glm::ivec2(0), std::move(f)) {}
 
 Engine::~Engine() {
     unregister_callbacks_();

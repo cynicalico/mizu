@@ -4,7 +4,7 @@
 namespace mizu {
 Batch::Batch(GladGLContext &gl, BatchType type, gloo::Shader *shader, std::size_t capacity) {
     switch (type) {
-    case BatchType::Point:
+    case BatchType::Points:
         vertex_size = 6;
         vertices_per_obj = 1;
         vbo = std::make_unique<gloo::StaticSizeBuffer<float>>(gl, vertex_size * vertices_per_obj * capacity);
@@ -15,7 +15,7 @@ Batch::Batch(GladGLContext &gl, BatchType type, gloo::Shader *shader, std::size_
                       .vec("color", 3)
                       .build();
         break;
-    case BatchType::Line:
+    case BatchType::Lines:
         vertex_size = 9;
         vertices_per_obj = 2;
         vbo = std::make_unique<gloo::StaticSizeBuffer<float>>(gl, vertex_size * vertices_per_obj * capacity);
@@ -27,7 +27,7 @@ Batch::Batch(GladGLContext &gl, BatchType type, gloo::Shader *shader, std::size_
                       .vec("rot_params", 3)
                       .build();
         break;
-    case BatchType::Triangle:
+    case BatchType::Triangles:
         vertex_size = 9;
         vertices_per_obj = 3;
         vbo = std::make_unique<gloo::StaticSizeBuffer<float>>(gl, vertex_size * vertices_per_obj * capacity);
@@ -62,9 +62,9 @@ void BatchList::draw(const glm::mat4 &projection) const {
 
         gloo::DrawMode draw_mode;
         switch (type) {
-        case BatchType::Point: draw_mode = gloo::DrawMode::Points; break;
-        case BatchType::Line: draw_mode = gloo::DrawMode::Lines; break;
-        case BatchType::Triangle: draw_mode = gloo::DrawMode::Triangles; break;
+        case BatchType::Points: draw_mode = gloo::DrawMode::Points; break;
+        case BatchType::Lines: draw_mode = gloo::DrawMode::Lines; break;
+        case BatchType::Triangles: draw_mode = gloo::DrawMode::Triangles; break;
         }
         batch.vao->draw_arrays(
                 draw_mode, batch.vbo->front() / batch.vertex_size, batch.vbo->size() / batch.vertex_size
@@ -97,21 +97,21 @@ Batcher::Batcher(gloo::Context &ctx)
       batch_lists_{
               BatchList{
                       .gl = ctx_.ctx,
-                      .type = BatchType::Point,
+                      .type = BatchType::Points,
                       .shader = shaders_[0].get(),
                       // .batch_capacity = static_cast<std::size_t>(std::floor(8e6 / (32 * 6 * 1))),
                       .batch_capacity = 10,
               },
               BatchList{
                       .gl = ctx_.ctx,
-                      .type = BatchType::Line,
+                      .type = BatchType::Lines,
                       .shader = shaders_[1].get(),
                       // .batch_capacity = static_cast<std::size_t>(std::floor(8e6 / (32 * 9 * 2))),
                       .batch_capacity = 10,
               },
               BatchList{
                       .gl = ctx_.ctx,
-                      .type = BatchType::Triangle,
+                      .type = BatchType::Triangles,
                       .shader = shaders_[2].get(),
                       // .batch_capacity = static_cast<std::size_t>(std::floor(8e6 / (32 * 9 * 3))),
                       .batch_capacity = 10,

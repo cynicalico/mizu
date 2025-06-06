@@ -7,7 +7,6 @@
 #include <glm/mat4x4.hpp>
 #include <string>
 #include "mizu/callback_mgr.hpp"
-#include "mizu/types.hpp"
 
 namespace mizu {
 class Window {
@@ -30,11 +29,11 @@ public:
 
     void swap();
 
-    Size2d<int> get_size() const;
-    void set_size(Size2d<int> size);
+    glm::ivec2 get_size() const;
+    void set_size(glm::ivec2 size);
 
-    Pos2d<int> get_pos() const;
-    void set_pos(Pos2d<int> pos);
+    glm::ivec2 get_pos() const;
+    void set_pos(glm::ivec2 pos);
 
     void set_icon(SDL_Surface *icon);
     void set_icon_dir(const std::filesystem::path &path);
@@ -54,7 +53,7 @@ private:
 
 class WindowBuilder {
 public:
-    WindowBuilder(const std::string &title, Size2d<int> size);
+    WindowBuilder(const std::string &title, glm::ivec2 size);
     explicit WindowBuilder(const std::string &title);
 
     ~WindowBuilder() = default;

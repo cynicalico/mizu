@@ -5,28 +5,39 @@
 #include "mizu/color.hpp"
 
 namespace mizu {
-template<typename T = float, typename Color = Rgba>
+template<typename Color = Rgba>
     requires std::derived_from<Color, mizu::Color>
 struct Point {
-    glm::tvec2<T> pos;
+    glm::vec2 pos;
     Color color{};
+
+    Point(const glm::vec2 pos, Color color)
+        : pos(pos), color(color) {}
 };
 
-template<typename T = float, typename Color = Rgba>
+template<typename Color = Rgba>
     requires std::derived_from<Color, mizu::Color>
 struct Line {
-    glm::tvec2<T> v0;
-    glm::tvec2<T> v1;
+    glm::vec2 v0;
+    glm::vec2 v1;
+    glm::vec3 rot;
     Color color;
+
+    Line(const glm::vec2 v0, const glm::vec2 v1, const glm::vec3 rot, Color color)
+        : v0(v0), v1(v1), rot(rot), color(color) {}
 };
 
-template<typename T = float, typename Color = Rgba>
+template<typename Color = Rgba>
     requires std::derived_from<Color, mizu::Color>
 struct Triangle {
-    glm::tvec2<T> v0;
-    glm::tvec2<T> v1;
-    glm::tvec2<T> v2;
+    glm::vec2 v0;
+    glm::vec2 v1;
+    glm::vec2 v2;
+    glm::vec3 rot;
     Color color;
+
+    Triangle(const glm::vec2 v0, const glm::vec2 v1, const glm::vec2 v2, const glm::vec3 rot, Color color)
+        : v0(v0), v1(v1), v2(v2), rot(rot), color(color) {}
 };
 } // namespace mizu
 

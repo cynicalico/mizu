@@ -32,11 +32,25 @@ public:
 
     void clear(const Color &color, ClearBit clear_bits);
 
+    void point(glm::vec2 p, const Color &color);
+
+    void line(glm::vec2 p0, glm::vec2 p1, glm::vec3 rot, const Color &color);
+    void line(glm::vec2 p0, glm::vec2 p1, const Color &color);
+
+    void triangle(glm::vec2 p0, glm::vec2 p1, glm::vec2 p2, glm::vec3 rot, const Color &color);
     void triangle(glm::vec2 p0, glm::vec2 p1, glm::vec2 p2, const Color &color);
 
-    template<typename T, typename Color>
+    template<typename Color>
         requires std::derived_from<Color, mizu::Color>
-    void triangle(const Triangle<T, Color> &t);
+    void point(const Point<Color> &p);
+
+    template<typename Color>
+        requires std::derived_from<Color, mizu::Color>
+    void line(const Line<Color> &l);
+
+    template<typename Color>
+        requires std::derived_from<Color, mizu::Color>
+    void triangle(const Triangle<Color> &t);
 
 private:
     gloo::Context &gl_;
@@ -53,15 +67,22 @@ private:
     void post_draw_();
 };
 
-template<typename T, typename Color>
+template<typename Color>
     requires std::derived_from<Color, mizu::Color>
-void G2d::triangle(const Triangle<T, Color> &t) {
-    triangle(
-            {static_cast<float>(t.v0.x), static_cast<float>(t.v0.y)},
-            {static_cast<float>(t.v1.x), static_cast<float>(t.v1.y)},
-            {static_cast<float>(t.v2.x), static_cast<float>(t.v2.y)},
-            t.color
-    );
+void G2d::point(const Point<Color> &p) {
+    point(p.pos, p.color);
+}
+
+template<typename Color>
+    requires std::derived_from<Color, mizu::Color>
+void G2d::line(const Line<Color> &l) {
+    line(l.v0, l.v1, l.rot, l.color);
+}
+
+template<typename Color>
+    requires std::derived_from<Color, mizu::Color>
+void G2d::triangle(const Triangle<Color> &t) {
+    triangle(t.v0, t.v1, t.v2, t.rot, t.color);
 }
 } // namespace mizu
 

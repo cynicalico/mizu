@@ -14,7 +14,6 @@
 #include "mizu/memusage.hpp"
 #include "mizu/payloads.hpp"
 #include "mizu/time.hpp"
-#include "mizu/types.hpp"
 #include "mizu/window.hpp"
 
 namespace mizu {
@@ -33,7 +32,7 @@ public:
 
     FrameCounter<> frame_counter;
 
-    Engine(const std::string &window_title, Size2d<int> window_size, WindowBuildFunc f);
+    Engine(const std::string &window_title, glm::ivec2 window_size, WindowBuildFunc f);
     Engine(const std::string &window_title, WindowBuildFunc f);
 
     ~Engine();
@@ -76,8 +75,6 @@ void Engine::mainloop() {
         callbacks.pub_nowait<PPreDraw>();
         callbacks.pub_nowait<PPreDrawOverlay>();
 
-        callbacks.pub_nowait<PDraw>();
-
         ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
         dear::begin("FPS", nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoDecoration) && [&] {
@@ -92,8 +89,10 @@ void Engine::mainloop() {
         };
         ImGui::PopStyleVar();
 
-        callbacks.pub_nowait<PDrawOverlay>();
+        callbacks.pub_nowait<PDraw>();
+
         callbacks.pub_nowait<PPostDraw>();
+        callbacks.pub_nowait<PDrawOverlay>();
 
         callbacks.pub_nowait<PPresent>();
 

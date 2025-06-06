@@ -149,8 +149,8 @@ void InputMgr::key_up_(std::uint64_t timestamp, SDL_Keycode sdl_key, SDL_Keymod 
 void InputMgr::mouse_motion_(std::uint64_t, float x, float y, float dx, float dy) {
     mouse_pos_.x = x;
     mouse_pos_.y = y;
-    mouse_relative_.x = dx;
-    mouse_relative_.y = dy;
+    mouse_relative_.x += dx;
+    mouse_relative_.y += dy;
 }
 
 void InputMgr::mouse_down_(std::uint64_t timestamp, std::uint8_t sdl_button, float x, float y) {

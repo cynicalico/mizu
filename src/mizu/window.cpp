@@ -50,7 +50,8 @@ Window &Window::operator=(Window &&other) noexcept {
 }
 
 glm::mat4 Window::projection() const {
-    return glm::ortho(0.0f, static_cast<float>(get_size().w), static_cast<float>(get_size().h), 0.0f, -1.0f, 1.0f);
+    auto size = get_size();
+    return glm::ortho(0.0f, static_cast<float>(size.x), static_cast<float>(size.y), 0.0f, -1.0f, 1.0f);
 }
 
 SDL_Window *Window::underlying() const {
@@ -71,26 +72,26 @@ void Window::swap() {
         MIZU_LOG_ERROR("Failed to swap window: {}", SDL_GetError());
 }
 
-Size2d<int> Window::get_size() const {
-    Size2d<int> size;
-    if (!SDL_GetWindowSize(sdl_window_, &size.w, &size.h))
+glm::ivec2 Window::get_size() const {
+    glm::ivec2 size;
+    if (!SDL_GetWindowSize(sdl_window_, &size.x, &size.y))
         MIZU_LOG_ERROR("Failed to get size of window: {}", SDL_GetError());
     return size;
 }
 
-void Window::set_size(Size2d<int> size) {
-    if (!SDL_SetWindowSize(sdl_window_, size.w, size.h))
+void Window::set_size(glm::ivec2 size) {
+    if (!SDL_SetWindowSize(sdl_window_, size.x, size.y))
         MIZU_LOG_ERROR("Failed to set size of window: {}", SDL_GetError());
 }
 
-Pos2d<int> Window::get_pos() const {
-    Pos2d<int> pos;
+glm::ivec2 Window::get_pos() const {
+    glm::ivec2 pos;
     if (!SDL_GetWindowPosition(sdl_window_, &pos.x, &pos.y))
         MIZU_LOG_ERROR("Failed to get pos of window: {}", SDL_GetError());
     return pos;
 }
 
-void Window::set_pos(Pos2d<int> pos) {
+void Window::set_pos(glm::ivec2 pos) {
     if (!SDL_SetWindowPosition(sdl_window_, pos.x, pos.y))
         MIZU_LOG_ERROR("Failed to set pos of window: {}", SDL_GetError());
 }
@@ -106,7 +107,7 @@ void Window::set_icon_dir(const std::filesystem::path &path) {
         if (!entry.is_regular_file() || entry.path().extension() != ".png")
             continue;
 
-        auto surf = mizu::read_image_to_sdl_surface(entry);
+        auto surf = read_image_to_sdl_surface(entry);
         if (!surf)
             continue;
 
@@ -146,11 +147,11 @@ void Window::unregister_callbacks_() {
 }
 
 WindowBuilder::WindowBuilder(const std::string &title)
-    : WindowBuilder(title, Size2d<int>()) {}
+    : WindowBuilder(title, glm::ivec2(0)) {}
 
-WindowBuilder::WindowBuilder(const std::string &title, Size2d<int> size)
+WindowBuilder::WindowBuilder(const std::string &title, glm::ivec2 size)
     : title_(title),
-      location_(static_cast<int>(SDL_WINDOWPOS_CENTERED), static_cast<int>(SDL_WINDOWPOS_CENTERED), size.w, size.h),
+      location_(static_cast<int>(SDL_WINDOWPOS_CENTERED), static_cast<int>(SDL_WINDOWPOS_CENTERED), size.x, size.y),
       display_idx_(0) {
     props_ = SDL_CreateProperties();
     if (props_ == 0)

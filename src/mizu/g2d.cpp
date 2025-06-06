@@ -29,16 +29,38 @@ void G2d::clear(const Color &color, ClearBit clear_bits) {
     gl_.ctx.Clear(unwrap(clear_bits));
 }
 
-void G2d::triangle(glm::vec2 p0, glm::vec2 p1, glm::vec2 p2, const Color &color) {
+void G2d::point(glm::vec2 p, const Color &color) {
     auto gl_color = color.gl_color();
-    batcher_.add(
-            BatchType::Triangle,
-            {
-                    p0.x, p0.y, 0.0, gl_color.r, gl_color.g, gl_color.b, 0.0, 0.0, 0.0,
-                    p1.x, p1.y, 0.0, gl_color.r, gl_color.g, gl_color.b, 0.0, 0.0, 0.0,
-                    p2.x, p2.y, 0.0, gl_color.r, gl_color.g, gl_color.b, 0.0, 0.0, 0.0,
-            }
-    );
+    batcher_.add(BatchType::Points, {p.x, p.y, 0.0, gl_color.r, gl_color.g, gl_color.b});
+}
+
+void G2d::line(glm::vec2 p0, glm::vec2 p1, glm::vec3 rot, const Color &color) {
+    auto gl_color = color.gl_color();
+    // clang-format off
+    batcher_.add(BatchType::Lines, {
+        p0.x, p0.y, 0.0, gl_color.r, gl_color.g, gl_color.b, rot.x, rot.y, glm::radians(rot.z),
+        p1.x, p1.y, 0.0, gl_color.r, gl_color.g, gl_color.b, rot.x, rot.y, glm::radians(rot.z),
+    });
+    // clang-format on
+}
+
+void G2d::line(glm::vec2 p0, glm::vec2 p1, const Color &color) {
+    line(p0, p1, glm::vec3(0.0), color);
+}
+
+void G2d::triangle(glm::vec2 p0, glm::vec2 p1, glm::vec2 p2, glm::vec3 rot, const Color &color) {
+    auto gl_color = color.gl_color();
+    // clang-format off
+    batcher_.add(BatchType::Triangles, {
+        p0.x, p0.y, 0.0, gl_color.r, gl_color.g, gl_color.b, rot.x, rot.y, glm::radians(rot.z),
+        p1.x, p1.y, 0.0, gl_color.r, gl_color.g, gl_color.b, rot.x, rot.y, glm::radians(rot.z),
+        p2.x, p2.y, 0.0, gl_color.r, gl_color.g, gl_color.b, rot.x, rot.y, glm::radians(rot.z),
+    });
+    // clang-format on
+}
+
+void G2d::triangle(glm::vec2 p0, glm::vec2 p1, glm::vec2 p2, const Color &color) {
+    triangle(p0, p1, p2, glm::vec3(0.0), color);
 }
 
 void G2d::register_callbacks_() {
