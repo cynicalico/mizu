@@ -25,6 +25,8 @@ Ethereal::Ethereal(mizu::Engine *engine)
       window(engine->window.get()) {}
 
 void Ethereal::update(double dt) {
+
+
     if (input->pressed(mizu::Key::Escape))
         engine->shutdown();
 
@@ -42,9 +44,9 @@ void Ethereal::update(double dt) {
         float cy = input->mouse_y();
         float theta = mizu::rng::get(0.0f, 360.0f);
         triangles.emplace_back(
-                glm::vec2{cx + 20.0f * std::cosf(1.5707963705062866f), cy - 20.0f * std::sinf(1.5707963705062866f)},
-                glm::vec2{cx + 20.0f * std::cosf(3.665191411972046f), cy - 20.0f * std::sinf(3.665191411972046f)},
-                glm::vec2{cx + 20.0f * std::cosf(5.759586334228516f), cy - 20.0f * std::sinf(5.759586334228516f)},
+                glm::vec2{cx + 50.0f * std::cosf(1.5707963705062866f), cy - 50.0f * std::sinf(1.5707963705062866f)},
+                glm::vec2{cx + 50.0f * std::cosf(3.665191411972046f), cy - 50.0f * std::sinf(3.665191411972046f)},
+                glm::vec2{cx + 50.0f * std::cosf(5.759586334228516f), cy - 50.0f * std::sinf(5.759586334228516f)},
                 glm::vec3{cx, cy, theta},
                 mizu::rgb_f(mizu::rng::get<float>(), mizu::rng::get<float>(), mizu::rng::get<float>())
         );
@@ -52,12 +54,17 @@ void Ethereal::update(double dt) {
 }
 
 void Ethereal::draw() {
-    g2d->clear(mizu::rgb(0x000000), mizu::ClearBit::Color | mizu::ClearBit::Depth);
+    mizu::dear::begin("isoindfsdf") && [&] { ImGui::Text("%s", fmt::format("{}", triangles.size()).c_str()); };
 
-    g2d->line({0, 0}, {input->mouse_x(), input->mouse_y()}, mizu::rgb(0xffffff));
+    g2d->clear(mizu::rgb(0x000000), mizu::ClearBit::Color | mizu::ClearBit::Depth);
 
     for (const auto &triangle: triangles)
         g2d->triangle(triangle);
+
+    g2d->line({0, 0}, {input->mouse_x(), input->mouse_y()}, mizu::rgb(0xffffff));
+    g2d->line({window->get_size().x, 0}, {input->mouse_x(), input->mouse_y()}, mizu::rgb(0xffffff));
+    g2d->line({0, window->get_size().y}, {input->mouse_x(), input->mouse_y()}, mizu::rgb(0xffffff));
+    g2d->line(window->get_size(), {input->mouse_x(), input->mouse_y()}, mizu::rgb(0xffffff));
 }
 
 int main(int, char *[]) {

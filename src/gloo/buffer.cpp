@@ -4,12 +4,14 @@ namespace gloo {
 Buffer::Buffer(GladGLContext &gl)
     : gl_(gl) {
     gl_.GenBuffers(1, &id);
+    CHECK_GL_ERROR(gl_, GenBuffers);
     MIZU_LOG_TRACE("Created buffer id={}", id);
 }
 
 Buffer::~Buffer() {
     if (id != 0) {
         gl_.DeleteBuffers(1, &id);
+        CHECK_GL_ERROR(gl_, DeleteBuffers);
         MIZU_LOG_TRACE("Deleted buffer id={}", id);
     }
 }
@@ -31,9 +33,11 @@ MOVE_ASSIGN_OP_IMPL(Buffer) {
 
 void Buffer::bind(BufferTarget target) {
     gl_.BindBuffer(unwrap(target), id);
+    CHECK_GL_ERROR(gl_, BindBuffer);
 }
 
 void Buffer::unbind(BufferTarget target) {
     gl_.BindBuffer(unwrap(target), 0);
+    CHECK_GL_ERROR(gl_, UnbindBuffer);
 }
 } // namespace gloo

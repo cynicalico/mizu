@@ -51,7 +51,7 @@ Window &Window::operator=(Window &&other) noexcept {
 
 glm::mat4 Window::projection() const {
     auto size = get_size();
-    return glm::ortho(0.0f, static_cast<float>(size.x), static_cast<float>(size.y), 0.0f, -1.0f, 1.0f);
+    return glm::orthoZO(0.0f, static_cast<float>(size.x), static_cast<float>(size.y), 0.0f, 1.0f, 0.0f);
 }
 
 SDL_Window *Window::underlying() const {

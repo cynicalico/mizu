@@ -14,7 +14,8 @@ G2d::~G2d() {
 
 bool G2d::vsync() const {
     int vsync;
-    SDL_GL_GetSwapInterval(&vsync);
+    if (!SDL_GL_GetSwapInterval(&vsync))
+        MIZU_LOG_ERROR("Failded to get swap interval: {}", SDL_GetError());
 
     return vsync == 1;
 }
@@ -26,20 +27,24 @@ void G2d::set_vsync(bool enabled) {
 void G2d::clear(const Color &color, ClearBit clear_bits) {
     auto gl_color = color.gl_color();
     gl_.ctx.ClearColor(gl_color.r, gl_color.g, gl_color.b, gl_color.a);
+    CHECK_GL_ERROR(gl_.ctx, ClearColor);
     gl_.ctx.Clear(unwrap(clear_bits));
+    CHECK_GL_ERROR(gl_.ctx, Clear);
 }
 
 void G2d::point(glm::vec2 p, const Color &color) {
     auto gl_color = color.gl_color();
-    batcher_.add(BatchType::Points, {p.x, p.y, 0.0, gl_color.r, gl_color.g, gl_color.b});
+    auto z = batcher_.z();
+    batcher_.add(BatchType::Points, {p.x, p.y, z, gl_color.r, gl_color.g, gl_color.b});
 }
 
 void G2d::line(glm::vec2 p0, glm::vec2 p1, glm::vec3 rot, const Color &color) {
     auto gl_color = color.gl_color();
+    auto z = batcher_.z();
     // clang-format off
     batcher_.add(BatchType::Lines, {
-        p0.x, p0.y, 0.0, gl_color.r, gl_color.g, gl_color.b, rot.x, rot.y, glm::radians(rot.z),
-        p1.x, p1.y, 0.0, gl_color.r, gl_color.g, gl_color.b, rot.x, rot.y, glm::radians(rot.z),
+        p0.x, p0.y, z, gl_color.r, gl_color.g, gl_color.b, rot.x, rot.y, glm::radians(rot.z),
+        p1.x, p1.y, z, gl_color.r, gl_color.g, gl_color.b, rot.x, rot.y, glm::radians(rot.z),
     });
     // clang-format on
 }
@@ -50,11 +55,12 @@ void G2d::line(glm::vec2 p0, glm::vec2 p1, const Color &color) {
 
 void G2d::triangle(glm::vec2 p0, glm::vec2 p1, glm::vec2 p2, glm::vec3 rot, const Color &color) {
     auto gl_color = color.gl_color();
+    auto z = batcher_.z();
     // clang-format off
     batcher_.add(BatchType::Triangles, {
-        p0.x, p0.y, 0.0, gl_color.r, gl_color.g, gl_color.b, rot.x, rot.y, glm::radians(rot.z),
-        p1.x, p1.y, 0.0, gl_color.r, gl_color.g, gl_color.b, rot.x, rot.y, glm::radians(rot.z),
-        p2.x, p2.y, 0.0, gl_color.r, gl_color.g, gl_color.b, rot.x, rot.y, glm::radians(rot.z),
+        p0.x, p0.y, z, gl_color.r, gl_color.g, gl_color.b, rot.x, rot.y, glm::radians(rot.z),
+        p1.x, p1.y, z, gl_color.r, gl_color.g, gl_color.b, rot.x, rot.y, glm::radians(rot.z),
+        p2.x, p2.y, z, gl_color.r, gl_color.g, gl_color.b, rot.x, rot.y, glm::radians(rot.z),
     });
     // clang-format on
 }

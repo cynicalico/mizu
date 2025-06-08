@@ -4,6 +4,7 @@ namespace gloo {
 VertexArray::~VertexArray() {
     if (id != 0) {
         gl_.DeleteVertexArrays(1, &id);
+        CHECK_GL_ERROR(gl_, DeleteVertexArrays);
         MIZU_LOG_TRACE("Deleted vertex array id={}", id);
     }
 }
@@ -25,15 +26,18 @@ MOVE_ASSIGN_OP_IMPL(VertexArray) {
 
 void VertexArray::bind() {
     gl_.BindVertexArray(id);
+    CHECK_GL_ERROR(gl_, BindVertexArray);
 }
 
 void VertexArray::unbind() {
     gl_.BindVertexArray(0);
+    CHECK_GL_ERROR(gl_, BindVertexArray);
 }
 
 void VertexArray::draw_arrays(DrawMode mode, std::size_t first, std::size_t count) {
     bind();
     gl_.DrawArrays(unwrap(mode), first, count);
+    CHECK_GL_ERROR(gl_, DrawArrays);
     unbind();
 }
 
@@ -43,9 +47,11 @@ VertexArray::VertexArray(GladGLContext &gl, GLuint id)
 VertexArrayBuilder::VertexArrayBuilder(GladGLContext &gl)
     : gl_(gl) {
     gl_.GenVertexArrays(1, &id_);
+    CHECK_GL_ERROR(gl_, GenVertexArrays);
     MIZU_LOG_TRACE("Created vertex array id={}", id_);
 
     gl_.BindVertexArray(id_);
+    CHECK_GL_ERROR(gl_, BindVertexArray);
 }
 
 VertexArrayBuilder &VertexArrayBuilder::with(Shader *shader) {
@@ -69,6 +75,7 @@ std::unique_ptr<VertexArray> VertexArrayBuilder::build() {
     flush_();
 
     gl_.BindVertexArray(0);
+    CHECK_GL_ERROR(gl_, BindVertexArray);
     return std::unique_ptr<VertexArray>(new VertexArray(gl_, id_));
 }
 
@@ -99,11 +106,15 @@ void VertexArrayBuilder::flush_() {
                 stride * current_buf_item_size_,
                 reinterpret_cast<void *>(static_cast<uintptr_t>(attrib_info.offset * current_buf_item_size_))
         );
+        CHECK_GL_ERROR(gl_, VertexAttribPointer);
         gl_.EnableVertexAttribArray(attrib_info.index);
+        CHECK_GL_ERROR(gl_, EnableVertexAttribArray);
     }
 
     attrib_info_buf_.clear();
-    if (current_target_)
+    if (current_target_) {
         gl_.BindBuffer(unwrap(*current_target_), 0);
+        CHECK_GL_ERROR(gl_, BindBuffer);
+    }
 }
 } // namespace gloo

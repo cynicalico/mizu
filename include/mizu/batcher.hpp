@@ -43,6 +43,8 @@ public:
     NO_COPY(Batcher)
     NO_MOVE(Batcher)
 
+    float z();
+
     void add(BatchType type, std::initializer_list<float> vertex_data);
 
     void draw(glm::mat4 projection) const;
@@ -54,6 +56,7 @@ private:
 
     std::unique_ptr<gloo::Shader> shaders_[3];
     BatchList batch_lists_[3];
+    float z_level_{2.0f};
 };
 } // namespace mizu
 

@@ -9,5 +9,6 @@ uniform mat4 proj;
 void main() {
     out_color = color;
 
-    gl_Position = proj * vec4(pos, 1.0);
+    float z = -1.0 / pos.z;
+    gl_Position = proj * vec4(pos.x + 0.5, pos.y + 0.5, z, 1.0);
 }

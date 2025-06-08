@@ -7,7 +7,9 @@ Batch::Batch(GladGLContext &gl, BatchType type, gloo::Shader *shader, std::size_
     case BatchType::Points:
         vertex_size = 6;
         vertices_per_obj = 1;
-        vbo = std::make_unique<gloo::StaticSizeBuffer<float>>(gl, vertex_size * vertices_per_obj * capacity);
+        vbo = std::make_unique<gloo::StaticSizeBuffer<float>>(
+                gl, vertex_size * vertices_per_obj * capacity, gloo::FillMode::BackToFront
+        );
         vao = gloo::VertexArrayBuilder(gl)
                       .with(shader)
                       .with(vbo.get(), gloo::BufferTarget::Array)
@@ -18,7 +20,9 @@ Batch::Batch(GladGLContext &gl, BatchType type, gloo::Shader *shader, std::size_
     case BatchType::Lines:
         vertex_size = 9;
         vertices_per_obj = 2;
-        vbo = std::make_unique<gloo::StaticSizeBuffer<float>>(gl, vertex_size * vertices_per_obj * capacity);
+        vbo = std::make_unique<gloo::StaticSizeBuffer<float>>(
+                gl, vertex_size * vertices_per_obj * capacity, gloo::FillMode::BackToFront
+        );
         vao = gloo::VertexArrayBuilder(gl)
                       .with(shader)
                       .with(vbo.get(), gloo::BufferTarget::Array)
@@ -30,7 +34,9 @@ Batch::Batch(GladGLContext &gl, BatchType type, gloo::Shader *shader, std::size_
     case BatchType::Triangles:
         vertex_size = 9;
         vertices_per_obj = 3;
-        vbo = std::make_unique<gloo::StaticSizeBuffer<float>>(gl, vertex_size * vertices_per_obj * capacity);
+        vbo = std::make_unique<gloo::StaticSizeBuffer<float>>(
+                gl, vertex_size * vertices_per_obj * capacity, gloo::FillMode::BackToFront
+        );
         vao = gloo::VertexArrayBuilder(gl)
                       .with(shader)
                       .with(vbo.get(), gloo::BufferTarget::Array)
@@ -47,17 +53,24 @@ void BatchList::add(std::initializer_list<float> vertex_data) {
         batches.emplace_back(gl, type, shader, batch_capacity);
     } else if (batches[active_idx].vbo->is_full()) {
         active_idx++;
-        if (active_idx >= batches.size() - 1)
+        if (active_idx >= batches.size())
             batches.emplace_back(gl, type, shader, batch_capacity);
     }
+
+    assert(vertex_data.size() % batches[active_idx].vertex_size == 0);
     batches[active_idx].vbo->push(vertex_data);
 }
 
 void BatchList::draw(const glm::mat4 &projection) const {
+    if (batches.empty())
+        return;
+
     shader->use();
     shader->uniform("proj", projection);
 
-    for (auto &batch: batches) {
+    for (std::size_t i = active_idx + 1; i-- > 0;) {
+        auto &batch = batches[i];
+
         batch.vbo->sync_gl(gloo::BufferTarget::Array);
 
         gloo::DrawMode draw_mode;
@@ -66,6 +79,7 @@ void BatchList::draw(const glm::mat4 &projection) const {
         case BatchType::Lines: draw_mode = gloo::DrawMode::Lines; break;
         case BatchType::Triangles: draw_mode = gloo::DrawMode::Triangles; break;
         }
+
         batch.vao->draw_arrays(
                 draw_mode, batch.vbo->front() / batch.vertex_size, batch.vbo->size() / batch.vertex_size
         );
@@ -107,7 +121,7 @@ Batcher::Batcher(gloo::Context &ctx)
                       .type = BatchType::Lines,
                       .shader = shaders_[1].get(),
                       // .batch_capacity = static_cast<std::size_t>(std::floor(8e6 / (32 * 9 * 2))),
-                      .batch_capacity = 10,
+                      .batch_capacity = 2,
               },
               BatchList{
                       .gl = ctx_.ctx,
@@ -117,6 +131,10 @@ Batcher::Batcher(gloo::Context &ctx)
                       .batch_capacity = 10,
               }
       } {}
+
+float Batcher::z() {
+    return z_level_++;
+}
 
 void Batcher::add(BatchType type, std::initializer_list<float> vertex_data) {
     batch_lists_[unwrap(type)].add(vertex_data);
@@ -130,5 +148,6 @@ void Batcher::draw(glm::mat4 projection) const {
 void Batcher::clear() {
     for (auto &list: batch_lists_)
         list.clear();
+    z_level_ = 2.0f;
 }
 } // namespace mizu

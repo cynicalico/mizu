@@ -45,7 +45,7 @@ Engine::Engine(const std::string &window_title, glm::ivec2 window_size, WindowBu
             SDL_VERSIONNUM_MICRO(sdl_version)
     );
 
-    gloo::sdl3::Attr::set_context_version(gloo::ContextVersion(4, 3));
+    gloo::sdl3::Attr::set_context_version(gloo::ContextVersion(4, 5));
     gloo::sdl3::Attr::set_context_profile(gloo::sdl3::Profile::Core);
 
 #if !defined(NDEBUG)
@@ -85,6 +85,11 @@ Engine::Engine(const std::string &window_title, glm::ivec2 window_size, WindowBu
             reinterpret_cast<const char *>(gl.ctx.GetString(GL_VENDOR)),
             reinterpret_cast<const char *>(gl.ctx.GetString(GL_RENDERER))
     );
+
+    gl.enable(gloo::Capability::DepthTest);
+    gl.depth_func(gloo::DepthFunc::Greater);
+    gl.ctx.ClipControl(GL_LOWER_LEFT, GL_ZERO_TO_ONE);
+    gl.clear_depth(0.0f);
 
     input = std::make_unique<InputMgr>(callbacks);
 
@@ -250,7 +255,8 @@ void gl_debug_message_callback(
         MIZU_LOG_DEBUG("OpenGL: source={} type={} id={} msg={}", source_str.substr(9), type_str.substr(9), id, message);
         break;
     case GL_DEBUG_SEVERITY_NOTIFICATION:
-        MIZU_LOG_TRACE("OpenGL: source={} type={} id={} msg={}", source_str.substr(9), type_str.substr(9), id, message);
+        // MIZU_LOG_TRACE("OpenGL: source={} type={} id={} msg={}", source_str.substr(9), type_str.substr(9), id,
+        // message);
         break;
     default: break; // won't happen
     }

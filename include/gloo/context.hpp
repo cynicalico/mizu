@@ -64,6 +64,17 @@ enum class BlendFunc : GLenum {
     OneMinusSrc1Alpha = GL_ONE_MINUS_SRC_ALPHA
 };
 
+enum class DepthFunc : GLenum {
+    Never = GL_NEVER,
+    Less = GL_LESS,
+    Equal = GL_EQUAL,
+    LEqual = GL_LEQUAL,
+    Greater = GL_GREATER,
+    NotEqual = GL_NOTEQUAL,
+    GEqual = GL_GEQUAL,
+    Always = GL_ALWAYS,
+};
+
 class Context {
 public:
     GladGLContext ctx;
@@ -74,7 +85,11 @@ public:
     void disable(Capability cap);
     bool is_enabled(Capability cap) const;
 
+    void clear_depth(float depth);
+
     void blend_func(BlendFunc sfactor, BlendFunc dfactor);
+
+    void depth_func(DepthFunc func);
 
     void debug_message_callback(GLDEBUGPROC callback, const void *user_param);
 };

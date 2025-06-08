@@ -22,5 +22,6 @@ void main() {
         vec4( xtr, ytr, 0.0, 1.0)
     );
 
-    gl_Position = proj * rot * vec4(pos, 1.0);
+    float z = -1.0 / pos.z;
+    gl_Position = proj * rot * vec4(pos.xy, z, 1.0);
 }
