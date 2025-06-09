@@ -1,6 +1,11 @@
 #include <numbers>
 #include "mizu/mizu.hpp"
 
+struct RotTriangle {
+    mizu::Triangle<> t;
+    float r_mult;
+};
+
 class Ethereal final : public mizu::Application {
 public:
     mizu::AudioMgr *audio;
@@ -8,13 +13,16 @@ public:
     mizu::InputMgr *input;
     mizu::Window *window;
 
-    std::vector<mizu::Triangle<>> triangles{};
+    mizu::Ticker<> repeat_triangle{std::chrono::milliseconds(100)};
+    std::vector<RotTriangle> triangles{};
 
     explicit Ethereal(mizu::Engine *engine);
 
     void update(double dt) override;
 
     void draw() override;
+
+    void push_triangle();
 };
 
 Ethereal::Ethereal(mizu::Engine *engine)
@@ -25,8 +33,6 @@ Ethereal::Ethereal(mizu::Engine *engine)
       window(engine->window.get()) {}
 
 void Ethereal::update(double dt) {
-
-
     if (input->pressed(mizu::Key::Escape))
         engine->shutdown();
 
@@ -34,22 +40,19 @@ void Ethereal::update(double dt) {
         g2d->set_vsync(!g2d->vsync());
 
     for (auto &triangle: triangles)
-        triangle.rot.z += 45.0f * static_cast<float>(dt);
+        triangle.t.rot.z += 45.0f * triangle.r_mult * static_cast<float>(dt);
 
     if (input->pressed(mizu::Key::R))
         triangles.clear();
 
+    if (input->pressed(mizu::Key::F))
+        triangles.erase(triangles.begin() + mizu::rng::get<std::size_t>(0, triangles.size() - 1));
+
     if (input->pressed(mizu::MouseButton::Left)) {
-        float cx = input->mouse_x();
-        float cy = input->mouse_y();
-        float theta = mizu::rng::get(0.0f, 360.0f);
-        triangles.emplace_back(
-                glm::vec2{cx + 50.0f * std::cosf(1.5707963705062866f), cy - 50.0f * std::sinf(1.5707963705062866f)},
-                glm::vec2{cx + 50.0f * std::cosf(3.665191411972046f), cy - 50.0f * std::sinf(3.665191411972046f)},
-                glm::vec2{cx + 50.0f * std::cosf(5.759586334228516f), cy - 50.0f * std::sinf(5.759586334228516f)},
-                glm::vec3{cx, cy, theta},
-                mizu::rgb_f(mizu::rng::get<float>(), mizu::rng::get<float>(), mizu::rng::get<float>())
-        );
+        push_triangle();
+        repeat_triangle.reset();
+    } else if (input->down(mizu::MouseButton::Left) && repeat_triangle.tick() >= 1) {
+        push_triangle();
     }
 }
 
@@ -59,12 +62,24 @@ void Ethereal::draw() {
     g2d->clear(mizu::rgb(0x000000), mizu::ClearBit::Color | mizu::ClearBit::Depth);
 
     for (const auto &triangle: triangles)
-        g2d->triangle(triangle);
+        g2d->triangle(triangle.t);
+}
 
-    g2d->line({0, 0}, {input->mouse_x(), input->mouse_y()}, mizu::rgb(0xffffff));
-    g2d->line({window->get_size().x, 0}, {input->mouse_x(), input->mouse_y()}, mizu::rgb(0xffffff));
-    g2d->line({0, window->get_size().y}, {input->mouse_x(), input->mouse_y()}, mizu::rgb(0xffffff));
-    g2d->line(window->get_size(), {input->mouse_x(), input->mouse_y()}, mizu::rgb(0xffffff));
+void Ethereal::push_triangle() {
+    float cx = input->mouse_x();
+    float cy = input->mouse_y();
+    float theta = mizu::rng::get(0.0f, 360.0f);
+    float r_mult = mizu::rng::get(-20.0f, 20.0f);
+    triangles.emplace_back(
+            mizu::Triangle{
+                    glm::vec2{cx + 50.0f * std::cosf(1.5707963705062866f), cy - 50.0f * std::sinf(1.5707963705062866f)},
+                    glm::vec2{cx + 50.0f * std::cosf(3.665191411972046f), cy - 50.0f * std::sinf(3.665191411972046f)},
+                    glm::vec2{cx + 50.0f * std::cosf(5.759586334228516f), cy - 50.0f * std::sinf(5.759586334228516f)},
+                    glm::vec3{cx, cy, theta},
+                    mizu::rgb_f(mizu::rng::get<float>(), mizu::rng::get<float>(), mizu::rng::get<float>())
+            },
+            r_mult
+    );
 }
 
 int main(int, char *[]) {

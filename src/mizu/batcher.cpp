@@ -87,6 +87,29 @@ void BatchList::draw(const glm::mat4 &projection) const {
 }
 
 void BatchList::clear() {
+    batch_count_max.update(active_idx + 1);
+
+    if (garbage_checking) {
+        if (check_batches.tick() >= 1) {
+            batch_count_max.debug_print();
+            auto max_10s = batch_count_max.value();
+            SPDLOG_TRACE("max: {}, batches: {}", max_10s, batches.size());
+            while (max_10s < batches.size())
+                batches.pop_back();
+            SPDLOG_TRACE("After garbage collection: {}", batches.size());
+
+            if (max_10s <= 1) {
+                garbage_checking = false;
+                SPDLOG_TRACE("Stopping garbage collection");
+            }
+        }
+    } else if (last_batch_count <= 1 && batches.size() > 1) {
+        check_batches.reset();
+        garbage_checking = true;
+        SPDLOG_TRACE("Starting garbage collection w/ {} batches", batches.size());
+    }
+    last_batch_count = active_idx + 1;
+
     for (auto &batch: batches)
         batch.vbo->clear();
     active_idx = 0;
@@ -113,22 +136,20 @@ Batcher::Batcher(gloo::Context &ctx)
                       .gl = ctx_.ctx,
                       .type = BatchType::Points,
                       .shader = shaders_[0].get(),
-                      // .batch_capacity = static_cast<std::size_t>(std::floor(8e6 / (32 * 6 * 1))),
-                      .batch_capacity = 10,
+                      .batch_capacity = static_cast<std::size_t>(std::floor(8e6 / (32 * 6 * 1))),
               },
               BatchList{
                       .gl = ctx_.ctx,
                       .type = BatchType::Lines,
                       .shader = shaders_[1].get(),
-                      // .batch_capacity = static_cast<std::size_t>(std::floor(8e6 / (32 * 9 * 2))),
-                      .batch_capacity = 2,
+                      .batch_capacity = static_cast<std::size_t>(std::floor(8e6 / (32 * 9 * 2))),
               },
               BatchList{
                       .gl = ctx_.ctx,
                       .type = BatchType::Triangles,
                       .shader = shaders_[2].get(),
                       // .batch_capacity = static_cast<std::size_t>(std::floor(8e6 / (32 * 9 * 3))),
-                      .batch_capacity = 10,
+                      .batch_capacity = 5
               }
       } {}
 

@@ -14,6 +14,8 @@ public:
 
     explicit Ticker(duration interval = duration::zero());
 
+    void reset();
+
     std::uint64_t tick();
 
     duration dt() const { return dt_; }
@@ -31,6 +33,14 @@ private:
 template<typename Clock>
 Ticker<Clock>::Ticker(duration interval)
     : start_(Clock::now()), last_(start_), interval_(interval), dt_(0), acc_(0) {}
+
+template<typename Clock>
+void Ticker<Clock>::reset() {
+    start_ = Clock::now();
+    last_ = start_;
+    dt_ = duration::zero();
+    acc_ = duration::zero();
+}
 
 template<typename Clock>
 std::uint64_t Ticker<Clock>::tick() {
@@ -101,6 +111,74 @@ typename FrameCounter<Clock>::duration FrameCounter<Clock>::dt() const {
 template<typename FrameCounter>
 double as_secs_dt(typename FrameCounter::duration d) {
     return static_cast<double>(std::chrono::duration_cast<std::chrono::nanoseconds>(d).count() / 1e9);
+}
+
+template<typename T, typename Clock = std::chrono::steady_clock>
+class MaxPeriod {
+public:
+    using time_point = typename Ticker<Clock>::time_point;
+    using duration = typename Ticker<Clock>::duration;
+
+    explicit MaxPeriod(duration period);
+
+    void update(T v);
+
+    T value() const;
+
+    void debug_print() const;
+
+private:
+    std::deque<std::tuple<time_point, T>> samples_{};
+    std::unordered_map<T, std::size_t> frequency_{};
+    duration period_;
+
+    void inc_frequency_(T &v);
+    void dec_frequency_(T &v);
+};
+
+template<typename T, typename Clock>
+MaxPeriod<T, Clock>::MaxPeriod(duration period)
+    : period_(period) {}
+
+template<typename T, typename Clock>
+void MaxPeriod<T, Clock>::update(T v) {
+    auto now = Clock::now();
+    samples_.emplace_back(now, v);
+    inc_frequency_(v);
+
+    while (!samples_.empty() && now - std::get<0>(samples_.front()) > period_) {
+        dec_frequency_(std::get<1>(samples_.front()));
+        samples_.pop_front();
+    }
+}
+
+template<typename T, typename Clock>
+T MaxPeriod<T, Clock>::value() const {
+    return std::ranges::max_element(
+                   frequency_, [](const auto &a, const auto &b) { return std::get<0>(a) < std::get<0>(b); }
+    )->first;
+}
+
+template<typename T, typename Clock>
+void MaxPeriod<T, Clock>::debug_print() const {
+    for (const auto &[k, v]: frequency_)
+        MIZU_LOG_INFO("{}: {}", k, v);
+}
+
+template<typename T, typename Clock>
+void MaxPeriod<T, Clock>::inc_frequency_(T &v) {
+    auto it = frequency_.find(v);
+    if (it == frequency_.end())
+        it = frequency_.emplace_hint(it, v, 0);
+    ++it->second;
+}
+
+template<typename T, typename Clock>
+void MaxPeriod<T, Clock>::dec_frequency_(T &v) {
+    auto it = frequency_.find(v);
+    assert(it != frequency_.end());
+    if (--it->second == 0)
+        frequency_.erase(it);
 }
 } // namespace mizu
 

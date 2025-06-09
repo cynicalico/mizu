@@ -5,6 +5,7 @@
 #include "gloo/buffer.hpp"
 #include "gloo/context.hpp"
 #include "gloo/vertex_array.hpp"
+#include "mizu/time.hpp"
 
 namespace mizu {
 enum class BatchType : std::size_t { Points = 0, Lines = 1, Triangles = 2 };
@@ -28,6 +29,11 @@ struct BatchList {
 
     std::size_t active_idx{0};
     std::vector<Batch> batches{};
+
+    std::size_t last_batch_count{0};
+    Ticker<> check_batches{std::chrono::seconds(10)};
+    bool garbage_checking{false};
+    MaxPeriod<std::size_t> batch_count_max{std::chrono::seconds(10)};
 
     void add(std::initializer_list<float> vertex_data);
 
