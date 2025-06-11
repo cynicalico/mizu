@@ -86,11 +86,6 @@ Engine::Engine(const std::string &window_title, glm::ivec2 window_size, WindowBu
             reinterpret_cast<const char *>(gl.ctx.GetString(GL_RENDERER))
     );
 
-    gl.enable(gloo::Capability::DepthTest);
-    gl.depth_func(gloo::DepthFunc::Greater);
-    gl.ctx.ClipControl(GL_LOWER_LEFT, GL_ZERO_TO_ONE);
-    gl.clear_depth(0.0f);
-
     input = std::make_unique<InputMgr>(callbacks);
 
     g2d = std::make_unique<G2d>(callbacks, gl, window.get());

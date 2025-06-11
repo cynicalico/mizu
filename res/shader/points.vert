@@ -1,8 +1,8 @@
 #version 330 core
 in vec3 pos;
-in vec3 color;
+in vec4 color;
 
-out vec3 out_color;
+out vec4 out_color;
 
 uniform mat4 proj;
 

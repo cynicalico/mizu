@@ -64,6 +64,7 @@ private:
     void register_callbacks_();
     void unregister_callbacks_();
 
+    void pre_draw_();
     void post_draw_();
 };
 

@@ -17,13 +17,14 @@ struct Batch {
     std::unique_ptr<gloo::StaticSizeBuffer<float>> vbo;
     std::unique_ptr<gloo::VertexArray> vao;
 
-    Batch(GladGLContext &gl, BatchType type, gloo::Shader *shader, std::size_t capacity);
+    Batch(GladGLContext &gl, BatchType type, gloo::Shader *shader, std::size_t capacity, gloo::FillMode fill_mode);
 };
 
 struct BatchList {
     GladGLContext &gl;
 
     BatchType type;
+    gloo::FillMode fill_mode;
     gloo::Shader *shader;
     std::size_t batch_capacity;
 
@@ -32,7 +33,7 @@ struct BatchList {
 
     std::size_t last_batch_count{0};
     Ticker<> check_batches{std::chrono::seconds(10)};
-    bool garbage_checking{false};
+    bool checking_unused_{false};
     MaxPeriod<std::size_t> batch_count_max{std::chrono::seconds(10)};
 
     void add(std::initializer_list<float> vertex_data);
@@ -51,7 +52,7 @@ public:
 
     float z();
 
-    void add(BatchType type, std::initializer_list<float> vertex_data);
+    void add(BatchType type, bool trans, std::initializer_list<float> vertex_data);
 
     void draw(glm::mat4 projection) const;
 
@@ -61,8 +62,12 @@ private:
     gloo::Context &ctx_;
 
     std::unique_ptr<gloo::Shader> shaders_[3];
-    BatchList batch_lists_[3];
+    BatchList opaque_batch_lists_[3];
+    BatchList trans_batch_lists_[3];
     float z_level_{2.0f};
+
+    void add_opaque_(BatchType type, std::initializer_list<float> vertex_data);
+    void add_trans_(BatchType type, std::initializer_list<float> vertex_data);
 };
 } // namespace mizu
 

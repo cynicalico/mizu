@@ -36,7 +36,6 @@ set(${PROJECT_NAME}_headers
         include/mizu/image.hpp
         include/mizu/imconfig.hpp
         include/mizu/input_mgr.hpp
-        include/mizu/intermittent_lambda.hpp
         include/mizu/io.hpp
         include/mizu/is_any_of.hpp
         include/mizu/log.hpp
