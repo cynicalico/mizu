@@ -2,19 +2,25 @@
 #include "mizu/log.hpp"
 
 namespace gloo {
-Texture::Texture(GladGLContext &gl, const mizu::PngData &data, Scaling scaling)
+Texture::Texture(GladGLContext &gl, const mizu::PngData &data, MinFilter min_filter, MagFilter mag_filter)
     : gl_(gl) {
-    gl.TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    gl.TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    gl.TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, unwrap(scaling));
-    gl.TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, unwrap(scaling));
-
     gl_.GenTextures(1, &id);
     CHECK_GL_ERROR(gl_, GenTextures);
     MIZU_LOG_TRACE("Created texture id={}", id);
 
+    gl_.ActiveTexture(GL_TEXTURE0);
+    CHECK_GL_ERROR(gl_, BindTexture);
     gl_.BindTexture(GL_TEXTURE_2D, id);
     CHECK_GL_ERROR(gl_, BindTexture);
+
+    gl_.TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    CHECK_GL_ERROR(gl_, TexParameteri);
+    gl_.TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    CHECK_GL_ERROR(gl_, TexParameteri);
+    gl_.TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, unwrap(min_filter));
+    CHECK_GL_ERROR(gl_, TexParameteri);
+    gl_.TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, unwrap(mag_filter));
+    CHECK_GL_ERROR(gl_, TexParameteri);
 
     gl_.TexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, data.width, data.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data.bytes);
     CHECK_GL_ERROR(gl_, TexImage2D);

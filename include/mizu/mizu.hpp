@@ -5,6 +5,7 @@
 #include "mizu/callback_mgr.hpp"
 #include "mizu/color.hpp"
 #include "mizu/engine.hpp"
+#include "mizu/font/code_page_437.hpp"
 #include "mizu/g2d.hpp"
 #include "mizu/input_mgr.hpp"
 #include "mizu/io.hpp"

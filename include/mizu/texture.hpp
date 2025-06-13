@@ -9,7 +9,10 @@
 namespace mizu {
 class Texture {
 public:
-    Texture(gloo::Context &gl, const std::filesystem::path &path, gloo::Scaling scaling);
+    Texture(gloo::Context &gl, const std::filesystem::path &path, gloo::MinFilter min_filter, gloo::MagFilter mag_filter
+    );
+
+    ~Texture() = default;
 
     NO_COPY(Texture)
 

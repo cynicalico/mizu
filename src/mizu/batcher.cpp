@@ -245,11 +245,17 @@ void Batcher::draw(glm::mat4 projection) {
         list.set_projection_and_sync(projection);
 
     for (auto &params: saved_trans_draw_calls_) {
-        if (params.texture_id != 0)
+        if (params.texture_id != 0) {
+            gl_.ctx.ActiveTexture(GL_TEXTURE0);
+            CHECK_GL_ERROR(gl_.ctx, ActiveTexture);
             gl_.ctx.BindTexture(GL_TEXTURE_2D, params.texture_id);
+            CHECK_GL_ERROR(gl_.ctx, ActiveTexture);
+        }
         trans_batch_lists_[params.list_idx].draw(params.batch_idx, params.first, params.count);
-        if (params.texture_id != 0)
+        if (params.texture_id != 0) {
             gl_.ctx.BindTexture(GL_TEXTURE_2D, 0);
+            CHECK_GL_ERROR(gl_.ctx, BindTexture);
+        }
     }
 
     gl_.depth_mask(true);

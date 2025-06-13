@@ -1,12 +1,14 @@
 #include "mizu/texture.hpp"
 
 namespace mizu {
-Texture::Texture(gloo::Context &gl, const std::filesystem::path &path, gloo::Scaling scaling)
+Texture::Texture(
+        gloo::Context &gl, const std::filesystem::path &path, gloo::MinFilter min_filter, gloo::MagFilter mag_filter
+)
     : gl_(gl),
-      data_(read_image_data(path).value()),
+      data_(read_image_data(path).value_or(PngData(0, 0, 0, 0))),
       px_x_(1.0f / static_cast<float>(data_.width)),
       px_y_(1.0f / static_cast<float>(data_.height)),
-      handle_(gl_.ctx, data_, scaling) {}
+      handle_(gl_.ctx, data_, min_filter, mag_filter) {}
 
 MOVE_CONSTRUCTOR_IMPL(Texture)
     : gl_(other.gl_),

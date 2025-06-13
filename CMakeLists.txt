@@ -49,6 +49,7 @@ set(${PROJECT_NAME}_headers
         include/mizu/time.hpp
         include/mizu/window.hpp
         include/mizu/ds/priority_queue.hpp
+        include/mizu/font/code_page_437.hpp
         # [[[end]]]
 )
 
@@ -83,6 +84,7 @@ set(${PROJECT_NAME}_sources
         src/mizu/rng.cpp
         src/mizu/texture.cpp
         src/mizu/window.cpp
+        src/mizu/font/code_page_437.cpp
         # [[[end]]]
 )
 

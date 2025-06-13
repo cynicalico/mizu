@@ -12,8 +12,9 @@ G2d::~G2d() {
     unregister_callbacks_();
 }
 
-std::unique_ptr<Texture> G2d::load_texture(const std::filesystem::path &path, gloo::Scaling scaling) const {
-    return std::make_unique<Texture>(gl_, path, scaling);
+std::unique_ptr<Texture>
+G2d::load_texture(const std::filesystem::path &path, gloo::MinFilter min_filter, gloo::MagFilter mag_filter) const {
+    return std::make_unique<Texture>(gl_, path, min_filter, mag_filter);
 }
 
 bool G2d::vsync() const {
@@ -94,38 +95,40 @@ void G2d::fill_rect(glm::vec2 pos, glm::vec2 size, const Color &color) {
     fill_rect(pos, size, glm::vec3(0.0), color);
 }
 
-void G2d::texture(const Texture &t, glm::vec2 pos, glm::vec4 region, glm::vec3 rot, const Color &color) {
+void G2d::texture(
+        const Texture &t, glm::vec2 pos, glm::vec2 size, glm::vec4 region, glm::vec3 rot, const Color &color
+) {
     auto gl_color = color.gl_color();
     auto z = batcher_.z();
     // clang-format off
     // TODO: Allow for drawing fully opaque textures as opaque
     batcher_.add(BatchType::Tex, true, t.id(), {
-        pos.x,             pos.y,              z,
+        pos.x,          pos.y,          z,
         gl_color.r, gl_color.g, gl_color.b, gl_color.a,
         rot.x, rot.y, glm::radians(rot.z),
         t.s(region.x),            t.t(region.y),
 
-        pos.x + t.width(), pos.y,              z,
+        pos.x + size.x, pos.y,          z,
         gl_color.r, gl_color.g, gl_color.b, gl_color.a,
         rot.x, rot.y, glm::radians(rot.z),
         t.s(region.x + region.z), t.t(region.y),
 
-        pos.x + t.width(), pos.y + t.height(), z,
+        pos.x + size.x, pos.y + size.y, z,
         gl_color.r, gl_color.g, gl_color.b, gl_color.a,
         rot.x, rot.y, glm::radians(rot.z),
         t.s(region.x + region.z), t.t(region.y + region.w),
 
-        pos.x,             pos.y,              z,
+        pos.x,          pos.y,          z,
         gl_color.r, gl_color.g, gl_color.b, gl_color.a,
         rot.x, rot.y, glm::radians(rot.z),
         t.s(region.x),            t.t(region.y),
 
-        pos.x + t.width(), pos.y + t.height(), z,
+        pos.x + size.x, pos.y + size.y, z,
         gl_color.r, gl_color.g, gl_color.b, gl_color.a,
         rot.x, rot.y, glm::radians(rot.z),
         t.s(region.x + region.z), t.t(region.y + region.w),
 
-        pos.x,             pos.y + t.height(), z,
+        pos.x,          pos.y + size.y, z,
         gl_color.r, gl_color.g, gl_color.b, gl_color.a,
         rot.x, rot.y, glm::radians(rot.z),
         t.s(region.x),            t.t(region.y + region.w),
@@ -133,8 +136,16 @@ void G2d::texture(const Texture &t, glm::vec2 pos, glm::vec4 region, glm::vec3 r
     // clang-format on
 }
 
+void G2d::texture(const Texture &t, glm::vec2 pos, glm::vec4 region, glm::vec3 rot, const Color &color) {
+    texture(t, pos, {region.z, region.w}, region, rot, color);
+}
+
 void G2d::texture(const Texture &t, glm::vec2 pos, glm::vec3 rot, const Color &color) {
-    texture(t, pos, {0, 0, t.width(), t.height()}, rot, color);
+    texture(t, pos, {t.width(), t.height()}, {0, 0, t.width(), t.height()}, rot, color);
+}
+
+void G2d::texture(const Texture &t, glm::vec2 pos, glm::vec2 size, glm::vec3 rot, const Color &color) {
+    texture(t, pos, size, {0, 0, t.width(), t.height()}, rot, color);
 }
 
 void G2d::register_callbacks_() {

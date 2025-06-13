@@ -23,7 +23,11 @@ public:
     NO_COPY(G2d)
     NO_MOVE(G2d)
 
-    std::unique_ptr<Texture> load_texture(const std::filesystem::path &path, gloo::Scaling scaling) const;
+    std::unique_ptr<Texture> load_texture(
+            const std::filesystem::path &path,
+            gloo::MinFilter min_filter = gloo::MinFilter::Nearest,
+            gloo::MagFilter mag_filter = gloo::MagFilter::Linear
+    ) const;
 
     bool vsync() const;
     void set_vsync(bool enabled);
@@ -57,8 +61,16 @@ public:
         requires std::derived_from<Color, mizu::Color>
     void fill_rect(const Rectangle<Color> &r);
 
-    void texture(const Texture &t, glm::vec2 pos, glm::vec4 region, glm::vec3 rot, const Color &color = rgba(0xffffffff));
-    void texture(const Texture &t, glm::vec2 pos, glm::vec3 rot, const Color &color = rgba(0xffffffff));
+    void
+    texture(const Texture &t,
+            glm::vec2 pos,
+            glm::vec2 size,
+            glm::vec4 region,
+            glm::vec3 rot,
+            const Color &color = rgb(0xffffff));
+    void texture(const Texture &t, glm::vec2 pos, glm::vec4 region, glm::vec3 rot, const Color &color = rgb(0xffffff));
+    void texture(const Texture &t, glm::vec2 pos, glm::vec3 rot, const Color &color = rgb(0xffffff));
+    void texture(const Texture &t, glm::vec2 pos, glm::vec2 size, glm::vec3 rot, const Color &color = rgb(0xffffff));
 
 private:
     gloo::Context &gl_;
