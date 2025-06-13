@@ -57,32 +57,50 @@ Batch::Batch(gloo::Context &gl, BatchType type, gloo::Shader *shader, std::size_
     }
 }
 
+void BatchListBase::cleanup_unused_() {
+    batch_count_max_.update(active_idx_ + 1);
+    if (checking_unused_) {
+        if (check_batches_timer_.tick() >= 1) {
+            auto max_10s = batch_count_max_.value();
+            while (max_10s < batches_.size())
+                batches_.pop_back();
+
+            if (max_10s <= 1)
+                checking_unused_ = false;
+        }
+    } else if (last_batch_count_ <= 1 && batches_.size() > 1) {
+        check_batches_timer_.reset();
+        checking_unused_ = true;
+    }
+    last_batch_count_ = active_idx_ + 1;
+}
+
 void OpaqueBatchList::add(const std::initializer_list<float> vertex_data) {
-    if (batches.empty()) {
-        batches.emplace_back(gl, type, shader, batch_capacity, fill_mode);
-    } else if (batches[active_idx].vbo->is_full()) {
-        active_idx++;
-        if (active_idx >= batches.size())
-            batches.emplace_back(gl, type, shader, batch_capacity, fill_mode);
+    if (batches_.empty()) {
+        batches_.emplace_back(gl_, type_, shader_, batch_capacity_, fill_mode_);
+    } else if (batches_[active_idx_].vbo->is_full()) {
+        active_idx_++;
+        if (active_idx_ >= batches_.size())
+            batches_.emplace_back(gl_, type_, shader_, batch_capacity_, fill_mode_);
     }
 
-    assert(vertex_data.size() % batches[active_idx].vertex_size == 0);
-    batches[active_idx].vbo->push(vertex_data);
+    assert(vertex_data.size() % batches_[active_idx_].vertex_size == 0);
+    batches_[active_idx_].vbo->push(vertex_data);
 }
 
 void OpaqueBatchList::draw(const glm::mat4 &projection) {
-    if (batches.empty())
+    if (batches_.empty())
         return;
 
-    shader->use();
-    shader->uniform("proj", projection);
+    shader_->use();
+    shader_->uniform("proj", projection);
 
-    for (std::size_t i = active_idx + 1; i-- > 0;) {
-        auto &batch = batches[i];
+    for (std::size_t i = active_idx_ + 1; i-- > 0;) {
+        auto &batch = batches_[i];
 
         batch.vbo->sync_gl(gloo::BufferTarget::Array);
         batch.vao->draw_arrays(
-                batch_type_to_draw_mode(type),
+                batch_type_to_draw_mode(type_),
                 batch.vbo->front() / batch.vertex_size,
                 batch.vbo->size() / batch.vertex_size
         );
@@ -90,100 +108,74 @@ void OpaqueBatchList::draw(const glm::mat4 &projection) {
 }
 
 void OpaqueBatchList::clear() {
-    batch_count_max.update(active_idx + 1);
+    cleanup_unused_();
 
-    if (checking_unused_) {
-        if (check_batches.tick() >= 1) {
-            auto max_10s = batch_count_max.value();
-            while (max_10s < batches.size())
-                batches.pop_back();
-
-            if (max_10s <= 1)
-                checking_unused_ = false;
-        }
-    } else if (last_batch_count <= 1 && batches.size() > 1) {
-        check_batches.reset();
-        checking_unused_ = true;
-    }
-    last_batch_count = active_idx + 1;
-
-    for (auto &batch: batches)
+    for (auto &batch: batches_)
         batch.vbo->clear();
-    active_idx = 0;
+
+    active_idx_ = 0;
 }
 
-std::vector<TransBatchListSavedDrawParams> TransBatchList::draw_calls() {
+std::vector<TransBatchListDrawParams> TransBatchList::draw_calls() {
     save_draw_call_();
-    std::vector ret(saved_draw_calls);
-    saved_draw_calls.clear();
+    std::vector ret(saved_draw_calls_);
+    saved_draw_calls_.clear();
 
     return ret;
 }
 
 void TransBatchList::add(const std::initializer_list<float> vertex_data) {
-    if (batches.empty()) {
-        batches.emplace_back(gl, type, shader, batch_capacity, fill_mode);
-    } else if (batches[active_idx].vbo->is_full()) {
+    if (batches_.empty()) {
+        batches_.emplace_back(gl_, type_, shader_, batch_capacity_, fill_mode_);
+    } else if (batches_[active_idx_].vbo->is_full()) {
         save_draw_call_();
-        last_size = 0;
+        last_draw_call_offset_ = 0;
 
-        active_idx++;
-        if (active_idx >= batches.size())
-            batches.emplace_back(gl, type, shader, batch_capacity, fill_mode);
+        active_idx_++;
+        if (active_idx_ >= batches_.size())
+            batches_.emplace_back(gl_, type_, shader_, batch_capacity_, fill_mode_);
     }
 
-    assert(vertex_data.size() % batches[active_idx].vertex_size == 0);
-    batches[active_idx].vbo->push(vertex_data);
+    assert(vertex_data.size() % batches_[active_idx_].vertex_size == 0);
+    batches_[active_idx_].vbo->push(vertex_data);
 }
 
 void TransBatchList::set_projection_and_sync(const glm::mat4 &projection) {
-    if (batches.empty())
+    if (batches_.empty())
         return;
 
-    shader->use();
-    shader->uniform("proj", projection);
+    shader_->use();
+    shader_->uniform("proj", projection);
 
-    for (std::size_t i = active_idx + 1; i-- > 0;)
-        batches[i].vbo->sync_gl(gloo::BufferTarget::Array);
+    for (std::size_t i = active_idx_ + 1; i-- > 0;)
+        batches_[i].vbo->sync_gl(gloo::BufferTarget::Array);
 }
 
 void TransBatchList::draw(std::size_t batch_idx, std::size_t first, std::size_t count) {
-    shader->use();
+    shader_->use();
 
-    batches[batch_idx].vao->draw_arrays(
-            batch_type_to_draw_mode(type),
-            first / batches[batch_idx].vertex_size,
-            count / batches[batch_idx].vertex_size
+    batches_[batch_idx].vao->draw_arrays(
+            batch_type_to_draw_mode(type_),
+            first / batches_[batch_idx].vertex_size,
+            count / batches_[batch_idx].vertex_size
     );
 }
 
 void TransBatchList::clear() {
-    batch_count_max.update(active_idx + 1);
+    cleanup_unused_();
 
-    if (checking_unused_) {
-        if (check_batches.tick() >= 1) {
-            auto max_10s = batch_count_max.value();
-            while (max_10s < batches.size())
-                batches.pop_back();
-
-            if (max_10s <= 1)
-                checking_unused_ = false;
-        }
-    } else if (last_batch_count <= 1 && batches.size() > 1) {
-        check_batches.reset();
-        checking_unused_ = true;
-    }
-    last_batch_count = active_idx + 1;
-
-    for (auto &batch: batches)
+    for (auto &batch: batches_)
         batch.vbo->clear();
-    active_idx = 0;
-    last_size = 0;
+
+    active_idx_ = 0;
+    last_draw_call_offset_ = 0;
 }
 
 void TransBatchList::save_draw_call_() {
-    saved_draw_calls.emplace_back(0, active_idx, last_size, batches[active_idx].vbo->size() - last_size);
-    last_size = batches[active_idx].vbo->size();
+    saved_draw_calls_.emplace_back(
+            active_idx_, last_draw_call_offset_, batches_[active_idx_].vbo->size() - last_draw_call_offset_
+    );
+    last_draw_call_offset_ = batches_[active_idx_].vbo->size();
 }
 
 Batcher::Batcher(gloo::Context &ctx)
@@ -207,22 +199,19 @@ Batcher::Batcher(gloo::Context &ctx)
                       ctx_,
                       BatchType::Points,
                       shaders_[0].get(),
-                      // static_cast<std::size_t>(std::floor(8e6 / (32 * 7 * 1)))
-                      5
+                      static_cast<std::size_t>(std::floor(8e6 / (32 * 7 * 1)))
               ),
               OpaqueBatchList(
                       ctx_,
                       BatchType::Lines,
                       shaders_[1].get(),
-                      // static_cast<std::size_t>(std::floor(8e6 / (32 * 10 * 2)))
-                      5
+                      static_cast<std::size_t>(std::floor(8e6 / (32 * 10 * 2)))
               ),
               OpaqueBatchList(
                       ctx_,
                       BatchType::Triangles,
                       shaders_[2].get(),
-                      // static_cast<std::size_t>(std::floor(8e6 / (32 * 10 * 3)))
-                      5
+                      static_cast<std::size_t>(std::floor(8e6 / (32 * 10 * 3)))
               )
       },
       trans_batch_lists_{
@@ -230,22 +219,19 @@ Batcher::Batcher(gloo::Context &ctx)
                       ctx_,
                       BatchType::Points,
                       shaders_[0].get(),
-                      // static_cast<std::size_t>(std::floor(8e6 / (32 * 7 * 1)))
-                      5
+                      static_cast<std::size_t>(std::floor(8e6 / (32 * 7 * 1)))
               ),
               TransBatchList(
                       ctx_,
                       BatchType::Lines,
                       shaders_[1].get(),
-                      // static_cast<std::size_t>(std::floor(8e6 / (32 * 10 * 2)))
-                      5
+                      static_cast<std::size_t>(std::floor(8e6 / (32 * 10 * 2)))
               ),
               TransBatchList(
                       ctx_,
                       BatchType::Triangles,
                       shaders_[2].get(),
-                      // static_cast<std::size_t>(std::floor(8e6 / (32 * 10 * 3)))
-                      5
+                      static_cast<std::size_t>(std::floor(8e6 / (32 * 10 * 3)))
               )
       } {}
 
@@ -261,8 +247,8 @@ void Batcher::add(BatchType type, bool trans, const std::initializer_list<float>
 }
 
 void Batcher::draw(glm::mat4 projection) {
-    if (last_trans_list_idx_ != std::numeric_limits<std::size_t>::max())
-        push_saved_draw_calls_();
+    // Grab any draw calls from the most recent trans batch list
+    flush_trans_draw_calls_();
 
     for (auto &list: opaque_batch_lists_)
         list.draw(projection);
@@ -274,7 +260,7 @@ void Batcher::draw(glm::mat4 projection) {
     for (auto &list: trans_batch_lists_)
         list.set_projection_and_sync(projection);
 
-    for (auto &params: trans_draw_calls_)
+    for (auto &params: saved_trans_draw_calls_)
         trans_batch_lists_[params.list_idx].draw(params.batch_idx, params.first, params.count);
 
     ctx_.depth_mask(true);
@@ -287,8 +273,8 @@ void Batcher::clear() {
 
     for (auto &list: trans_batch_lists_)
         list.clear();
-    last_trans_list_idx_ = std::numeric_limits<std::size_t>::max();
-    trans_draw_calls_.clear();
+    last_trans_batch_list_idx_ = std::numeric_limits<std::size_t>::max();
+    saved_trans_draw_calls_.clear();
 
     z_level_ = 2.0f;
 }
@@ -298,19 +284,22 @@ void Batcher::add_opaque_(BatchType type, const std::initializer_list<float> ver
 }
 
 void Batcher::add_trans_(BatchType type, const std::initializer_list<float> vertex_data) {
-    if (last_trans_list_idx_ != std::numeric_limits<std::size_t>::max() && last_trans_list_idx_ != unwrap(type))
-        push_saved_draw_calls_();
+    if (last_trans_batch_list_idx_ != unwrap(type))
+        flush_trans_draw_calls_();
 
     trans_batch_lists_[unwrap(type)].add(vertex_data);
-    last_trans_list_idx_ = unwrap(type);
+    last_trans_batch_list_idx_ = unwrap(type);
 }
 
-void Batcher::push_saved_draw_calls_() {
-    auto new_draw_calls = trans_batch_lists_[last_trans_list_idx_].draw_calls();
-    for (auto &draw_call: new_draw_calls)
-        draw_call.list_idx = last_trans_list_idx_;
+void Batcher::flush_trans_draw_calls_() {
+    if (last_trans_batch_list_idx_ == std::numeric_limits<std::size_t>::max())
+        return;
 
-    trans_draw_calls_.reserve(trans_draw_calls_.size() + new_draw_calls.size());
-    trans_draw_calls_.insert(trans_draw_calls_.end(), new_draw_calls.begin(), new_draw_calls.end());
+    auto new_draw_calls = trans_batch_lists_[last_trans_batch_list_idx_].draw_calls();
+    for (auto &draw_call: new_draw_calls)
+        draw_call.list_idx = last_trans_batch_list_idx_;
+
+    saved_trans_draw_calls_.reserve(saved_trans_draw_calls_.size() + new_draw_calls.size());
+    saved_trans_draw_calls_.insert(saved_trans_draw_calls_.end(), new_draw_calls.begin(), new_draw_calls.end());
 }
 } // namespace mizu

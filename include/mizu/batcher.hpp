@@ -20,45 +20,54 @@ struct Batch {
     Batch(gloo::Context &gl, BatchType type, gloo::Shader *shader, std::size_t capacity, gloo::FillMode fill_mode);
 };
 
-struct BatchListBase {
-    gloo::Context &gl;
+class BatchListBase {
+protected:
+    gloo::Context &gl_;
+    BatchType type_;
+    gloo::Shader *shader_;
+    std::size_t batch_capacity_;
+    gloo::FillMode fill_mode_;
 
-    BatchType type;
-    gloo::FillMode fill_mode;
-    gloo::Shader *shader;
-    std::size_t batch_capacity;
+    std::size_t active_idx_;
+    std::vector<Batch> batches_;
 
-    std::size_t active_idx;
-    std::vector<Batch> batches;
-
-    std::size_t last_batch_count;
-    Ticker<> check_batches;
     bool checking_unused_;
-    MaxPeriod<std::size_t> batch_count_max;
+    Ticker<> check_batches_timer_;
+    MaxPeriod<std::size_t> batch_count_max_;
+    std::size_t last_batch_count_;
 
     BatchListBase(
             gloo::Context &gl,
             BatchType type,
-            gloo::FillMode fill_mode,
             gloo::Shader *shader,
-            std::size_t batch_capacity
+            std::size_t batch_capacity,
+            gloo::FillMode fill_mode
     )
-        : gl(gl),
-          type(type),
-          fill_mode(fill_mode),
-          shader(shader),
-          batch_capacity(batch_capacity),
-          active_idx(0),
-          batches(),
-          last_batch_count(0),
-          check_batches(std::chrono::seconds(10)),
+        : gl_(gl),
+          type_(type),
+          shader_(shader),
+          batch_capacity_(batch_capacity),
+          fill_mode_(fill_mode),
+          active_idx_(0),
+          batches_(),
           checking_unused_(false),
-          batch_count_max(std::chrono::seconds(10)) {}
+          check_batches_timer_(std::chrono::seconds(10)),
+          batch_count_max_(std::chrono::seconds(10)),
+          last_batch_count_(0) {}
+
+    NO_COPY(BatchListBase)
+    NO_MOVE(BatchListBase)
+
+    void cleanup_unused_();
 };
 
-struct OpaqueBatchList : BatchListBase {
+class OpaqueBatchList : BatchListBase {
+public:
     OpaqueBatchList(gloo::Context &gl, BatchType type, gloo::Shader *shader, std::size_t batch_capacity)
-        : BatchListBase(gl, type, gloo::FillMode::BackToFront, shader, batch_capacity) {}
+        : BatchListBase(gl, type, shader, batch_capacity, gloo::FillMode::BackToFront) {}
+
+    NO_COPY(OpaqueBatchList)
+    NO_MOVE(OpaqueBatchList)
 
     void add(std::initializer_list<float> vertex_data);
 
@@ -67,21 +76,22 @@ struct OpaqueBatchList : BatchListBase {
     void clear();
 };
 
-struct TransBatchListSavedDrawParams {
-    std::size_t list_idx;
+struct TransBatchListDrawParams {
     std::size_t batch_idx;
     std::size_t first;
     std::size_t count;
+    std::size_t list_idx{0};
 };
 
-struct TransBatchList : BatchListBase {
+class TransBatchList : BatchListBase {
+public:
     TransBatchList(gloo::Context &gl, BatchType type, gloo::Shader *shader, std::size_t batch_capacity)
-        : BatchListBase(gl, type, gloo::FillMode::FrontToBack, shader, batch_capacity) {}
+        : BatchListBase(gl, type, shader, batch_capacity, gloo::FillMode::FrontToBack) {}
 
-    std::size_t last_size{0};
-    std::vector<TransBatchListSavedDrawParams> saved_draw_calls{};
+    NO_COPY(TransBatchList)
+    NO_MOVE(TransBatchList)
 
-    std::vector<TransBatchListSavedDrawParams> draw_calls();
+    std::vector<TransBatchListDrawParams> draw_calls();
 
     void add(std::initializer_list<float> vertex_data);
 
@@ -92,6 +102,9 @@ struct TransBatchList : BatchListBase {
     void clear();
 
 private:
+    std::size_t last_draw_call_offset_{0};
+    std::vector<TransBatchListDrawParams> saved_draw_calls_{};
+
     void save_draw_call_();
 };
 
@@ -118,15 +131,15 @@ private:
     OpaqueBatchList opaque_batch_lists_[3];
 
     TransBatchList trans_batch_lists_[3];
-    std::size_t last_trans_list_idx_{std::numeric_limits<std::size_t>::max()};
-    std::vector<TransBatchListSavedDrawParams> trans_draw_calls_{};
+    std::size_t last_trans_batch_list_idx_{std::numeric_limits<std::size_t>::max()};
+    std::vector<TransBatchListDrawParams> saved_trans_draw_calls_{};
 
     float z_level_{2.0f};
 
     void add_opaque_(BatchType type, std::initializer_list<float> vertex_data);
 
     void add_trans_(BatchType type, std::initializer_list<float> vertex_data);
-    void push_saved_draw_calls_();
+    void flush_trans_draw_calls_();
 };
 } // namespace mizu
 
