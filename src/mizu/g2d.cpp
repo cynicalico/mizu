@@ -34,11 +34,11 @@ void G2d::clear(const Color &color, gloo::ClearBit mask) {
     gl_.clear(mask);
 }
 
-void G2d::point(glm::vec2 p, const Color &color) {
+void G2d::point(glm::vec2 pos, const Color &color) {
     auto gl_color = color.gl_color();
     auto z = batcher_.z();
     batcher_.add(
-            BatchType::Points, gl_color.a < 1.0f, 0, {p.x, p.y, z, gl_color.r, gl_color.g, gl_color.b, gl_color.a}
+            BatchType::Points, gl_color.a < 1.0f, 0, {pos.x, pos.y, z, gl_color.r, gl_color.g, gl_color.b, gl_color.a}
     );
 }
 
@@ -57,7 +57,7 @@ void G2d::line(glm::vec2 p0, glm::vec2 p1, const Color &color) {
     line(p0, p1, glm::vec3(0.0), color);
 }
 
-void G2d::triangle(glm::vec2 p0, glm::vec2 p1, glm::vec2 p2, glm::vec3 rot, const Color &color) {
+void G2d::fill_tri(glm::vec2 p0, glm::vec2 p1, glm::vec2 p2, glm::vec3 rot, const Color &color) {
     auto gl_color = color.gl_color();
     auto z = batcher_.z();
     // clang-format off
@@ -69,47 +69,72 @@ void G2d::triangle(glm::vec2 p0, glm::vec2 p1, glm::vec2 p2, glm::vec3 rot, cons
     // clang-format on
 }
 
-void G2d::triangle(glm::vec2 p0, glm::vec2 p1, glm::vec2 p2, const Color &color) {
-    triangle(p0, p1, p2, glm::vec3(0.0), color);
+void G2d::fill_tri(glm::vec2 p0, glm::vec2 p1, glm::vec2 p2, const Color &color) {
+    fill_tri(p0, p1, p2, glm::vec3(0.0), color);
 }
 
-void G2d::texture(const Texture &t, glm::vec2 p, glm::vec3 rot, const Color &color) {
+void G2d::fill_rect(glm::vec2 pos, glm::vec2 size, glm::vec3 rot, const Color &color) {
+    auto gl_color = color.gl_color();
+    auto z = batcher_.z();
+    // clang-format off
+    batcher_.add(BatchType::Triangles, gl_color.a < 1.0f, 0, {
+        pos.x,          pos.y,          z, gl_color.r, gl_color.g, gl_color.b, gl_color.a, rot.x, rot.y, glm::radians(rot.z),
+        pos.x + size.x, pos.y,          z, gl_color.r, gl_color.g, gl_color.b, gl_color.a, rot.x, rot.y, glm::radians(rot.z),
+        pos.x + size.x, pos.y + size.y, z, gl_color.r, gl_color.g, gl_color.b, gl_color.a, rot.x, rot.y, glm::radians(rot.z),
+    });
+    batcher_.add(BatchType::Triangles, gl_color.a < 1.0f, 0, {
+        pos.x,          pos.y,          z, gl_color.r, gl_color.g, gl_color.b, gl_color.a, rot.x, rot.y, glm::radians(rot.z),
+        pos.x + size.x, pos.y + size.y, z, gl_color.r, gl_color.g, gl_color.b, gl_color.a, rot.x, rot.y, glm::radians(rot.z),
+        pos.x,          pos.y + size.y, z, gl_color.r, gl_color.g, gl_color.b, gl_color.a, rot.x, rot.y, glm::radians(rot.z),
+    });
+    // clang-format on
+}
+
+void G2d::fill_rect(glm::vec2 pos, glm::vec2 size, const Color &color) {
+    fill_rect(pos, size, glm::vec3(0.0), color);
+}
+
+void G2d::texture(const Texture &t, glm::vec2 pos, glm::vec4 region, glm::vec3 rot, const Color &color) {
     auto gl_color = color.gl_color();
     auto z = batcher_.z();
     // clang-format off
     // TODO: Allow for drawing fully opaque textures as opaque
     batcher_.add(BatchType::Tex, true, t.id(), {
-        p.x,              p.y,              z,
+        pos.x,             pos.y,              z,
         gl_color.r, gl_color.g, gl_color.b, gl_color.a,
         rot.x, rot.y, glm::radians(rot.z),
-        t.s(0.0f), t.t(0.0f),
+        t.s(region.x),            t.t(region.y),
 
-        p.x + t.width(),  p.y,              z,
+        pos.x + t.width(), pos.y,              z,
         gl_color.r, gl_color.g, gl_color.b, gl_color.a,
         rot.x, rot.y, glm::radians(rot.z),
-        t.s(t.width()), t.t(0.0f),
+        t.s(region.x + region.z), t.t(region.y),
 
-        p.x + t.width(),  p.y + t.height(), z,
+        pos.x + t.width(), pos.y + t.height(), z,
         gl_color.r, gl_color.g, gl_color.b, gl_color.a,
         rot.x, rot.y, glm::radians(rot.z),
-        t.s(t.width()), t.t(t.height()),
+        t.s(region.x + region.z), t.t(region.y + region.w),
 
-        p.x,              p.y,              z,
+        pos.x,             pos.y,              z,
         gl_color.r, gl_color.g, gl_color.b, gl_color.a,
         rot.x, rot.y, glm::radians(rot.z),
-        t.s(0.0f), t.t(0.0f),
+        t.s(region.x),            t.t(region.y),
 
-        p.x + t.width(),  p.y + t.height(), z,
+        pos.x + t.width(), pos.y + t.height(), z,
         gl_color.r, gl_color.g, gl_color.b, gl_color.a,
         rot.x, rot.y, glm::radians(rot.z),
-        t.s(t.width()), t.t(t.height()),
+        t.s(region.x + region.z), t.t(region.y + region.w),
 
-        p.x,              p.y + t.height(), z,
+        pos.x,             pos.y + t.height(), z,
         gl_color.r, gl_color.g, gl_color.b, gl_color.a,
         rot.x, rot.y, glm::radians(rot.z),
-        t.s(0.0f), t.t(t.height()),
+        t.s(region.x),            t.t(region.y + region.w),
     });
     // clang-format on
+}
+
+void G2d::texture(const Texture &t, glm::vec2 pos, glm::vec3 rot, const Color &color) {
+    texture(t, pos, {0, 0, t.width(), t.height()}, rot, color);
 }
 
 void G2d::register_callbacks_() {

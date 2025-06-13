@@ -14,7 +14,6 @@
 #include "mizu/window.hpp"
 
 namespace mizu {
-
 class G2d {
 public:
     G2d(CallbackMgr &callbacks, gloo::Context &gl, Window *window);
@@ -31,7 +30,7 @@ public:
 
     void clear(const Color &color, gloo::ClearBit mask = gloo::ClearBit::Color | gloo::ClearBit::Depth);
 
-    void point(glm::vec2 p, const Color &color);
+    void point(glm::vec2 pos, const Color &color);
 
     template<typename Color>
         requires std::derived_from<Color, mizu::Color>
@@ -44,14 +43,22 @@ public:
         requires std::derived_from<Color, mizu::Color>
     void line(const Line<Color> &l);
 
-    void triangle(glm::vec2 p0, glm::vec2 p1, glm::vec2 p2, glm::vec3 rot, const Color &color);
-    void triangle(glm::vec2 p0, glm::vec2 p1, glm::vec2 p2, const Color &color);
+    void fill_tri(glm::vec2 p0, glm::vec2 p1, glm::vec2 p2, glm::vec3 rot, const Color &color);
+    void fill_tri(glm::vec2 p0, glm::vec2 p1, glm::vec2 p2, const Color &color);
 
     template<typename Color>
         requires std::derived_from<Color, mizu::Color>
-    void triangle(const Triangle<Color> &t);
+    void fill_tri(const Triangle<Color> &t);
 
-    void texture(const Texture &t, glm::vec2 p, glm::vec3 rot, const Color &color = rgba(0xffffffff));
+    void fill_rect(glm::vec2 pos, glm::vec2 size, glm::vec3 rot, const Color &color);
+    void fill_rect(glm::vec2 pos, glm::vec2 size, const Color &color);
+
+    template<typename Color>
+        requires std::derived_from<Color, mizu::Color>
+    void fill_rect(const Rectangle<Color> &r);
+
+    void texture(const Texture &t, glm::vec2 pos, glm::vec4 region, glm::vec3 rot, const Color &color = rgba(0xffffffff));
+    void texture(const Texture &t, glm::vec2 pos, glm::vec3 rot, const Color &color = rgba(0xffffffff));
 
 private:
     gloo::Context &gl_;
@@ -83,8 +90,14 @@ void G2d::line(const Line<Color> &l) {
 
 template<typename Color>
     requires std::derived_from<Color, mizu::Color>
-void G2d::triangle(const Triangle<Color> &t) {
-    triangle(t.v0, t.v1, t.v2, t.rot, t.color);
+void G2d::fill_tri(const Triangle<Color> &t) {
+    fill_tri(t.v0, t.v1, t.v2, t.rot, t.color);
+}
+
+template<typename Color>
+    requires std::derived_from<Color, mizu::Color>
+void G2d::fill_rect(const Rectangle<Color> &r) {
+    fill_rect(r.pos, r.size, r.rot, r.color);
 }
 } // namespace mizu
 
