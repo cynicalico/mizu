@@ -3,12 +3,14 @@
 
 #include <glm/vec2.hpp>
 #include "gloo/context.hpp"
+#include "gloo/texture.hpp"
 #include "mizu/batcher.hpp"
 #include "mizu/callback_mgr.hpp"
 #include "mizu/class_helpers.hpp"
 #include "mizu/color.hpp"
 #include "mizu/enum_class_helpers.hpp"
 #include "mizu/shapes.hpp"
+#include "mizu/texture.hpp"
 #include "mizu/window.hpp"
 
 namespace mizu {
@@ -22,6 +24,8 @@ public:
     NO_COPY(G2d)
     NO_MOVE(G2d)
 
+    std::unique_ptr<Texture> load_texture(const std::filesystem::path &path, gloo::Scaling scaling) const;
+
     bool vsync() const;
     void set_vsync(bool enabled);
 
@@ -29,23 +33,25 @@ public:
 
     void point(glm::vec2 p, const Color &color);
 
+    template<typename Color>
+        requires std::derived_from<Color, mizu::Color>
+    void point(const Point<Color> &p);
+
     void line(glm::vec2 p0, glm::vec2 p1, glm::vec3 rot, const Color &color);
     void line(glm::vec2 p0, glm::vec2 p1, const Color &color);
+
+    template<typename Color>
+        requires std::derived_from<Color, mizu::Color>
+    void line(const Line<Color> &l);
 
     void triangle(glm::vec2 p0, glm::vec2 p1, glm::vec2 p2, glm::vec3 rot, const Color &color);
     void triangle(glm::vec2 p0, glm::vec2 p1, glm::vec2 p2, const Color &color);
 
     template<typename Color>
         requires std::derived_from<Color, mizu::Color>
-    void point(const Point<Color> &p);
-
-    template<typename Color>
-        requires std::derived_from<Color, mizu::Color>
-    void line(const Line<Color> &l);
-
-    template<typename Color>
-        requires std::derived_from<Color, mizu::Color>
     void triangle(const Triangle<Color> &t);
+
+    void texture(const Texture &t, glm::vec2 p, glm::vec3 rot, const Color &color = rgba(0xffffffff));
 
 private:
     gloo::Context &gl_;

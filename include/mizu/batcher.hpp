@@ -8,7 +8,7 @@
 #include "mizu/time.hpp"
 
 namespace mizu {
-enum class BatchType : std::size_t { Points = 0, Lines = 1, Triangles = 2 };
+enum class BatchType : std::size_t { Points = 0, Lines = 1, Triangles = 2, Tex = 3 };
 
 struct Batch {
     std::size_t vertex_size;
@@ -70,6 +70,7 @@ struct TransBatchListDrawParams {
     std::size_t batch_idx;
     std::size_t first;
     std::size_t count;
+    std::size_t texture_id{0};
     std::size_t list_idx{0};
 };
 
@@ -99,6 +100,9 @@ private:
 };
 
 class Batcher {
+    const std::size_t NO_LAST_IDX_ = std::numeric_limits<std::size_t>::max();
+    const GLuint NO_LAST_ID_ = std::numeric_limits<GLuint>::max();
+
 public:
     explicit Batcher(gloo::Context &ctx);
 
@@ -107,7 +111,7 @@ public:
 
     float z();
 
-    void add(BatchType type, bool trans, std::initializer_list<float> vertex_data);
+    void add(BatchType type, bool trans, GLuint texture_id, std::initializer_list<float> vertex_data);
 
     void draw(glm::mat4 projection);
 
@@ -116,19 +120,20 @@ public:
 private:
     gloo::Context &gl_;
 
-    std::unique_ptr<gloo::Shader> shaders_[3];
+    std::unique_ptr<gloo::Shader> shaders_[4];
 
     OpaqueBatchList opaque_batch_lists_[3];
 
-    TransBatchList trans_batch_lists_[3];
-    std::size_t last_trans_batch_list_idx_{std::numeric_limits<std::size_t>::max()};
+    TransBatchList trans_batch_lists_[4];
+    std::size_t last_trans_batch_list_idx_{NO_LAST_IDX_};
+    GLuint last_texture_id_{NO_LAST_ID_};
     std::vector<TransBatchListDrawParams> saved_trans_draw_calls_{};
 
     float z_level_{2.0f};
 
     void add_opaque_(BatchType type, std::initializer_list<float> vertex_data);
 
-    void add_trans_(BatchType type, std::initializer_list<float> vertex_data);
+    void add_trans_(BatchType type, GLuint texture_id, std::initializer_list<float> vertex_data);
     void flush_trans_draw_calls_();
 };
 } // namespace mizu

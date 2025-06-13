@@ -2,22 +2,24 @@
 #include "mizu/io.hpp"
 
 namespace mizu {
-constexpr std::size_t vertex_size_map[3] = {7, 10, 10};
+constexpr std::size_t vertex_size_map[4] = {7, 10, 10, 12};
 
-constexpr std::size_t vertices_per_obj_map[3] = {1, 2, 3};
+constexpr std::size_t vertices_per_obj_map[4] = {1, 2, 3, 6};
 
 constexpr auto MB = static_cast<std::size_t>(8e6);
-constexpr std::size_t batch_capacity_map[3] = {
+constexpr std::size_t batch_capacity_map[4] = {
         MB / (32 * vertex_size_map[unwrap(BatchType::Points)] * vertices_per_obj_map[unwrap(BatchType::Points)]),
         MB / (32 * vertex_size_map[unwrap(BatchType::Lines)] * vertices_per_obj_map[unwrap(BatchType::Lines)]),
         MB / (32 * vertex_size_map[unwrap(BatchType::Triangles)] * vertices_per_obj_map[unwrap(BatchType::Triangles)]),
+        MB / (32 * vertex_size_map[unwrap(BatchType::Tex)] * vertices_per_obj_map[unwrap(BatchType::Tex)])
 };
 
-constexpr gloo::DrawMode draw_mode_map[3] = {gloo::DrawMode::Points, gloo::DrawMode::Lines, gloo::DrawMode::Triangles};
+constexpr gloo::DrawMode draw_mode_map[4] = {
+        gloo::DrawMode::Points, gloo::DrawMode::Lines, gloo::DrawMode::Triangles, gloo::DrawMode::Triangles
+};
 
 Batch::Batch(gloo::Context &gl, BatchType type, gloo::Shader *shader, std::size_t capacity, gloo::FillMode fill_mode) {
     vertex_size = vertex_size_map[unwrap(type)];
-
     vbo = std::make_unique<gloo::StaticSizeBuffer<float>>(
             gl.ctx, vertex_size * vertices_per_obj_map[unwrap(type)] * capacity, fill_mode
     );
@@ -47,6 +49,16 @@ Batch::Batch(gloo::Context &gl, BatchType type, gloo::Shader *shader, std::size_
                       .vec("pos", 3)
                       .vec("color", 4)
                       .vec("rot_params", 3)
+                      .build();
+        break;
+    case BatchType::Tex:
+        vao = gloo::VertexArrayBuilder(gl.ctx)
+                      .with(shader)
+                      .with(vbo.get(), gloo::BufferTarget::Array)
+                      .vec("pos", 3)
+                      .vec("color", 4)
+                      .vec("rot_params", 3)
+                      .vec("tex_coord", 2)
                       .build();
         break;
     }
@@ -188,6 +200,10 @@ Batcher::Batcher(gloo::Context &ctx)
                       .stage_src(gloo::ShaderType::Vertex, *read_file("res/shader/tris.vert"))
                       .stage_src(gloo::ShaderType::Fragment, *read_file("res/shader/tris.frag"))
                       .link(),
+              gloo::ShaderBuilder(gl_.ctx)
+                      .stage_src(gloo::ShaderType::Vertex, *read_file("res/shader/tex.vert"))
+                      .stage_src(gloo::ShaderType::Fragment, *read_file("res/shader/tex.frag"))
+                      .link(),
       },
       opaque_batch_lists_{
               OpaqueBatchList(gl_, BatchType::Points, shaders_[0].get()),
@@ -197,18 +213,21 @@ Batcher::Batcher(gloo::Context &ctx)
       trans_batch_lists_{
               TransBatchList(gl_, BatchType::Points, shaders_[0].get()),
               TransBatchList(gl_, BatchType::Lines, shaders_[1].get()),
-              TransBatchList(gl_, BatchType::Triangles, shaders_[2].get())
+              TransBatchList(gl_, BatchType::Triangles, shaders_[2].get()),
+              TransBatchList(gl_, BatchType::Tex, shaders_[3].get())
       } {}
 
 float Batcher::z() {
     return z_level_++;
 }
 
-void Batcher::add(BatchType type, bool trans, const std::initializer_list<float> vertex_data) {
-    if (trans)
-        add_trans_(type, vertex_data);
-    else
+void Batcher::add(BatchType type, bool trans, GLuint texture_id, const std::initializer_list<float> vertex_data) {
+    if (trans) {
+        add_trans_(type, texture_id, vertex_data);
+    } else {
+        assert(type != BatchType::Tex);
         add_opaque_(type, vertex_data);
+    }
 }
 
 void Batcher::draw(glm::mat4 projection) {
@@ -225,8 +244,13 @@ void Batcher::draw(glm::mat4 projection) {
     for (auto &list: trans_batch_lists_)
         list.set_projection_and_sync(projection);
 
-    for (auto &params: saved_trans_draw_calls_)
+    for (auto &params: saved_trans_draw_calls_) {
+        if (params.texture_id != 0)
+            gl_.ctx.BindTexture(GL_TEXTURE_2D, params.texture_id);
         trans_batch_lists_[params.list_idx].draw(params.batch_idx, params.first, params.count);
+        if (params.texture_id != 0)
+            gl_.ctx.BindTexture(GL_TEXTURE_2D, 0);
+    }
 
     gl_.depth_mask(true);
     gl_.disable(gloo::Capability::Blend);
@@ -238,7 +262,8 @@ void Batcher::clear() {
 
     for (auto &list: trans_batch_lists_)
         list.clear();
-    last_trans_batch_list_idx_ = std::numeric_limits<std::size_t>::max();
+    last_trans_batch_list_idx_ = NO_LAST_IDX_;
+    last_texture_id_ = NO_LAST_ID_;
     saved_trans_draw_calls_.clear();
 
     z_level_ = 2.0f;
@@ -248,21 +273,28 @@ void Batcher::add_opaque_(BatchType type, const std::initializer_list<float> ver
     opaque_batch_lists_[unwrap(type)].add(vertex_data);
 }
 
-void Batcher::add_trans_(BatchType type, const std::initializer_list<float> vertex_data) {
+void Batcher::add_trans_(BatchType type, GLuint texture_id, const std::initializer_list<float> vertex_data) {
     if (last_trans_batch_list_idx_ != unwrap(type))
+        flush_trans_draw_calls_();
+    else if (last_texture_id_ != NO_LAST_ID_ && last_texture_id_ != texture_id)
         flush_trans_draw_calls_();
 
     trans_batch_lists_[unwrap(type)].add(vertex_data);
     last_trans_batch_list_idx_ = unwrap(type);
+
+    if (texture_id != 0)
+        last_texture_id_ = texture_id;
 }
 
 void Batcher::flush_trans_draw_calls_() {
-    if (last_trans_batch_list_idx_ == std::numeric_limits<std::size_t>::max())
+    if (last_trans_batch_list_idx_ == NO_LAST_IDX_)
         return;
 
     auto new_draw_calls = trans_batch_lists_[last_trans_batch_list_idx_].draw_calls();
-    for (auto &draw_call: new_draw_calls)
+    for (auto &draw_call: new_draw_calls) {
         draw_call.list_idx = last_trans_batch_list_idx_;
+        draw_call.texture_id = last_texture_id_;
+    }
 
     saved_trans_draw_calls_.reserve(saved_trans_draw_calls_.size() + new_draw_calls.size());
     saved_trans_draw_calls_.insert(saved_trans_draw_calls_.end(), new_draw_calls.begin(), new_draw_calls.end());

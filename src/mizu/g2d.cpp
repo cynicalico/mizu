@@ -12,6 +12,10 @@ G2d::~G2d() {
     unregister_callbacks_();
 }
 
+std::unique_ptr<Texture> G2d::load_texture(const std::filesystem::path &path, gloo::Scaling scaling) const {
+    return std::make_unique<Texture>(gl_, path, scaling);
+}
+
 bool G2d::vsync() const {
     int vsync;
     if (!SDL_GL_GetSwapInterval(&vsync))
@@ -33,14 +37,16 @@ void G2d::clear(const Color &color, gloo::ClearBit mask) {
 void G2d::point(glm::vec2 p, const Color &color) {
     auto gl_color = color.gl_color();
     auto z = batcher_.z();
-    batcher_.add(BatchType::Points, gl_color.a < 1.0f, {p.x, p.y, z, gl_color.r, gl_color.g, gl_color.b, gl_color.a});
+    batcher_.add(
+            BatchType::Points, gl_color.a < 1.0f, 0, {p.x, p.y, z, gl_color.r, gl_color.g, gl_color.b, gl_color.a}
+    );
 }
 
 void G2d::line(glm::vec2 p0, glm::vec2 p1, glm::vec3 rot, const Color &color) {
     auto gl_color = color.gl_color();
     auto z = batcher_.z();
     // clang-format off
-    batcher_.add(BatchType::Lines, gl_color.a < 1.0f, {
+    batcher_.add(BatchType::Lines, gl_color.a < 1.0f, 0, {
         p0.x, p0.y, z, gl_color.r, gl_color.g, gl_color.b, gl_color.a, rot.x, rot.y, glm::radians(rot.z),
         p1.x, p1.y, z, gl_color.r, gl_color.g, gl_color.b, gl_color.a, rot.x, rot.y, glm::radians(rot.z),
     });
@@ -55,7 +61,7 @@ void G2d::triangle(glm::vec2 p0, glm::vec2 p1, glm::vec2 p2, glm::vec3 rot, cons
     auto gl_color = color.gl_color();
     auto z = batcher_.z();
     // clang-format off
-    batcher_.add(BatchType::Triangles, gl_color.a < 1.0f, {
+    batcher_.add(BatchType::Triangles, gl_color.a < 1.0f, 0, {
         p0.x, p0.y, z, gl_color.r, gl_color.g, gl_color.b, gl_color.a, rot.x, rot.y, glm::radians(rot.z),
         p1.x, p1.y, z, gl_color.r, gl_color.g, gl_color.b, gl_color.a, rot.x, rot.y, glm::radians(rot.z),
         p2.x, p2.y, z, gl_color.r, gl_color.g, gl_color.b, gl_color.a, rot.x, rot.y, glm::radians(rot.z),
@@ -65,6 +71,45 @@ void G2d::triangle(glm::vec2 p0, glm::vec2 p1, glm::vec2 p2, glm::vec3 rot, cons
 
 void G2d::triangle(glm::vec2 p0, glm::vec2 p1, glm::vec2 p2, const Color &color) {
     triangle(p0, p1, p2, glm::vec3(0.0), color);
+}
+
+void G2d::texture(const Texture &t, glm::vec2 p, glm::vec3 rot, const Color &color) {
+    auto gl_color = color.gl_color();
+    auto z = batcher_.z();
+    // clang-format off
+    // TODO: Allow for drawing fully opaque textures as opaque
+    batcher_.add(BatchType::Tex, true, t.id(), {
+        p.x,              p.y,              z,
+        gl_color.r, gl_color.g, gl_color.b, gl_color.a,
+        rot.x, rot.y, glm::radians(rot.z),
+        t.s(0.0f), t.t(0.0f),
+
+        p.x + t.width(),  p.y,              z,
+        gl_color.r, gl_color.g, gl_color.b, gl_color.a,
+        rot.x, rot.y, glm::radians(rot.z),
+        t.s(t.width()), t.t(0.0f),
+
+        p.x + t.width(),  p.y + t.height(), z,
+        gl_color.r, gl_color.g, gl_color.b, gl_color.a,
+        rot.x, rot.y, glm::radians(rot.z),
+        t.s(t.width()), t.t(t.height()),
+
+        p.x,              p.y,              z,
+        gl_color.r, gl_color.g, gl_color.b, gl_color.a,
+        rot.x, rot.y, glm::radians(rot.z),
+        t.s(0.0f), t.t(0.0f),
+
+        p.x + t.width(),  p.y + t.height(), z,
+        gl_color.r, gl_color.g, gl_color.b, gl_color.a,
+        rot.x, rot.y, glm::radians(rot.z),
+        t.s(t.width()), t.t(t.height()),
+
+        p.x,              p.y + t.height(), z,
+        gl_color.r, gl_color.g, gl_color.b, gl_color.a,
+        rot.x, rot.y, glm::radians(rot.z),
+        t.s(0.0f), t.t(t.height()),
+    });
+    // clang-format on
 }
 
 void G2d::register_callbacks_() {

@@ -29,10 +29,10 @@ public:
 
     void swap();
 
-    glm::ivec2 get_size() const;
+    glm::ivec2 size() const;
     void set_size(glm::ivec2 size);
 
-    glm::ivec2 get_pos() const;
+    glm::ivec2 pos() const;
     void set_pos(glm::ivec2 pos);
 
     void set_icon(SDL_Surface *icon);

@@ -1,7 +1,7 @@
 #include "mizu/window.hpp"
 #include <SDL3/SDL.h>
 #include <glm/ext/matrix_clip_space.hpp>
-#include "mizu/image.hpp"
+#include "mizu/io.hpp"
 #include "mizu/log.hpp"
 #include "mizu/payloads.hpp"
 
@@ -50,8 +50,7 @@ Window &Window::operator=(Window &&other) noexcept {
 }
 
 glm::mat4 Window::projection() const {
-    auto size = get_size();
-    return glm::orthoZO(0.0f, static_cast<float>(size.x), static_cast<float>(size.y), 0.0f, 1.0f, 0.0f);
+    return glm::orthoZO(0.0f, static_cast<float>(size().x), static_cast<float>(size().y), 0.0f, 1.0f, 0.0f);
 }
 
 SDL_Window *Window::underlying() const {
@@ -72,7 +71,7 @@ void Window::swap() {
         MIZU_LOG_ERROR("Failed to swap window: {}", SDL_GetError());
 }
 
-glm::ivec2 Window::get_size() const {
+glm::ivec2 Window::size() const {
     glm::ivec2 size;
     if (!SDL_GetWindowSize(sdl_window_, &size.x, &size.y))
         MIZU_LOG_ERROR("Failed to get size of window: {}", SDL_GetError());
@@ -84,7 +83,7 @@ void Window::set_size(glm::ivec2 size) {
         MIZU_LOG_ERROR("Failed to set size of window: {}", SDL_GetError());
 }
 
-glm::ivec2 Window::get_pos() const {
+glm::ivec2 Window::pos() const {
     glm::ivec2 pos;
     if (!SDL_GetWindowPosition(sdl_window_, &pos.x, &pos.y))
         MIZU_LOG_ERROR("Failed to get pos of window: {}", SDL_GetError());
@@ -118,7 +117,7 @@ void Window::set_icon_dir(const std::filesystem::path &path) {
     }
 
     if (!icon)
-        MIZU_LOG_ERROR("No .png images in directory {} for window icon", path.string());
+        MIZU_LOG_ERROR("No .png images in directory '{}' for window icon", path);
     else
         set_icon(icon);
 }

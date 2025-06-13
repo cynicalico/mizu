@@ -19,6 +19,7 @@ set(${PROJECT_NAME}_headers
         include/gloo/buffer.hpp
         include/gloo/context.hpp
         include/gloo/shader.hpp
+        include/gloo/texture.hpp
         include/gloo/vertex_array.hpp
         include/gloo/sdl3/attr.hpp
         include/gloo/sdl3/context_flags.hpp
@@ -33,7 +34,6 @@ set(${PROJECT_NAME}_headers
         include/mizu/engine.hpp
         include/mizu/enum_class_helpers.hpp
         include/mizu/g2d.hpp
-        include/mizu/image.hpp
         include/mizu/imconfig.hpp
         include/mizu/input_mgr.hpp
         include/mizu/io.hpp
@@ -45,6 +45,7 @@ set(${PROJECT_NAME}_headers
         include/mizu/platform.hpp
         include/mizu/rng.hpp
         include/mizu/shapes.hpp
+        include/mizu/texture.hpp
         include/mizu/time.hpp
         include/mizu/window.hpp
         include/mizu/ds/priority_queue.hpp
@@ -63,6 +64,7 @@ set(${PROJECT_NAME}_sources
         src/gloo/buffer.cpp
         src/gloo/context.cpp
         src/gloo/shader.cpp
+        src/gloo/texture.cpp
         src/gloo/vertex_array.cpp
         src/gloo/sdl3/attr.cpp
         src/gloo/sdl3/context_flags.cpp
@@ -74,12 +76,12 @@ set(${PROJECT_NAME}_sources
         src/mizu/dear.cpp
         src/mizu/engine.cpp
         src/mizu/g2d.cpp
-        src/mizu/image.cpp
         src/mizu/input_mgr.cpp
         src/mizu/io.cpp
         src/mizu/memusage.cpp
         src/mizu/platform.cpp
         src/mizu/rng.cpp
+        src/mizu/texture.cpp
         src/mizu/window.cpp
         # [[[end]]]
 )
