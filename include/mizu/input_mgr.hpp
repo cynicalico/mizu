@@ -322,6 +322,8 @@ public:
     float mouse_py() const;
     float mouse_dx() const;
     float mouse_dy() const;
+    float mouse_scroll_x() const;
+    float mouse_scroll_y() const;
 
 private:
     struct KeyState {
@@ -345,6 +347,7 @@ private:
     glm::vec2 mouse_pos_{};
     glm::vec2 prev_mouse_pos_{};
     glm::vec2 mouse_relative_{};
+    glm::vec2 mouse_scroll_{};
 
     std::size_t callback_id_{0};
     CallbackMgr &callbacks_;
@@ -359,6 +362,7 @@ private:
     void mouse_motion_(std::uint64_t timestamp, float x, float y, float dx, float dy);
     void mouse_down_(std::uint64_t timestamp, std::uint8_t sdl_button, float x, float y);
     void mouse_up_(std::uint64_t timestamp, std::uint8_t sdl_button, float x, float y);
+    void mouse_wheel_(std::uint64_t timestamp, bool natural, float x, float y, float mouse_x, float mouse_y);
 };
 } // namespace mizu
 

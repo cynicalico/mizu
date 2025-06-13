@@ -40,6 +40,16 @@ void Context::depth_func(DepthFunc func) {
     CHECK_GL_ERROR(ctx, DepthFunc);
 }
 
+void Context::clip_control(ClipOrigin origin, ClipDepth depth) {
+    ctx.ClipControl(static_cast<GLenum>(origin), static_cast<GLenum>(depth));
+    CHECK_GL_ERROR(ctx, ClipControl);
+}
+
+void Context::depth_mask(bool enabled) {
+    ctx.DepthMask(enabled ? GL_TRUE : GL_FALSE);
+    CHECK_GL_ERROR(ctx, DepthMask);
+}
+
 void Context::debug_message_callback(GLDEBUGPROC callback, const void *user_param) {
     ctx.DebugMessageCallback(callback, user_param);
     CHECK_GL_ERROR(ctx, DebugMessageCallback);

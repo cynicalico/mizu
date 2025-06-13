@@ -17,30 +17,82 @@ struct Batch {
     std::unique_ptr<gloo::StaticSizeBuffer<float>> vbo;
     std::unique_ptr<gloo::VertexArray> vao;
 
-    Batch(GladGLContext &gl, BatchType type, gloo::Shader *shader, std::size_t capacity, gloo::FillMode fill_mode);
+    Batch(gloo::Context &gl, BatchType type, gloo::Shader *shader, std::size_t capacity, gloo::FillMode fill_mode);
 };
 
-struct BatchList {
-    GladGLContext &gl;
+struct BatchListBase {
+    gloo::Context &gl;
 
     BatchType type;
     gloo::FillMode fill_mode;
     gloo::Shader *shader;
     std::size_t batch_capacity;
 
-    std::size_t active_idx{0};
-    std::vector<Batch> batches{};
+    std::size_t active_idx;
+    std::vector<Batch> batches;
 
-    std::size_t last_batch_count{0};
-    Ticker<> check_batches{std::chrono::seconds(10)};
-    bool checking_unused_{false};
-    MaxPeriod<std::size_t> batch_count_max{std::chrono::seconds(10)};
+    std::size_t last_batch_count;
+    Ticker<> check_batches;
+    bool checking_unused_;
+    MaxPeriod<std::size_t> batch_count_max;
+
+    BatchListBase(
+            gloo::Context &gl,
+            BatchType type,
+            gloo::FillMode fill_mode,
+            gloo::Shader *shader,
+            std::size_t batch_capacity
+    )
+        : gl(gl),
+          type(type),
+          fill_mode(fill_mode),
+          shader(shader),
+          batch_capacity(batch_capacity),
+          active_idx(0),
+          batches(),
+          last_batch_count(0),
+          check_batches(std::chrono::seconds(10)),
+          checking_unused_(false),
+          batch_count_max(std::chrono::seconds(10)) {}
+};
+
+struct OpaqueBatchList : BatchListBase {
+    OpaqueBatchList(gloo::Context &gl, BatchType type, gloo::Shader *shader, std::size_t batch_capacity)
+        : BatchListBase(gl, type, gloo::FillMode::BackToFront, shader, batch_capacity) {}
 
     void add(std::initializer_list<float> vertex_data);
 
-    void draw(const glm::mat4 &projection) const;
+    void draw(const glm::mat4 &projection);
 
     void clear();
+};
+
+struct TransBatchListSavedDrawParams {
+    std::size_t list_idx;
+    std::size_t batch_idx;
+    std::size_t first;
+    std::size_t count;
+};
+
+struct TransBatchList : BatchListBase {
+    TransBatchList(gloo::Context &gl, BatchType type, gloo::Shader *shader, std::size_t batch_capacity)
+        : BatchListBase(gl, type, gloo::FillMode::FrontToBack, shader, batch_capacity) {}
+
+    std::size_t last_size{0};
+    std::vector<TransBatchListSavedDrawParams> saved_draw_calls{};
+
+    std::vector<TransBatchListSavedDrawParams> draw_calls();
+
+    void add(std::initializer_list<float> vertex_data);
+
+    void set_projection_and_sync(const glm::mat4 &projection);
+
+    void draw(std::size_t batch_idx, std::size_t first, std::size_t count);
+
+    void clear();
+
+private:
+    void save_draw_call_();
 };
 
 class Batcher {
@@ -54,7 +106,7 @@ public:
 
     void add(BatchType type, bool trans, std::initializer_list<float> vertex_data);
 
-    void draw(glm::mat4 projection) const;
+    void draw(glm::mat4 projection);
 
     void clear();
 
@@ -62,12 +114,19 @@ private:
     gloo::Context &ctx_;
 
     std::unique_ptr<gloo::Shader> shaders_[3];
-    BatchList opaque_batch_lists_[3];
-    BatchList trans_batch_lists_[3];
+
+    OpaqueBatchList opaque_batch_lists_[3];
+
+    TransBatchList trans_batch_lists_[3];
+    std::size_t last_trans_list_idx_{std::numeric_limits<std::size_t>::max()};
+    std::vector<TransBatchListSavedDrawParams> trans_draw_calls_{};
+
     float z_level_{2.0f};
 
     void add_opaque_(BatchType type, std::initializer_list<float> vertex_data);
+
     void add_trans_(BatchType type, std::initializer_list<float> vertex_data);
+    void push_saved_draw_calls_();
 };
 } // namespace mizu
 

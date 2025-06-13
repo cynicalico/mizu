@@ -84,6 +84,14 @@ float InputMgr::mouse_dy() const {
     return mouse_relative_.y;
 }
 
+float InputMgr::mouse_scroll_x() const {
+    return mouse_scroll_.x;
+}
+
+float InputMgr::mouse_scroll_y() const {
+    return mouse_scroll_.y;
+}
+
 void InputMgr::register_callbacks_() {
     callback_id_ = callbacks_.reg();
     callbacks_.sub<PPreUpdate>(callback_id_, [&](const auto &p) { update_(p.dt); });
@@ -98,9 +106,13 @@ void InputMgr::register_callbacks_() {
     callbacks_.sub<PEventMouseButtonUp>(callback_id_, [&](const auto &p) {
         mouse_up_(p.timestamp, p.button, p.x, p.y);
     });
+    callbacks_.sub<PEventMouseWheel>(callback_id_, [&](const auto &p) {
+        mouse_wheel_(p.timestamp, p.natural, p.x, p.y, p.mouse_x, p.mouse_y);
+    });
 }
 
 void InputMgr::unregister_callbacks_() {
+    callbacks_.unsub<PEventMouseWheel>(callback_id_);
     callbacks_.unsub<PEventMouseButtonUp>(callback_id_);
     callbacks_.unsub<PEventMouseButtonDown>(callback_id_);
     callbacks_.unsub<PEventMouseMotion>(callback_id_);
@@ -124,12 +136,15 @@ void InputMgr::update_(double dt) {
     prev_mouse_pos_.y = mouse_pos_.y;
     mouse_relative_.x = 0;
     mouse_relative_.y = 0;
+    mouse_scroll_.x = 0;
+    mouse_scroll_.y = 0;
 
     callbacks_.poll<PEventKeyDown>(callback_id_);
     callbacks_.poll<PEventKeyUp>(callback_id_);
     callbacks_.poll<PEventMouseMotion>(callback_id_);
     callbacks_.poll<PEventMouseButtonDown>(callback_id_);
     callbacks_.poll<PEventMouseButtonUp>(callback_id_);
+    callbacks_.poll<PEventMouseWheel>(callback_id_);
 }
 
 void InputMgr::key_down_(std::uint64_t timestamp, SDL_Keycode sdl_key, SDL_Keymod sdl_mods) {
@@ -165,5 +180,10 @@ void InputMgr::mouse_up_(std::uint64_t timestamp, std::uint8_t sdl_button, float
     mouse_button_state_[button].timestamp = timestamp;
     mouse_button_state_[button].pressed = false;
     mouse_button_state_[button].mods = static_cast<Mod>(SDL_GetModState());
+}
+
+void InputMgr::mouse_wheel_(std::uint64_t timestamp, bool natural, float x, float y, float mouse_x, float mouse_y) {
+    mouse_scroll_.x += x;
+    mouse_scroll_.y += y;
 }
 } // namespace mizu

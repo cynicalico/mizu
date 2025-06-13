@@ -85,7 +85,7 @@ void G2d::unregister_callbacks_() {
 void G2d::pre_draw_() {
     gl_.enable(gloo::Capability::DepthTest);
     gl_.depth_func(gloo::DepthFunc::Greater);
-    gl_.ctx.ClipControl(GL_LOWER_LEFT, GL_ZERO_TO_ONE);
+    gl_.clip_control(gloo::ClipOrigin::LowerLeft, gloo::ClipDepth::ZeroToOne);
     gl_.clear_depth(0.0f);
 }
 
@@ -95,7 +95,7 @@ void G2d::post_draw_() {
 
     gl_.disable(gloo::Capability::DepthTest);
     gl_.depth_func(gloo::DepthFunc::Less);
-    gl_.ctx.ClipControl(GL_LOWER_LEFT, GL_NEGATIVE_ONE_TO_ONE);
+    gl_.clip_control(gloo::ClipOrigin::LowerLeft, gloo::ClipDepth::NegativeOneToOne);
     gl_.clear_depth(1.0f);
 }
 } // namespace mizu

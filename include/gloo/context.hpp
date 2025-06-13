@@ -75,6 +75,16 @@ enum class DepthFunc : GLenum {
     Always = GL_ALWAYS,
 };
 
+enum class ClipOrigin : GLenum {
+    LowerLeft = GL_LOWER_LEFT,
+    UpperLeft = GL_UPPER_LEFT,
+};
+
+enum class ClipDepth : GLenum {
+    NegativeOneToOne = GL_NEGATIVE_ONE_TO_ONE,
+    ZeroToOne = GL_ZERO_TO_ONE,
+};
+
 class Context {
 public:
     GladGLContext ctx;
@@ -90,6 +100,10 @@ public:
     void blend_func(BlendFunc sfactor, BlendFunc dfactor);
 
     void depth_func(DepthFunc func);
+
+    void clip_control(ClipOrigin origin, ClipDepth depth);
+
+    void depth_mask(bool enabled);
 
     void debug_message_callback(GLDEBUGPROC callback, const void *user_param);
 };
