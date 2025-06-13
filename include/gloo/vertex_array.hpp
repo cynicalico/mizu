@@ -5,8 +5,8 @@
 #include <memory>
 #include "gloo/buffer.hpp"
 #include "gloo/shader.hpp"
-#include "mizu/class_helpers.hpp"
-#include "mizu/is_any_of.hpp"
+#include "mizu/util/class_helpers.hpp"
+#include "mizu/util/is_any_of.hpp"
 
 namespace gloo {
 enum class DrawMode : GLenum {

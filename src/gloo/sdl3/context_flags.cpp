@@ -1,5 +1,5 @@
 #include "gloo/sdl3/context_flags.hpp"
-#include "mizu/log.hpp"
+#include "mizu/core/log.hpp"
 
 namespace gloo::sdl3 {
 ContextFlagsBuilder::ContextFlagsBuilder()

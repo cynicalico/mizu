@@ -1,5 +1,5 @@
 #include "gloo/context.hpp"
-#include "mizu/log.hpp"
+#include "mizu/core/log.hpp"
 
 namespace gloo {
 std::optional<ContextVersion> Context::load(GLADloadfunc func) {

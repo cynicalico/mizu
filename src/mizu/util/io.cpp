@@ -1,7 +1,7 @@
-#include "mizu/io.hpp"
+#include "mizu/util/io.hpp"
 #include <fstream>
-#include "mizu/log.hpp"
-#include "mizu/platform.hpp"
+#include "mizu/core/log.hpp"
+#include "mizu/util/platform.hpp"
 
 namespace mizu {
 namespace internal {

@@ -8,7 +8,7 @@
 #include <string>
 #include <tuple>
 #include <unordered_set>
-#include "mizu/class_helpers.hpp"
+#include "mizu/util/class_helpers.hpp"
 
 namespace gloo {
 class Shader {

@@ -19,7 +19,7 @@ public:
 Ethereal::Ethereal(mizu::Engine *engine)
     : Application(engine), g2d(engine->g2d.get()), input(engine->input.get()), window(engine->window.get()) {
     font_tex = g2d->load_texture(
-            "examples/font/1px_7x9.png", gloo::MinFilter::NearestMipmapNearest, gloo::MagFilter::Nearest
+            "examples/font/1px_7x9_no_bg.png", gloo::MinFilter::NearestMipmapNearest, gloo::MagFilter::Nearest
     );
     font = std::make_unique<mizu::CodePage437>(g2d, *font_tex, glm::uvec2{7, 9}, 2);
 }
@@ -35,7 +35,9 @@ void Ethereal::update(double dt) {
 void Ethereal::draw() {
     g2d->clear(mizu::rgb(0x000000));
 
-    font->draw("Hello, world!\nThis is text!", {50, 50}, 2.0f);
+    const std::string s = "Hello, world!\nThis is text!";
+    g2d->fill_rect({50, 50}, font->calculate_size(s, 2.0f), mizu::rgb(0xff0000));
+    font->draw(s, {50, 50}, 2.0f);
 }
 
 int main(int, char *[]) {

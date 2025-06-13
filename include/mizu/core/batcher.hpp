@@ -5,7 +5,7 @@
 #include "gloo/buffer.hpp"
 #include "gloo/context.hpp"
 #include "gloo/vertex_array.hpp"
-#include "mizu/time.hpp"
+#include "mizu/util/time.hpp"
 
 namespace mizu {
 enum class BatchType : std::size_t { Points = 0, Lines = 1, Triangles = 2, Tex = 3 };

@@ -6,8 +6,8 @@
 #include <alext.h>
 #include <filesystem>
 #include <sndfile.hh>
-#include "mizu/callback_mgr.hpp"
-#include "mizu/class_helpers.hpp"
+#include "mizu/core/callback_mgr.hpp"
+#include "mizu/util/class_helpers.hpp"
 
 namespace mizu {
 inline LPALEVENTCONTROLSOFT alEventControlSOFT;

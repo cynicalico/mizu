@@ -4,7 +4,7 @@
 #include <chrono>
 #include <deque>
 #include <functional>
-#include "mizu/averagers.hpp"
+#include "mizu/util/averagers.hpp"
 
 namespace mizu {
 template<typename Clock = std::chrono::steady_clock>

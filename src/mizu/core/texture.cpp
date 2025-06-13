@@ -1,4 +1,4 @@
-#include "mizu/texture.hpp"
+#include "mizu/core/texture.hpp"
 
 namespace mizu {
 Texture::Texture(

@@ -1,5 +1,5 @@
 #include "gloo/texture.hpp"
-#include "mizu/log.hpp"
+#include "mizu/core/log.hpp"
 
 namespace gloo {
 Texture::Texture(GladGLContext &gl, const mizu::PngData &data, MinFilter min_filter, MagFilter mag_filter)

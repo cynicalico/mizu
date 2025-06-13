@@ -1,8 +1,8 @@
 #ifndef MIZU_FONT_CODE_PAGE_437_HPP
 #define MIZU_FONT_CODE_PAGE_437_HPP
 
-#include "mizu/class_helpers.hpp"
-#include "mizu/g2d.hpp"
+#include "mizu/util/class_helpers.hpp"
+#include "mizu/core/g2d.hpp"
 
 namespace mizu {
 class CodePage437 {
@@ -11,6 +11,11 @@ public:
 
     NO_COPY(CodePage437)
     NO_MOVE(CodePage437)
+
+    unsigned int char_w() const;
+    unsigned int char_h() const;
+
+    glm::vec2 calculate_size(std::string_view text, float scale = 1.0f) const;
 
     void draw(std::string_view text, glm::vec2 pos, float scale, const Color &color = rgb(0xffffff)) const;
     void draw(std::string_view text, glm::vec2 pos, const Color &color = rgb(0xffffff)) const;

@@ -1,9 +1,9 @@
-#include "mizu/engine.hpp"
+#include "mizu/core/engine.hpp"
 #include <SDL3/SDL.h>
 #include <utility>
 #include "gloo/sdl3/attr.hpp"
-#include "mizu/log.hpp"
-#include "mizu/platform.hpp"
+#include "mizu/core/log.hpp"
+#include "mizu/util/platform.hpp"
 
 #if defined(MIZU_PLATFORM_WINDOWS)
 #include "windows.h"

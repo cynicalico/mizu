@@ -1,6 +1,6 @@
-#include "mizu/input_mgr.hpp"
+#include "mizu/core/input_mgr.hpp"
 #include <SDL3/SDL_keyboard.h>
-#include "mizu/log.hpp"
+#include "mizu/core/log.hpp"
 
 namespace mizu {
 InputMgr::InputMgr(CallbackMgr &callbacks)

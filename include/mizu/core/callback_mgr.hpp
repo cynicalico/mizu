@@ -5,7 +5,7 @@
 #include <functional>
 #include <optional>
 #include <vector>
-#include "mizu/log.hpp"
+#include "mizu/core/log.hpp"
 
 namespace mizu {
 class CallbackMgr {

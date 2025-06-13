@@ -23,33 +23,33 @@ set(${PROJECT_NAME}_headers
         include/gloo/vertex_array.hpp
         include/gloo/sdl3/attr.hpp
         include/gloo/sdl3/context_flags.hpp
-        include/mizu/application.hpp
-        include/mizu/audio_mgr.hpp
-        include/mizu/averagers.hpp
-        include/mizu/batcher.hpp
-        include/mizu/callback_mgr.hpp
-        include/mizu/class_helpers.hpp
-        include/mizu/color.hpp
-        include/mizu/dear.hpp
-        include/mizu/engine.hpp
-        include/mizu/enum_class_helpers.hpp
-        include/mizu/g2d.hpp
         include/mizu/imconfig.hpp
-        include/mizu/input_mgr.hpp
-        include/mizu/io.hpp
-        include/mizu/is_any_of.hpp
-        include/mizu/log.hpp
-        include/mizu/memusage.hpp
         include/mizu/mizu.hpp
-        include/mizu/payloads.hpp
-        include/mizu/platform.hpp
-        include/mizu/rng.hpp
-        include/mizu/shapes.hpp
-        include/mizu/texture.hpp
-        include/mizu/time.hpp
-        include/mizu/window.hpp
+        include/mizu/core/application.hpp
+        include/mizu/core/audio_mgr.hpp
+        include/mizu/core/batcher.hpp
+        include/mizu/core/callback_mgr.hpp
+        include/mizu/core/color.hpp
+        include/mizu/core/dear.hpp
+        include/mizu/core/engine.hpp
+        include/mizu/core/g2d.hpp
+        include/mizu/core/input_mgr.hpp
+        include/mizu/core/log.hpp
+        include/mizu/core/payloads.hpp
+        include/mizu/core/texture.hpp
+        include/mizu/core/window.hpp
         include/mizu/ds/priority_queue.hpp
         include/mizu/font/code_page_437.hpp
+        include/mizu/util/averagers.hpp
+        include/mizu/util/class_helpers.hpp
+        include/mizu/util/enum_class_helpers.hpp
+        include/mizu/util/io.hpp
+        include/mizu/util/is_any_of.hpp
+        include/mizu/util/memusage.hpp
+        include/mizu/util/platform.hpp
+        include/mizu/util/rng.hpp
+        include/mizu/util/shapes.hpp
+        include/mizu/util/time.hpp
         # [[[end]]]
 )
 
@@ -69,22 +69,22 @@ set(${PROJECT_NAME}_sources
         src/gloo/vertex_array.cpp
         src/gloo/sdl3/attr.cpp
         src/gloo/sdl3/context_flags.cpp
-        src/mizu/application.cpp
-        src/mizu/audio_mgr.cpp
-        src/mizu/averagers.cpp
-        src/mizu/batcher.cpp
-        src/mizu/color.cpp
-        src/mizu/dear.cpp
-        src/mizu/engine.cpp
-        src/mizu/g2d.cpp
-        src/mizu/input_mgr.cpp
-        src/mizu/io.cpp
-        src/mizu/memusage.cpp
-        src/mizu/platform.cpp
-        src/mizu/rng.cpp
-        src/mizu/texture.cpp
-        src/mizu/window.cpp
+        src/mizu/core/application.cpp
+        src/mizu/core/audio_mgr.cpp
+        src/mizu/core/batcher.cpp
+        src/mizu/core/color.cpp
+        src/mizu/core/dear.cpp
+        src/mizu/core/engine.cpp
+        src/mizu/core/g2d.cpp
+        src/mizu/core/input_mgr.cpp
+        src/mizu/core/texture.cpp
+        src/mizu/core/window.cpp
         src/mizu/font/code_page_437.cpp
+        src/mizu/util/averagers.cpp
+        src/mizu/util/io.cpp
+        src/mizu/util/memusage.cpp
+        src/mizu/util/platform.cpp
+        src/mizu/util/rng.cpp
         # [[[end]]]
 )
 

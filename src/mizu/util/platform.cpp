@@ -1,6 +1,6 @@
-#include "mizu/platform.hpp"
+#include "mizu/util/platform.hpp"
 #include "fmt/ranges.h"
-#include "mizu/log.hpp"
+#include "mizu/core/log.hpp"
 
 namespace mizu {
 void log_platform() {

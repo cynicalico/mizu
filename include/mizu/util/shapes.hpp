@@ -2,7 +2,7 @@
 #define MIZU_SHAPES_HPP
 
 #include <glm/vec2.hpp>
-#include "mizu/color.hpp"
+#include "mizu/core/color.hpp"
 
 namespace mizu {
 template<typename Color = Rgba>

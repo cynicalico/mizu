@@ -2,7 +2,7 @@
 #define GLOO_SDL3_GL_CONTEXT_FLAGS_HPP
 
 #include <SDL3/SDL_video.h>
-#include "mizu/enum_class_helpers.hpp"
+#include "mizu/util/enum_class_helpers.hpp"
 
 namespace gloo::sdl3 {
 enum class ContextFlags : int {

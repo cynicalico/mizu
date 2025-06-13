@@ -1,6 +1,6 @@
-#include "mizu/g2d.hpp"
+#include "mizu/core/g2d.hpp"
 #include <SDL3/SDL_video.h>
-#include "mizu/payloads.hpp"
+#include "mizu/core/payloads.hpp"
 
 namespace mizu {
 G2d::G2d(CallbackMgr &callbacks, gloo::Context &gl, Window *window)

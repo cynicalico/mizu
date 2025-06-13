@@ -5,16 +5,16 @@
 #include <memory>
 #include <string>
 #include "gloo/context.hpp"
-#include "mizu/application.hpp"
-#include "mizu/audio_mgr.hpp"
-#include "mizu/callback_mgr.hpp"
-#include "mizu/dear.hpp"
-#include "mizu/g2d.hpp"
-#include "mizu/input_mgr.hpp"
-#include "mizu/memusage.hpp"
-#include "mizu/payloads.hpp"
-#include "mizu/time.hpp"
-#include "mizu/window.hpp"
+#include "mizu/core/application.hpp"
+#include "mizu/core/audio_mgr.hpp"
+#include "mizu/core/callback_mgr.hpp"
+#include "mizu/core/dear.hpp"
+#include "mizu/core/g2d.hpp"
+#include "mizu/core/input_mgr.hpp"
+#include "mizu/core/window.hpp"
+#include "mizu/util/memusage.hpp"
+#include "mizu/util/time.hpp"
+#include "payloads.hpp"
 
 namespace mizu {
 class Engine {

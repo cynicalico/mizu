@@ -6,7 +6,7 @@
 #include <cstdint>
 #include <random>
 #include <string>
-#include "mizu/is_any_of.hpp"
+#include "mizu/util/is_any_of.hpp"
 
 namespace mizu::rng {
 

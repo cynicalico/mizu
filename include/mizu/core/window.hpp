@@ -6,7 +6,7 @@
 #include <filesystem>
 #include <glm/mat4x4.hpp>
 #include <string>
-#include "mizu/callback_mgr.hpp"
+#include "mizu/core/callback_mgr.hpp"
 
 namespace mizu {
 class Window {

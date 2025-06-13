@@ -4,9 +4,9 @@
 #include <SDL3/SDL_mouse.h>
 #include <fmt/format.h>
 #include <glm/vec2.hpp>
-#include "mizu/callback_mgr.hpp"
-#include "mizu/enum_class_helpers.hpp"
-#include "mizu/payloads.hpp"
+#include "mizu/core/callback_mgr.hpp"
+#include "mizu/util/enum_class_helpers.hpp"
+#include "payloads.hpp"
 
 namespace mizu {
 enum class Key : int {

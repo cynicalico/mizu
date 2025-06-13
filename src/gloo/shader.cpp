@@ -1,6 +1,6 @@
 #include "gloo/shader.hpp"
 #include "glm/gtc/type_ptr.hpp"
-#include "mizu/log.hpp"
+#include "mizu/core/log.hpp"
 
 namespace gloo {
 Shader::~Shader() {

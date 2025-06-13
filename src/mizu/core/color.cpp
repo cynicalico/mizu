@@ -1,4 +1,4 @@
-#include "mizu/color.hpp"
+#include "mizu/core/color.hpp"
 #include <cmath>
 
 namespace mizu {

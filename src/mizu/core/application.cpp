@@ -1,6 +1,6 @@
-#include "mizu/application.hpp"
-#include "mizu/engine.hpp"
-#include "mizu/payloads.hpp"
+#include "mizu/core/application.hpp"
+#include "mizu/core/engine.hpp"
+#include "mizu/core/payloads.hpp"
 
 namespace mizu {
 Application::Application(Engine *engine)

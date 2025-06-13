@@ -2,8 +2,8 @@
 #define GLOO_TEXTURE_HPP
 
 #include "gloo/context.hpp"
-#include "mizu/class_helpers.hpp"
-#include "mizu/io.hpp"
+#include "mizu/util/class_helpers.hpp"
+#include "mizu/util/io.hpp"
 
 namespace gloo {
 enum class MinFilter : GLenum {

@@ -1,6 +1,6 @@
-#include "mizu/audio_mgr.hpp"
-#include "mizu/log.hpp"
-#include "mizu/payloads.hpp"
+#include "mizu/core/audio_mgr.hpp"
+#include "mizu/core/payloads.hpp"
+#include "mizu/core/log.hpp"
 
 #ifndef AL_SOFT_hold_on_disconnect
 #define AL_SOFT_hold_on_disconnect

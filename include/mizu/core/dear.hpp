@@ -4,9 +4,9 @@
 #include <SDL3/SDL_events.h>
 #include <imgui.h>
 #include "glm/vec2.hpp"
-#include "mizu/callback_mgr.hpp"
-#include "mizu/class_helpers.hpp"
-#include "mizu/window.hpp"
+#include "mizu/core/callback_mgr.hpp"
+#include "mizu/util/class_helpers.hpp"
+#include "mizu/core/window.hpp"
 
 namespace mizu {
 class Dear {

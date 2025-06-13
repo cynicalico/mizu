@@ -2,9 +2,9 @@
 #define GLOO_BUFFER_HPP
 
 #include <glad/gl.h>
-#include "mizu/class_helpers.hpp"
-#include "mizu/enum_class_helpers.hpp"
-#include "mizu/log.hpp"
+#include "mizu/util/class_helpers.hpp"
+#include "mizu/core/log.hpp"
+#include "mizu/util/enum_class_helpers.hpp"
 
 namespace gloo {
 enum class BufferTarget : GLenum {

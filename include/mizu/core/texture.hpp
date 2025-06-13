@@ -4,7 +4,7 @@
 #include <filesystem>
 #include "gloo/context.hpp"
 #include "gloo/texture.hpp"
-#include "mizu/io.hpp"
+#include "mizu/util/io.hpp"
 
 namespace mizu {
 class Texture {

@@ -1,5 +1,5 @@
 #include "gloo/sdl3/attr.hpp"
-#include "mizu/log.hpp"
+#include "mizu/core/log.hpp"
 
 namespace gloo::sdl3 {
 std::optional<int> Attr::red_bits() {

@@ -4,14 +4,14 @@
 #include <glm/vec2.hpp>
 #include "gloo/context.hpp"
 #include "gloo/texture.hpp"
-#include "mizu/batcher.hpp"
-#include "mizu/callback_mgr.hpp"
-#include "mizu/class_helpers.hpp"
-#include "mizu/color.hpp"
-#include "mizu/enum_class_helpers.hpp"
-#include "mizu/shapes.hpp"
-#include "mizu/texture.hpp"
-#include "mizu/window.hpp"
+#include "mizu/core/batcher.hpp"
+#include "mizu/core/callback_mgr.hpp"
+#include "mizu/util/class_helpers.hpp"
+#include "mizu/core/color.hpp"
+#include "mizu/util/enum_class_helpers.hpp"
+#include "mizu/util/shapes.hpp"
+#include "mizu/core/texture.hpp"
+#include "mizu/core/window.hpp"
 
 namespace mizu {
 class G2d {

@@ -1,5 +1,5 @@
-#include "mizu/batcher.hpp"
-#include "mizu/io.hpp"
+#include "mizu/core/batcher.hpp"
+#include "mizu/util/io.hpp"
 
 namespace mizu {
 constexpr std::size_t vertex_size_map[4] = {7, 10, 10, 12};

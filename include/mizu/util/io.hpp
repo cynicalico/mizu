@@ -7,7 +7,7 @@
 #include <png.h>
 #include <pngconf.h>
 #include <string>
-#include "mizu/class_helpers.hpp"
+#include "mizu/util/class_helpers.hpp"
 
 namespace mizu {
 namespace internal {

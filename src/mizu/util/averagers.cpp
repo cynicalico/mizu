@@ -1,4 +1,4 @@
-#include "mizu/averagers.hpp"
+#include "mizu/util/averagers.hpp"
 
 namespace mizu {
 CMA::CMA(std::size_t sample_count)

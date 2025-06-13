@@ -1,5 +1,5 @@
-#include "mizu/memusage.hpp"
-#include "mizu/platform.hpp"
+#include "mizu/util/memusage.hpp"
+#include "mizu/util/platform.hpp"
 
 #if defined(MIZU_PLATFORM_WINDOWS)
 // clang-format off

@@ -1,9 +1,11 @@
 #ifndef MIZU_PAYLOADS_HPP
 #define MIZU_PAYLOADS_HPP
 
+#include <AL/alc.h>
 #include <SDL3/SDL_keycode.h>
 #include <SDL3/SDL_scancode.h>
-#include <alc.h>
+#include <cstdint>
+#include <string>
 
 namespace mizu {
 /*****************

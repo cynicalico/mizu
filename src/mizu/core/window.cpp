@@ -1,9 +1,9 @@
-#include "mizu/window.hpp"
+#include "mizu/core/window.hpp"
 #include <SDL3/SDL.h>
 #include <glm/ext/matrix_clip_space.hpp>
-#include "mizu/io.hpp"
-#include "mizu/log.hpp"
-#include "mizu/payloads.hpp"
+#include "mizu/core/payloads.hpp"
+#include "mizu/core/log.hpp"
+#include "mizu/util/io.hpp"
 
 namespace mizu {
 Window::~Window() {

@@ -3,8 +3,8 @@
 
 #include <glad/gl.h>
 #include <optional>
-#include "mizu/color.hpp"
-#include "mizu/enum_class_helpers.hpp"
+#include "mizu/core/color.hpp"
+#include "mizu/util/enum_class_helpers.hpp"
 
 namespace gloo {
 struct ContextVersion {

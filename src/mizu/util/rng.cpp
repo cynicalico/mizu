@@ -1,5 +1,5 @@
-#include "mizu/rng.hpp"
-#include "mizu/log.hpp"
+#include "mizu/util/rng.hpp"
+#include "mizu/core/log.hpp"
 
 namespace mizu::rng {
 
