@@ -19,7 +19,7 @@ constexpr inline auto enum_range = [](auto front, auto back) {
  */
 
 template<typename Enum>
-std::underlying_type_t<Enum> unwrap(Enum e) {
+constexpr std::underlying_type_t<Enum> unwrap(Enum e) {
     return static_cast<std::underlying_type_t<Enum>>(e);
 }
 

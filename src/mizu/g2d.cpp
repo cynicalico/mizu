@@ -15,13 +15,14 @@ G2d::~G2d() {
 bool G2d::vsync() const {
     int vsync;
     if (!SDL_GL_GetSwapInterval(&vsync))
-        MIZU_LOG_ERROR("Failded to get swap interval: {}", SDL_GetError());
+        MIZU_LOG_ERROR("Failed to get swap interval: {}", SDL_GetError());
 
     return vsync == 1;
 }
 
 void G2d::set_vsync(bool enabled) {
-    SDL_GL_SetSwapInterval(enabled ? 1 : 0);
+    if (!SDL_GL_SetSwapInterval(enabled ? 1 : 0))
+        MIZU_LOG_ERROR("Failed to set swap interval: {}", SDL_GetError());
 }
 
 void G2d::clear(const Color &color, gloo::ClearBit mask) {

@@ -2,23 +2,28 @@
 #include "mizu/io.hpp"
 
 namespace mizu {
-gloo::DrawMode batch_type_to_draw_mode(BatchType type) {
-    switch (type) {
-    case BatchType::Points: return gloo::DrawMode::Points;
-    case BatchType::Lines: return gloo::DrawMode::Lines;
-    case BatchType::Triangles: return gloo::DrawMode::Triangles;
-    default: std::unreachable();
-    }
-}
+constexpr std::size_t vertex_size_map[3] = {7, 10, 10};
+
+constexpr std::size_t vertices_per_obj_map[3] = {1, 2, 3};
+
+constexpr auto MB = static_cast<std::size_t>(8e6);
+constexpr std::size_t batch_capacity_map[3] = {
+        MB / (32 * vertex_size_map[unwrap(BatchType::Points)] * vertices_per_obj_map[unwrap(BatchType::Points)]),
+        MB / (32 * vertex_size_map[unwrap(BatchType::Lines)] * vertices_per_obj_map[unwrap(BatchType::Lines)]),
+        MB / (32 * vertex_size_map[unwrap(BatchType::Triangles)] * vertices_per_obj_map[unwrap(BatchType::Triangles)]),
+};
+
+constexpr gloo::DrawMode draw_mode_map[3] = {gloo::DrawMode::Points, gloo::DrawMode::Lines, gloo::DrawMode::Triangles};
 
 Batch::Batch(gloo::Context &gl, BatchType type, gloo::Shader *shader, std::size_t capacity, gloo::FillMode fill_mode) {
+    vertex_size = vertex_size_map[unwrap(type)];
+
+    vbo = std::make_unique<gloo::StaticSizeBuffer<float>>(
+            gl.ctx, vertex_size * vertices_per_obj_map[unwrap(type)] * capacity, fill_mode
+    );
+
     switch (type) {
     case BatchType::Points:
-        vertex_size = 7;
-        vertices_per_obj = 1;
-        vbo = std::make_unique<gloo::StaticSizeBuffer<float>>(
-                gl.ctx, vertex_size * vertices_per_obj * capacity, fill_mode
-        );
         vao = gloo::VertexArrayBuilder(gl.ctx)
                       .with(shader)
                       .with(vbo.get(), gloo::BufferTarget::Array)
@@ -27,11 +32,6 @@ Batch::Batch(gloo::Context &gl, BatchType type, gloo::Shader *shader, std::size_
                       .build();
         break;
     case BatchType::Lines:
-        vertex_size = 10;
-        vertices_per_obj = 2;
-        vbo = std::make_unique<gloo::StaticSizeBuffer<float>>(
-                gl.ctx, vertex_size * vertices_per_obj * capacity, fill_mode
-        );
         vao = gloo::VertexArrayBuilder(gl.ctx)
                       .with(shader)
                       .with(vbo.get(), gloo::BufferTarget::Array)
@@ -41,11 +41,6 @@ Batch::Batch(gloo::Context &gl, BatchType type, gloo::Shader *shader, std::size_
                       .build();
         break;
     case BatchType::Triangles:
-        vertex_size = 10;
-        vertices_per_obj = 3;
-        vbo = std::make_unique<gloo::StaticSizeBuffer<float>>(
-                gl.ctx, vertex_size * vertices_per_obj * capacity, fill_mode
-        );
         vao = gloo::VertexArrayBuilder(gl.ctx)
                       .with(shader)
                       .with(vbo.get(), gloo::BufferTarget::Array)
@@ -77,11 +72,11 @@ void BatchListBase::cleanup_unused_() {
 
 void OpaqueBatchList::add(const std::initializer_list<float> vertex_data) {
     if (batches_.empty()) {
-        batches_.emplace_back(gl_, type_, shader_, batch_capacity_, fill_mode_);
+        batches_.emplace_back(gl_, type_, shader_, batch_capacity_map[unwrap(type_)], fill_mode_);
     } else if (batches_[active_idx_].vbo->is_full()) {
         active_idx_++;
         if (active_idx_ >= batches_.size())
-            batches_.emplace_back(gl_, type_, shader_, batch_capacity_, fill_mode_);
+            batches_.emplace_back(gl_, type_, shader_, batch_capacity_map[unwrap(type_)], fill_mode_);
     }
 
     assert(vertex_data.size() % batches_[active_idx_].vertex_size == 0);
@@ -100,7 +95,7 @@ void OpaqueBatchList::draw(const glm::mat4 &projection) {
 
         batch.vbo->sync_gl(gloo::BufferTarget::Array);
         batch.vao->draw_arrays(
-                batch_type_to_draw_mode(type_),
+                draw_mode_map[unwrap(type_)],
                 batch.vbo->front() / batch.vertex_size,
                 batch.vbo->size() / batch.vertex_size
         );
@@ -126,14 +121,14 @@ std::vector<TransBatchListDrawParams> TransBatchList::draw_calls() {
 
 void TransBatchList::add(const std::initializer_list<float> vertex_data) {
     if (batches_.empty()) {
-        batches_.emplace_back(gl_, type_, shader_, batch_capacity_, fill_mode_);
+        batches_.emplace_back(gl_, type_, shader_, batch_capacity_map[unwrap(type_)], fill_mode_);
     } else if (batches_[active_idx_].vbo->is_full()) {
         save_draw_call_();
         last_draw_call_offset_ = 0;
 
         active_idx_++;
         if (active_idx_ >= batches_.size())
-            batches_.emplace_back(gl_, type_, shader_, batch_capacity_, fill_mode_);
+            batches_.emplace_back(gl_, type_, shader_, batch_capacity_map[unwrap(type_)], fill_mode_);
     }
 
     assert(vertex_data.size() % batches_[active_idx_].vertex_size == 0);
@@ -155,7 +150,7 @@ void TransBatchList::draw(std::size_t batch_idx, std::size_t first, std::size_t 
     shader_->use();
 
     batches_[batch_idx].vao->draw_arrays(
-            batch_type_to_draw_mode(type_),
+            draw_mode_map[unwrap(type_)],
             first / batches_[batch_idx].vertex_size,
             count / batches_[batch_idx].vertex_size
     );
@@ -195,44 +190,14 @@ Batcher::Batcher(gloo::Context &ctx)
                       .link(),
       },
       opaque_batch_lists_{
-              OpaqueBatchList(
-                      ctx_,
-                      BatchType::Points,
-                      shaders_[0].get(),
-                      static_cast<std::size_t>(std::floor(8e6 / (32 * 7 * 1)))
-              ),
-              OpaqueBatchList(
-                      ctx_,
-                      BatchType::Lines,
-                      shaders_[1].get(),
-                      static_cast<std::size_t>(std::floor(8e6 / (32 * 10 * 2)))
-              ),
-              OpaqueBatchList(
-                      ctx_,
-                      BatchType::Triangles,
-                      shaders_[2].get(),
-                      static_cast<std::size_t>(std::floor(8e6 / (32 * 10 * 3)))
-              )
+              OpaqueBatchList(ctx_, BatchType::Points, shaders_[0].get()),
+              OpaqueBatchList(ctx_, BatchType::Lines, shaders_[1].get()),
+              OpaqueBatchList(ctx_, BatchType::Triangles, shaders_[2].get())
       },
       trans_batch_lists_{
-              TransBatchList(
-                      ctx_,
-                      BatchType::Points,
-                      shaders_[0].get(),
-                      static_cast<std::size_t>(std::floor(8e6 / (32 * 7 * 1)))
-              ),
-              TransBatchList(
-                      ctx_,
-                      BatchType::Lines,
-                      shaders_[1].get(),
-                      static_cast<std::size_t>(std::floor(8e6 / (32 * 10 * 2)))
-              ),
-              TransBatchList(
-                      ctx_,
-                      BatchType::Triangles,
-                      shaders_[2].get(),
-                      static_cast<std::size_t>(std::floor(8e6 / (32 * 10 * 3)))
-              )
+              TransBatchList(ctx_, BatchType::Points, shaders_[0].get()),
+              TransBatchList(ctx_, BatchType::Lines, shaders_[1].get()),
+              TransBatchList(ctx_, BatchType::Triangles, shaders_[2].get())
       } {}
 
 float Batcher::z() {

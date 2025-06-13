@@ -101,8 +101,8 @@ constexpr GLenum VertexArrayBuilder::determine_buf_type_() {
         return GL_INT;
     else if constexpr (std::is_same_v<T, unsigned int>)
         return GL_UNSIGNED_INT;
-
-    std::unreachable();
+    else
+        std::unreachable();
 }
 } // namespace gloo
 

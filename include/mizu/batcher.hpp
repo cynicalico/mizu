@@ -12,8 +12,6 @@ enum class BatchType : std::size_t { Points = 0, Lines = 1, Triangles = 2 };
 
 struct Batch {
     std::size_t vertex_size;
-    std::size_t vertices_per_obj;
-
     std::unique_ptr<gloo::StaticSizeBuffer<float>> vbo;
     std::unique_ptr<gloo::VertexArray> vao;
 
@@ -25,7 +23,6 @@ protected:
     gloo::Context &gl_;
     BatchType type_;
     gloo::Shader *shader_;
-    std::size_t batch_capacity_;
     gloo::FillMode fill_mode_;
 
     std::size_t active_idx_;
@@ -36,17 +33,10 @@ protected:
     MaxPeriod<std::size_t> batch_count_max_;
     std::size_t last_batch_count_;
 
-    BatchListBase(
-            gloo::Context &gl,
-            BatchType type,
-            gloo::Shader *shader,
-            std::size_t batch_capacity,
-            gloo::FillMode fill_mode
-    )
+    BatchListBase(gloo::Context &gl, BatchType type, gloo::Shader *shader, gloo::FillMode fill_mode)
         : gl_(gl),
           type_(type),
           shader_(shader),
-          batch_capacity_(batch_capacity),
           fill_mode_(fill_mode),
           active_idx_(0),
           batches_(),
@@ -63,8 +53,8 @@ protected:
 
 class OpaqueBatchList : BatchListBase {
 public:
-    OpaqueBatchList(gloo::Context &gl, BatchType type, gloo::Shader *shader, std::size_t batch_capacity)
-        : BatchListBase(gl, type, shader, batch_capacity, gloo::FillMode::BackToFront) {}
+    OpaqueBatchList(gloo::Context &gl, BatchType type, gloo::Shader *shader)
+        : BatchListBase(gl, type, shader, gloo::FillMode::BackToFront) {}
 
     NO_COPY(OpaqueBatchList)
     NO_MOVE(OpaqueBatchList)
@@ -85,8 +75,8 @@ struct TransBatchListDrawParams {
 
 class TransBatchList : BatchListBase {
 public:
-    TransBatchList(gloo::Context &gl, BatchType type, gloo::Shader *shader, std::size_t batch_capacity)
-        : BatchListBase(gl, type, shader, batch_capacity, gloo::FillMode::FrontToBack) {}
+    TransBatchList(gloo::Context &gl, BatchType type, gloo::Shader *shader)
+        : BatchListBase(gl, type, shader, gloo::FillMode::FrontToBack) {}
 
     NO_COPY(TransBatchList)
     NO_MOVE(TransBatchList)
