@@ -114,7 +114,7 @@ public:
     void clear();
 
 private:
-    gloo::Context &ctx_;
+    gloo::Context &gl_;
 
     std::unique_ptr<gloo::Shader> shaders_[3];
 

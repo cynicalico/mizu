@@ -174,30 +174,30 @@ void TransBatchList::save_draw_call_() {
 }
 
 Batcher::Batcher(gloo::Context &ctx)
-    : ctx_(ctx),
+    : gl_(ctx),
       shaders_{
-              gloo::ShaderBuilder(ctx_.ctx)
+              gloo::ShaderBuilder(gl_.ctx)
                       .stage_src(gloo::ShaderType::Vertex, *read_file("res/shader/points.vert"))
                       .stage_src(gloo::ShaderType::Fragment, *read_file("res/shader/points.frag"))
                       .link(),
-              gloo::ShaderBuilder(ctx_.ctx)
+              gloo::ShaderBuilder(gl_.ctx)
                       .stage_src(gloo::ShaderType::Vertex, *read_file("res/shader/lines.vert"))
                       .stage_src(gloo::ShaderType::Fragment, *read_file("res/shader/lines.frag"))
                       .link(),
-              gloo::ShaderBuilder(ctx_.ctx)
+              gloo::ShaderBuilder(gl_.ctx)
                       .stage_src(gloo::ShaderType::Vertex, *read_file("res/shader/tris.vert"))
                       .stage_src(gloo::ShaderType::Fragment, *read_file("res/shader/tris.frag"))
                       .link(),
       },
       opaque_batch_lists_{
-              OpaqueBatchList(ctx_, BatchType::Points, shaders_[0].get()),
-              OpaqueBatchList(ctx_, BatchType::Lines, shaders_[1].get()),
-              OpaqueBatchList(ctx_, BatchType::Triangles, shaders_[2].get())
+              OpaqueBatchList(gl_, BatchType::Points, shaders_[0].get()),
+              OpaqueBatchList(gl_, BatchType::Lines, shaders_[1].get()),
+              OpaqueBatchList(gl_, BatchType::Triangles, shaders_[2].get())
       },
       trans_batch_lists_{
-              TransBatchList(ctx_, BatchType::Points, shaders_[0].get()),
-              TransBatchList(ctx_, BatchType::Lines, shaders_[1].get()),
-              TransBatchList(ctx_, BatchType::Triangles, shaders_[2].get())
+              TransBatchList(gl_, BatchType::Points, shaders_[0].get()),
+              TransBatchList(gl_, BatchType::Lines, shaders_[1].get()),
+              TransBatchList(gl_, BatchType::Triangles, shaders_[2].get())
       } {}
 
 float Batcher::z() {
@@ -218,9 +218,9 @@ void Batcher::draw(glm::mat4 projection) {
     for (auto &list: opaque_batch_lists_)
         list.draw(projection);
 
-    ctx_.depth_mask(false);
-    ctx_.enable(gloo::Capability::Blend);
-    ctx_.blend_func(gloo::BlendFunc::SrcAlpha, gloo::BlendFunc::OneMinusSrcAlpha);
+    gl_.depth_mask(false);
+    gl_.enable(gloo::Capability::Blend);
+    gl_.blend_func(gloo::BlendFunc::SrcAlpha, gloo::BlendFunc::OneMinusSrcAlpha);
 
     for (auto &list: trans_batch_lists_)
         list.set_projection_and_sync(projection);
@@ -228,8 +228,8 @@ void Batcher::draw(glm::mat4 projection) {
     for (auto &params: saved_trans_draw_calls_)
         trans_batch_lists_[params.list_idx].draw(params.batch_idx, params.first, params.count);
 
-    ctx_.depth_mask(true);
-    ctx_.disable(gloo::Capability::Blend);
+    gl_.depth_mask(true);
+    gl_.disable(gloo::Capability::Blend);
 }
 
 void Batcher::clear() {
