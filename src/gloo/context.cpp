@@ -9,6 +9,17 @@ std::optional<ContextVersion> Context::load(GLADloadfunc func) {
     return ContextVersion(GLAD_VERSION_MAJOR(glad_version), GLAD_VERSION_MINOR(glad_version));
 }
 
+void Context::clear_color(const mizu::Color &color) {
+    auto gl_color = color.gl_color();
+    ctx.ClearColor(gl_color.r, gl_color.g, gl_color.b, gl_color.a);
+    CHECK_GL_ERROR(ctx, ClearColor);
+}
+
+void Context::clear(ClearBit mask) {
+    ctx.Clear(unwrap(mask));
+    CHECK_GL_ERROR(ctx, Clear);
+}
+
 void Context::enable(Capability cap) {
     ctx.Enable(static_cast<GLenum>(cap));
     CHECK_GL_ERROR(ctx, Enable);

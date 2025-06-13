@@ -25,7 +25,7 @@ void Ethereal::update(double dt) {
 }
 
 void Ethereal::draw() {
-    g2d->clear(mizu::rgba(0x00000000), mizu::ClearBit::Color | mizu::ClearBit::Depth);
+    g2d->clear(mizu::rgba(0x00000000));
 
     g2d->triangle({50, 50}, {100, 100}, {50, 100}, mizu::rgba(0xffff0080));
     g2d->line({0, 0}, {input->mouse_x(), input->mouse_y()}, mizu::rgba(0xff00ff80));

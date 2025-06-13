@@ -12,11 +12,6 @@
 #include "mizu/window.hpp"
 
 namespace mizu {
-enum class ClearBit : GLenum {
-    Color = GL_COLOR_BUFFER_BIT,
-    Depth = GL_DEPTH_BUFFER_BIT,
-    Stencil = GL_STENCIL_BUFFER_BIT
-};
 
 class G2d {
 public:
@@ -30,7 +25,7 @@ public:
     bool vsync() const;
     void set_vsync(bool enabled);
 
-    void clear(const Color &color, ClearBit clear_bits);
+    void clear(const Color &color, gloo::ClearBit mask = gloo::ClearBit::Color | gloo::ClearBit::Depth);
 
     void point(glm::vec2 p, const Color &color);
 
@@ -86,7 +81,5 @@ void G2d::triangle(const Triangle<Color> &t) {
     triangle(t.v0, t.v1, t.v2, t.rot, t.color);
 }
 } // namespace mizu
-
-ENUM_CLASS_ENABLE_BITOPS(mizu::ClearBit);
 
 #endif // MIZU_G2D_HPP

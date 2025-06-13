@@ -3,6 +3,8 @@
 
 #include <glad/gl.h>
 #include <optional>
+#include "mizu/color.hpp"
+#include "mizu/enum_class_helpers.hpp"
 
 namespace gloo {
 struct ContextVersion {
@@ -11,6 +13,12 @@ struct ContextVersion {
 
     ContextVersion(int major, int minor)
         : major(major), minor(minor) {}
+};
+
+enum class ClearBit : GLenum {
+    Color = GL_COLOR_BUFFER_BIT,
+    Depth = GL_DEPTH_BUFFER_BIT,
+    Stencil = GL_STENCIL_BUFFER_BIT
 };
 
 enum class Capability : GLenum {
@@ -91,6 +99,9 @@ public:
 
     std::optional<ContextVersion> load(GLADloadfunc func);
 
+    void clear_color(const mizu::Color &color);
+    void clear(ClearBit mask);
+
     void enable(Capability cap);
     void disable(Capability cap);
     bool is_enabled(Capability cap) const;
@@ -108,5 +119,7 @@ public:
     void debug_message_callback(GLDEBUGPROC callback, const void *user_param);
 };
 } // namespace gloo
+
+ENUM_CLASS_ENABLE_BITOPS(gloo::ClearBit);
 
 #endif // GLOO_CONTEXT_HPP

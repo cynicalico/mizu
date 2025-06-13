@@ -24,12 +24,9 @@ void G2d::set_vsync(bool enabled) {
     SDL_GL_SetSwapInterval(enabled ? 1 : 0);
 }
 
-void G2d::clear(const Color &color, ClearBit clear_bits) {
-    auto gl_color = color.gl_color();
-    gl_.ctx.ClearColor(gl_color.r, gl_color.g, gl_color.b, gl_color.a);
-    CHECK_GL_ERROR(gl_.ctx, ClearColor);
-    gl_.ctx.Clear(unwrap(clear_bits));
-    CHECK_GL_ERROR(gl_.ctx, Clear);
+void G2d::clear(const Color &color, gloo::ClearBit mask) {
+    gl_.clear_color(color);
+    gl_.clear(mask);
 }
 
 void G2d::point(glm::vec2 p, const Color &color) {
