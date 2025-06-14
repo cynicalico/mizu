@@ -3,15 +3,15 @@
 using RuleString = std::vector<size_t>;
 using CellState = std::vector<std::uint32_t>;
 
-const std::size_t ROWS = 100;
-const std::size_t COLS = 100;
+const std::size_t ROWS = 200;
+const std::size_t COLS = 200;
 
 const RuleString BORN = RuleString{3};
 const RuleString STAY = RuleString{2, 3};
 
-const auto SIM_DELAY = std::chrono::milliseconds(50);
+const auto SIM_DELAY = std::chrono::milliseconds(25);
 
-const float CELL_SIZE = 10.0f;
+const float CELL_SIZE = 8.0f;
 const float WINDOW_PADDING = CELL_SIZE;
 
 const auto BG_COLOR = mizu::rgb(0x14182e);
@@ -23,10 +23,10 @@ const std::vector CELL_COLORS{
         mizu::rgb(0xad2f45),
         mizu::rgb(0xe64539),
         mizu::rgb(0xff8933),
-        // mizu::rgb(0xffc2a1),
+        mizu::rgb(0xffc2a1),
         mizu::rgb(0xf5ffe8)};
 
-const auto ALIVE = CELL_COLORS.size() - 1;
+const auto ALIVE = CELL_COLORS.size();
 
 class GameOfLife final : public mizu::Application {
 public:
@@ -68,7 +68,7 @@ GameOfLife::GameOfLife(mizu::Engine *engine)
     simulating = false;
     simulation_ticker = mizu::Ticker(SIM_DELAY);
 
-    g2d->set_vsync(false);
+    g2d->set_vsync(!g2d->vsync());
 }
 
 bool GameOfLife::mouse_in_bounds() const {
@@ -85,10 +85,11 @@ std::size_t GameOfLife::idx_from_mouse_pos() const {
 std::size_t GameOfLife::count_neighbors(std::size_t state_r, std::size_t state_c) const {
     std::size_t count = 0;
 
-    const auto start_r = (state_r == 0) ? 0 : state_r - 1;
-    const auto end_r = (state_r == ROWS - 1) ? ROWS - 1 : state_r + 1;
-    const auto start_c = (state_c == 0) ? 0 : state_c - 1;
-    const auto end_c = (state_c == COLS - 1) ? COLS - 1 : state_c + 1;
+    const auto start_r = state_r == 0 ? 0 : state_r - 1;
+    const auto end_r = state_r == ROWS - 1 ? ROWS - 1 : state_r + 1;
+    const auto start_c = state_c == 0 ? 0 : state_c - 1;
+    const auto end_c = state_c == COLS - 1 ? COLS - 1 : state_c + 1;
+
     for (std::size_t r = start_r; r <= end_r; ++r) {
         for (std::size_t c = start_c; c <= end_c; ++c)
             if (!(r == state_r && c == state_c) && state[r * COLS + c] == ALIVE)
@@ -159,7 +160,7 @@ void GameOfLife::draw() {
             if (state[r * COLS + c] > 0) {
                 const auto x = WINDOW_PADDING + 1 + c + c * CELL_SIZE;
                 const auto y = WINDOW_PADDING + 1 + r + r * CELL_SIZE;
-                g2d->fill_rect({x, y}, {CELL_SIZE, CELL_SIZE}, CELL_COLORS[state[r * COLS + c]]);
+                g2d->fill_rect({x, y}, {CELL_SIZE, CELL_SIZE}, CELL_COLORS[state[r * COLS + c] - 1]);
             }
         }
     }
