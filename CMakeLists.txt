@@ -2,12 +2,13 @@ cmake_minimum_required(VERSION 3.30)
 project(mizu LANGUAGES C CXX)
 
 option(BUILD_SHARED_LIBS "Build using shared libraries" OFF)
+option(MIZU_BUILD_EXAMPLE "Build example programs" OFF)
 
 if (MSVC)
     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 endif ()
 
-set(${PROJECT_NAME}_headers
+set(mizu_headers
         #[=[ [[[cog
         import cog, glob
         from pathlib import Path
@@ -53,7 +54,7 @@ set(${PROJECT_NAME}_headers
         # [[[end]]]
 )
 
-set(${PROJECT_NAME}_sources
+set(mizu_sources
         #[=[ [[[cog
         import cog, glob
         from pathlib import Path
@@ -88,11 +89,11 @@ set(${PROJECT_NAME}_sources
         # [[[end]]]
 )
 
-add_library(mizu ${${PROJECT_NAME}_headers} ${${PROJECT_NAME}_sources})
+add_library(mizu ${mizu_headers} ${mizu_sources})
 
-target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_23)
+target_compile_features(mizu PUBLIC cxx_std_23)
 
-target_include_directories(${PROJECT_NAME} PUBLIC include)
+target_include_directories(mizu PUBLIC include)
 
 if (WIN32)
     target_compile_definitions(mizu PRIVATE WIN32_LEAN_AND_MEAN NOMINMAX)
@@ -104,6 +105,10 @@ target_compile_definitions(mizu PUBLIC
 )
 
 add_subdirectory(thirdparty)
-target_link_libraries(${PROJECT_NAME} PUBLIC mizu_thirdparty)
+target_link_libraries(mizu PUBLIC mizu_thirdparty)
 
-add_subdirectory(examples)
+add_library(mizu::mizu ALIAS mizu)
+
+if (MIZU_BUILD_EXAMPLE)
+    add_subdirectory(example)
+endif ()
