@@ -5,8 +5,8 @@
 #include <imgui.h>
 #include "glm/vec2.hpp"
 #include "mizu/core/callback_mgr.hpp"
-#include "mizu/util/class_helpers.hpp"
 #include "mizu/core/window.hpp"
+#include "mizu/util/class_helpers.hpp"
 
 namespace mizu {
 class Dear {

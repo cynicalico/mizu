@@ -13,8 +13,7 @@ bool prepare_png_read(
         std::size_t &stride,
         png_uint_32 &width,
         png_uint_32 &height,
-        png_uint_32 &channels
-) {
+        png_uint_32 &channels) {
 #if defined(MIZU_PLATFORM_WINDOWS)
     if (fopen_s(&fp, path.string().c_str(), "rb") != 0) {
 #else
@@ -197,14 +196,14 @@ SDL_Surface *read_image_to_sdl_surface(const std::filesystem::path &path) {
 }
 
 std::optional<std::string> read_file(const std::filesystem::path &path) {
-    const auto size = file_size(path);
-    std::string content(size, '\0');
-
     std::ifstream in(path);
     if (!in.is_open()) {
         MIZU_LOG_ERROR("Failed to open file: '{}'", path);
         return std::nullopt;
     }
+
+    const auto size = file_size(path);
+    std::string content(size, '\0');
     in.read(&content[0], size);
 
     return content;

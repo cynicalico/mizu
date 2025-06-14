@@ -1,8 +1,8 @@
 #include "mizu/core/window.hpp"
 #include <SDL3/SDL.h>
 #include <glm/ext/matrix_clip_space.hpp>
-#include "mizu/core/payloads.hpp"
 #include "mizu/core/log.hpp"
+#include "mizu/core/payloads.hpp"
 #include "mizu/util/io.hpp"
 
 namespace mizu {
@@ -101,6 +101,11 @@ void Window::set_icon(SDL_Surface *icon) {
 }
 
 void Window::set_icon_dir(const std::filesystem::path &path) {
+    if (!exists(path)) {
+        MIZU_LOG_ERROR("Cannot find directory: '{}'", path);
+        return;
+    }
+
     SDL_Surface *icon = nullptr;
     for (const std::filesystem::directory_iterator dir(path); auto &entry: dir) {
         if (!entry.is_regular_file() || entry.path().extension() != ".png")

@@ -11,10 +11,10 @@
 #include "mizu/core/dear.hpp"
 #include "mizu/core/g2d.hpp"
 #include "mizu/core/input_mgr.hpp"
+#include "mizu/core/payloads.hpp"
 #include "mizu/core/window.hpp"
 #include "mizu/util/memusage.hpp"
 #include "mizu/util/time.hpp"
-#include "payloads.hpp"
 
 namespace mizu {
 class Engine {
@@ -45,9 +45,9 @@ public:
 
     void shutdown();
 
-    template<typename T>
+    template<typename T, typename... Args>
         requires std::derived_from<T, Application>
-    void mainloop();
+    void mainloop(Args &&...args);
 
 private:
     bool running_;
@@ -59,10 +59,10 @@ private:
     void unregister_callbacks_();
 };
 
-template<typename T>
+template<typename T, typename... Args>
     requires std::derived_from<T, Application>
-void Engine::mainloop() {
-    auto application = T(this);
+void Engine::mainloop(Args &&...args) {
+    auto application = T(this, std::forward<Args>(args)...);
 
     do {
         frame_counter.update();
@@ -83,8 +83,7 @@ void Engine::mainloop() {
                     "FPS: {:.2Lf}{} | Mem: {:.2Lf} MB",
                     frame_counter.fps(),
                     g2d->vsync() ? " (vsync)" : "",
-                    memusage()
-            );
+                    memusage());
             ImGui::Text("%s", fps_str.c_str());
         };
         ImGui::PopStyleVar();

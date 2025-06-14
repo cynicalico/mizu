@@ -1,8 +1,8 @@
 #include "mizu/core/dear.hpp"
 #include <imgui_impl_opengl3.h>
 #include <imgui_impl_sdl3.h>
-#include "mizu/core/payloads.hpp"
 #include "mizu/core/log.hpp"
+#include "mizu/core/payloads.hpp"
 
 namespace mizu {
 Dear::Dear(CallbackMgr &callbacks, Window *window)
