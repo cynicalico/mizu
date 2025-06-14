@@ -42,6 +42,14 @@ if (MSVC)
             "ALSOFT_BACKEND_DSOUND OFF"
             "ALSOFT_BACKEND_WAVE OFF"
     )
+else ()
+    set(OPENAL_SOFT_CPM_OPTIONS ${OPENAL_SOFT_CPM_OPTIONS}
+            "ALSOFT_BACKEND_PIPEWIRE ON"
+            "ALSOFT_REQUIRE_PIPEWIRE ON"
+            "ALSOFT_BACKEND_PULSEAUDIO OFF"
+            "ALSOFT_BACKEND_OSS OFF"
+            "ALSOFT_BACKEND_SOLARIS OFF"
+    )
 endif ()
 CPMAddPackage(
         NAME openal-soft

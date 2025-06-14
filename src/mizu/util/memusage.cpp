@@ -15,5 +15,9 @@ double memusage() {
     GetProcessMemoryInfo(GetCurrentProcess(), reinterpret_cast<PROCESS_MEMORY_COUNTERS *>(&pmc), sizeof(pmc));
     return pmc.PrivateUsage / 1'048'576.0;
 }
+#else
+double memusage() {
+    return 0;
+}
 #endif
 } // namespace mizu
