@@ -121,9 +121,9 @@ add_library(mizu_thirdparty STATIC
         ${imgui_SOURCE_DIR}/misc/freetype/imgui_freetype.cpp
 )
 
-target_compile_definitions(mizu_thirdparty PUBLIC
-        IMGUI_USER_CONFIG="${CMAKE_SOURCE_DIR}/include/mizu/imconfig.hpp"
-)
+# target_compile_definitions(mizu_thirdparty PUBLIC
+#         IMGUI_USER_CONFIG="${CMAKE_SOURCE_DIR}/include/mizu/imconfig.hpp"
+# )
 
 target_include_directories(mizu_thirdparty PUBLIC
         ${pcg_SOURCE_DIR}/include
