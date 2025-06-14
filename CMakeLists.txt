@@ -101,7 +101,7 @@ if (WIN32)
 endif ()
 
 target_compile_definitions(mizu PUBLIC
-        IMGUI_USER_CONFIG="${CMAKE_SOURCE_DIR}/include/mizu/imconfig.hpp"
+        IMGUI_USER_CONFIG="${CMAKE_CURRENT_SOURCE_DIR}/include/mizu/imconfig.hpp"
 )
 
 add_subdirectory(thirdparty)
