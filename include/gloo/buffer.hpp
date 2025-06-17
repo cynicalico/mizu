@@ -2,8 +2,8 @@
 #define GLOO_BUFFER_HPP
 
 #include <glad/gl.h>
-#include "mizu/util/class_helpers.hpp"
 #include "mizu/core/log.hpp"
+#include "mizu/util/class_helpers.hpp"
 #include "mizu/util/enum_class_helpers.hpp"
 
 namespace gloo {
@@ -58,7 +58,8 @@ public:
 
     std::size_t front() const;
     std::size_t size() const;
-    std::size_t is_full() const;
+    bool is_full() const;
+    bool has_room_for(std::size_t num_elements) const;
 
     void push(std::initializer_list<T> vs);
 
@@ -150,10 +151,17 @@ std::size_t StaticSizeBuffer<T>::size() const {
 }
 
 template<typename T>
-std::size_t StaticSizeBuffer<T>::is_full() const {
+bool StaticSizeBuffer<T>::is_full() const {
     if (fill_mode_ == FillMode::FrontToBack)
         return data_pos_ == data_capacity_;
     return data_pos_ == 0;
+}
+
+template<typename T>
+bool StaticSizeBuffer<T>::has_room_for(std::size_t num_elements) const {
+    if (fill_mode_ == FillMode::FrontToBack)
+        return data_pos_ + num_elements <= data_capacity_;
+    return data_pos_ >= num_elements;
 }
 
 template<typename T>
@@ -195,14 +203,12 @@ void StaticSizeBuffer<T>::sync_gl(BufferTarget target) {
     } else if (fill_mode_ == FillMode::FrontToBack) {
         assert(gl_buf_pos_ < data_pos_);
         gl_.BufferSubData(
-                unwrap(target), gl_buf_pos_ * sizeof(T), (data_pos_ - gl_buf_pos_) * sizeof(T), data_ + gl_buf_pos_
-        );
+                unwrap(target), gl_buf_pos_ * sizeof(T), (data_pos_ - gl_buf_pos_) * sizeof(T), data_ + gl_buf_pos_);
         CHECK_GL_ERROR(gl_, BufferSubData);
     } else {
         assert(gl_buf_pos_ > data_pos_);
         gl_.BufferSubData(
-                unwrap(target), data_pos_ * sizeof(T), (gl_buf_pos_ - data_pos_) * sizeof(T), data_ + data_pos_
-        );
+                unwrap(target), data_pos_ * sizeof(T), (gl_buf_pos_ - data_pos_) * sizeof(T), data_ + data_pos_);
         CHECK_GL_ERROR(gl_, BufferSubData);
     }
     gl_buf_pos_ = data_pos_;

@@ -39,8 +39,7 @@ void G2d::point(glm::vec2 pos, const Color &color) {
     auto gl_color = color.gl_color();
     auto z = batcher_.z();
     batcher_.add(
-            BatchType::Points, gl_color.a < 1.0f, 0, {pos.x, pos.y, z, gl_color.r, gl_color.g, gl_color.b, gl_color.a}
-    );
+            BatchType::Points, gl_color.a < 1.0f, 0, {pos.x, pos.y, z, gl_color.r, gl_color.g, gl_color.b, gl_color.a});
 }
 
 void G2d::line(glm::vec2 p0, glm::vec2 p1, glm::vec3 rot, const Color &color) {
@@ -82,8 +81,6 @@ void G2d::fill_rect(glm::vec2 pos, glm::vec2 size, glm::vec3 rot, const Color &c
         pos.x,          pos.y,          z, gl_color.r, gl_color.g, gl_color.b, gl_color.a, rot.x, rot.y, glm::radians(rot.z),
         pos.x + size.x, pos.y,          z, gl_color.r, gl_color.g, gl_color.b, gl_color.a, rot.x, rot.y, glm::radians(rot.z),
         pos.x + size.x, pos.y + size.y, z, gl_color.r, gl_color.g, gl_color.b, gl_color.a, rot.x, rot.y, glm::radians(rot.z),
-    });
-    batcher_.add(BatchType::Triangles, gl_color.a < 1.0f, 0, {
         pos.x,          pos.y,          z, gl_color.r, gl_color.g, gl_color.b, gl_color.a, rot.x, rot.y, glm::radians(rot.z),
         pos.x + size.x, pos.y + size.y, z, gl_color.r, gl_color.g, gl_color.b, gl_color.a, rot.x, rot.y, glm::radians(rot.z),
         pos.x,          pos.y + size.y, z, gl_color.r, gl_color.g, gl_color.b, gl_color.a, rot.x, rot.y, glm::radians(rot.z),
@@ -96,8 +93,7 @@ void G2d::fill_rect(glm::vec2 pos, glm::vec2 size, const Color &color) {
 }
 
 void G2d::texture(
-        const Texture &t, glm::vec2 pos, glm::vec2 size, glm::vec4 region, glm::vec3 rot, const Color &color
-) {
+        const Texture &t, glm::vec2 pos, glm::vec2 size, glm::vec4 region, glm::vec3 rot, const Color &color) {
     auto gl_color = color.gl_color();
     auto z = batcher_.z();
     // clang-format off
