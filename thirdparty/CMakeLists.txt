@@ -42,6 +42,14 @@ if (MSVC)
             "ALSOFT_BACKEND_DSOUND OFF"
             "ALSOFT_BACKEND_WAVE OFF"
     )
+else ()
+    set(OPENAL_SOFT_CPM_OPTIONS ${OPENAL_SOFT_CPM_OPTIONS}
+            "ALSOFT_BACKEND_PIPEWIRE ON"
+            "ALSOFT_REQUIRE_PIPEWIRE ON"
+            "ALSOFT_BACKEND_PULSEAUDIO OFF"
+            "ALSOFT_BACKEND_OSS OFF"
+            "ALSOFT_BACKEND_SOLARIS OFF"
+    )
 endif ()
 CPMAddPackage(
         NAME openal-soft
@@ -113,9 +121,9 @@ add_library(mizu_thirdparty STATIC
         ${imgui_SOURCE_DIR}/misc/freetype/imgui_freetype.cpp
 )
 
-target_compile_definitions(mizu_thirdparty PUBLIC
-        IMGUI_USER_CONFIG="${CMAKE_SOURCE_DIR}/include/mizu/imconfig.hpp"
-)
+# target_compile_definitions(mizu_thirdparty PUBLIC
+#         IMGUI_USER_CONFIG="${CMAKE_SOURCE_DIR}/include/mizu/imconfig.hpp"
+# )
 
 target_include_directories(mizu_thirdparty PUBLIC
         ${pcg_SOURCE_DIR}/include

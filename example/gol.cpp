@@ -42,7 +42,7 @@ public:
     bool simulating;
     mizu::Ticker<> simulation_ticker;
 
-    GameOfLife(mizu::Engine *engine);
+    explicit GameOfLife(mizu::Engine *engine);
 
     bool mouse_in_bounds() const;
     std::size_t idx_from_mouse_pos() const;
@@ -57,10 +57,10 @@ public:
 
 GameOfLife::GameOfLife(mizu::Engine *engine)
     : Application(engine), g2d(engine->g2d.get()), input(engine->input.get()), window(engine->window.get()) {
-    window->set_icon_dir("examples/icon/gol");
+    window->set_icon_dir("example/icon/gol");
 
     font_tex = g2d->load_texture(
-            "examples/font/1px_7x9_no_bg.png", gloo::MinFilter::NearestMipmapNearest, gloo::MagFilter::Nearest);
+            "example/font/1px_7x9_no_bg.png", gloo::MinFilter::NearestMipmapNearest, gloo::MagFilter::Nearest);
     font = std::make_unique<mizu::CodePage437>(g2d, *font_tex, glm::uvec2{7, 9}, 2);
 
     state = CellState(ROWS * COLS);

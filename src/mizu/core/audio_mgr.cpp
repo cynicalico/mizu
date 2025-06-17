@@ -1,6 +1,7 @@
 #include "mizu/core/audio_mgr.hpp"
 #include "mizu/core/log.hpp"
 #include "mizu/core/payloads.hpp"
+#include "mizu/util/platform.hpp"
 
 #ifndef AL_SOFT_hold_on_disconnect
 #define AL_SOFT_hold_on_disconnect
@@ -11,8 +12,7 @@ namespace mizu {
 bool check_al_errors_();
 bool check_alc_errors_(ALCdevice *device);
 void al_event_callback_(
-        ALenum eventType, ALuint object, ALuint param, ALsizei length, const ALchar *message, void *userParam
-) noexcept;
+        ALenum eventType, ALuint object, ALuint param, ALsizei length, const ALchar *message, void *userParam) noexcept;
 
 void alc_event_callback_(
         ALCenum eventType,
@@ -20,8 +20,7 @@ void alc_event_callback_(
         ALCdevice *device,
         ALCsizei length,
         const ALCchar *message,
-        void *userParam
-) noexcept;
+        void *userParam) noexcept;
 const char *FormatName(ALenum format);
 Sound load_sound_impl(const std::filesystem::path &path);
 
@@ -54,21 +53,19 @@ AudioMgr::AudioMgr(CallbackMgr &callbacks)
             "Initialized OpenAL v{}, vendor: {}, renderer: {}",
             alGetString(AL_VERSION),
             alGetString(AL_VENDOR),
-            alGetString(AL_RENDERER)
-    );
+            alGetString(AL_RENDERER));
 
     alDisable(AL_STOP_SOURCES_ON_DISCONNECT_SOFT);
     check_al_errors_();
 
     if (alIsExtensionPresent("AL_SOFT_events")) {
-        alEventControlSOFT = static_cast<LPALEVENTCONTROLSOFT>(alGetProcAddress("alEventControlSOFT"));
-        alEventCallbackSOFT = static_cast<LPALEVENTCALLBACKSOFT>(alGetProcAddress("alEventCallbackSOFT"));
+        alEventControlSOFT = reinterpret_cast<LPALEVENTCONTROLSOFT>(alGetProcAddress("alEventControlSOFT"));
+        alEventCallbackSOFT = reinterpret_cast<LPALEVENTCALLBACKSOFT>(alGetProcAddress("alEventCallbackSOFT"));
 
         constexpr ALenum types[3] = {
                 AL_EVENT_TYPE_BUFFER_COMPLETED_SOFT,
                 AL_EVENT_TYPE_SOURCE_STATE_CHANGED_SOFT,
-                AL_EVENT_TYPE_DISCONNECTED_SOFT
-        };
+                AL_EVENT_TYPE_DISCONNECTED_SOFT};
         alEventControlSOFT(sizeof(types) / sizeof(ALenum), types, AL_TRUE);
         alEventCallbackSOFT(al_event_callback_, static_cast<void *>(&callbacks_));
     } else {
@@ -77,15 +74,16 @@ AudioMgr::AudioMgr(CallbackMgr &callbacks)
 
     if (alcIsExtensionPresent(device_, "ALC_SOFT_system_events")) {
         alcEventIsSupportedSOFT =
-                static_cast<LPALCEVENTISSUPPORTEDSOFT>(alcGetProcAddress(device_, "alcEventIsSupportedSOFT"));
-        alcEventControlSOFT = static_cast<LPALCEVENTCONTROLSOFT>(alcGetProcAddress(device_, "alcEventControlSOFT"));
-        alcEventCallbackSOFT = static_cast<LPALCEVENTCALLBACKSOFT>(alcGetProcAddress(device_, "alcEventCallbackSOFT"));
+                reinterpret_cast<LPALCEVENTISSUPPORTEDSOFT>(alcGetProcAddress(device_, "alcEventIsSupportedSOFT"));
+        alcEventControlSOFT =
+                reinterpret_cast<LPALCEVENTCONTROLSOFT>(alcGetProcAddress(device_, "alcEventControlSOFT"));
+        alcEventCallbackSOFT =
+                reinterpret_cast<LPALCEVENTCALLBACKSOFT>(alcGetProcAddress(device_, "alcEventCallbackSOFT"));
 
         std::vector types{
                 ALC_EVENT_TYPE_DEFAULT_DEVICE_CHANGED_SOFT,
                 ALC_EVENT_TYPE_DEVICE_ADDED_SOFT,
-                ALC_EVENT_TYPE_DEVICE_REMOVED_SOFT
-        };
+                ALC_EVENT_TYPE_DEVICE_REMOVED_SOFT};
         for (auto it = types.begin(); it != types.end(); ++it)
             if (alcEventIsSupportedSOFT(*it, ALC_PLAYBACK_DEVICE_SOFT) != ALC_EVENT_SUPPORTED_SOFT)
                 it = types.erase(it);
@@ -96,10 +94,12 @@ AudioMgr::AudioMgr(CallbackMgr &callbacks)
         MIZU_LOG_WARN("ALC_SOFT_system_events not supported");
     }
 
-    if (alcIsExtensionPresent(device_, "ALC_SOFT_reopen_device"))
-        alcReopenDeviceSOFT = static_cast<LPALCREOPENDEVICESOFT>(alcGetProcAddress(device_, "alcReopenDeviceSOFT"));
-    else
+    if (alcIsExtensionPresent(device_, "ALC_SOFT_reopen_device")) {
+        alcReopenDeviceSOFT =
+                reinterpret_cast<LPALCREOPENDEVICESOFT>(alcGetProcAddress(device_, "alcReopenDeviceSOFT"));
+    } else {
         MIZU_LOG_WARN("ALC_SOFT_reopen_device not supported");
+    }
 
     const ALCchar *name = device_specifier_(device_);
     MIZU_LOG_DEBUG("Opened \"{}\"", name);
@@ -155,8 +155,7 @@ Sound AudioMgr::load_sound(const std::filesystem::path &path) {
                 sound.path,
                 FormatName(sound.format),
                 sound.sfinfo.samplerate,
-                fmt::format("{}{}{:02}:{:02}.{:03}", h == 0 ? "" : fmt::to_string(h), h == 0 ? "" : ":", m, s, ms)
-        );
+                fmt::format("{}{}{:02}:{:02}.{:03}", h == 0 ? "" : fmt::to_string(h), h == 0 ? "" : ":", m, s, ms));
     }
     return sound;
 }
@@ -293,8 +292,12 @@ bool check_alc_errors_(ALCdevice *device) {
 }
 
 void al_event_callback_(
-        ALenum eventType, ALuint object, ALuint param, ALsizei length, const ALchar *message, void *userParam
-) noexcept {
+        ALenum eventType,
+        ALuint object,
+        ALuint param,
+        ALsizei length,
+        const ALchar *message,
+        void *userParam) noexcept {
 #define STRINGIFY(e)                                                                                                   \
     case e: return #e;
     std::string eventType_string = std::invoke([eventType] {
@@ -315,8 +318,7 @@ void alc_event_callback_(
         ALCdevice *device,
         ALCsizei length,
         const ALCchar *message,
-        void *userParam
-) noexcept {
+        void *userParam) noexcept {
 #define STRINGIFY(e)                                                                                                   \
     case e: return #e;
     std::string eventType_string = std::invoke([eventType] {
@@ -411,7 +413,11 @@ const char *FormatName(ALenum format) {
 
 Sound load_sound_impl(const std::filesystem::path &path) {
     SF_INFO sfinfo;
+#if defined(MIZU_PLATFORM_WINDOWS)
     SNDFILE *sndfile = sf_wchar_open(path.c_str(), SFM_READ, &sfinfo);
+#else
+    SNDFILE *sndfile = sf_open(path.c_str(), SFM_READ, &sfinfo);
+#endif
     if (!sndfile) {
         MIZU_LOG_ERROR("Failed to open audio file '{}': {}", path, sf_strerror(sndfile));
         return {};
