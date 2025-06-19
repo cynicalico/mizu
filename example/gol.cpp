@@ -30,9 +30,9 @@ const auto ALIVE = CELL_COLORS.size();
 
 class GameOfLife final : public mizu::Application {
 public:
-    mizu::G2d *g2d;
-    mizu::InputMgr *input;
-    mizu::Window *window;
+    mizu::G2d &g2d;
+    mizu::InputMgr &input;
+    mizu::Window &window;
 
     std::unique_ptr<mizu::Texture> font_tex;
     std::unique_ptr<mizu::CodePage437> font;
@@ -56,10 +56,10 @@ public:
 };
 
 GameOfLife::GameOfLife(mizu::Engine *engine)
-    : Application(engine), g2d(engine->g2d.get()), input(engine->input.get()), window(engine->window.get()) {
-    window->set_icon_dir("example/icon/gol");
+    : Application(engine), g2d(*engine->g2d), input(*engine->input), window(*engine->window) {
+    window.set_icon_dir("example/icon/gol");
 
-    font_tex = g2d->load_texture(
+    font_tex = g2d.load_texture(
             "example/font/1px_7x9_no_bg.png", gloo::MinFilter::NearestMipmapNearest, gloo::MagFilter::Nearest);
     font = std::make_unique<mizu::CodePage437>(g2d, *font_tex, glm::uvec2{7, 9}, 2);
 
@@ -68,17 +68,17 @@ GameOfLife::GameOfLife(mizu::Engine *engine)
     simulating = false;
     simulation_ticker = mizu::Ticker(SIM_DELAY);
 
-    g2d->set_vsync(!g2d->vsync());
+    g2d.set_vsync(false);
 }
 
 bool GameOfLife::mouse_in_bounds() const {
-    return input->mouse_x() > WINDOW_PADDING && input->mouse_x() < window->size().x - WINDOW_PADDING - 1 &&
-           input->mouse_y() > WINDOW_PADDING && input->mouse_y() < window->size().y - WINDOW_PADDING - 1;
+    return input.mouse_x() > WINDOW_PADDING && input.mouse_x() < window.size().x - WINDOW_PADDING - 1 &&
+           input.mouse_y() > WINDOW_PADDING && input.mouse_y() < window.size().y - WINDOW_PADDING - 1;
 }
 
 std::size_t GameOfLife::idx_from_mouse_pos() const {
-    const auto r = static_cast<std::size_t>((input->mouse_y() - WINDOW_PADDING) / (CELL_SIZE + 1));
-    const auto c = static_cast<std::size_t>((input->mouse_x() - WINDOW_PADDING) / (CELL_SIZE + 1));
+    const auto r = static_cast<std::size_t>((input.mouse_y() - WINDOW_PADDING) / (CELL_SIZE + 1));
+    const auto c = static_cast<std::size_t>((input.mouse_x() - WINDOW_PADDING) / (CELL_SIZE + 1));
     return r * COLS + c;
 }
 
@@ -126,16 +126,16 @@ void GameOfLife::update(double dt) {
             simulate();
     }
 
-    if (input->pressed(mizu::Key::Escape))
+    if (input.pressed(mizu::Key::Escape))
         engine->shutdown();
 
-    if (input->down(mizu::MouseButton::Left) && mouse_in_bounds())
+    if (input.down(mizu::MouseButton::Left) && mouse_in_bounds())
         state[idx_from_mouse_pos()] = ALIVE;
 
-    if (input->down(mizu::MouseButton::Right) && mouse_in_bounds())
+    if (input.down(mizu::MouseButton::Right) && mouse_in_bounds())
         state[idx_from_mouse_pos()] = 0;
 
-    if (input->pressed(mizu::Key::Space)) {
+    if (input.pressed(mizu::Key::Space)) {
         simulating = !simulating;
         if (simulating)
             simulation_ticker.reset();
@@ -143,16 +143,16 @@ void GameOfLife::update(double dt) {
 }
 
 void GameOfLife::draw() {
-    g2d->clear(BG_COLOR);
+    g2d.clear(BG_COLOR);
 
     for (std::size_t i = 0; i < COLS + 1; ++i) {
         const auto x = WINDOW_PADDING + i + i * CELL_SIZE;
-        g2d->line({x, WINDOW_PADDING}, {x, window->size().y - WINDOW_PADDING}, GRID_COLOR);
+        g2d.line({x, WINDOW_PADDING}, {x, window.size().y - WINDOW_PADDING}, GRID_COLOR);
     }
 
     for (std::size_t i = 0; i < ROWS + 1; ++i) {
         const auto y = WINDOW_PADDING + i + i * CELL_SIZE;
-        g2d->line({WINDOW_PADDING, y}, {window->size().x - WINDOW_PADDING, y}, GRID_COLOR);
+        g2d.line({WINDOW_PADDING, y}, {window.size().x - WINDOW_PADDING, y}, GRID_COLOR);
     }
 
     for (std::size_t r = 0; r < ROWS; ++r) {
@@ -160,7 +160,7 @@ void GameOfLife::draw() {
             if (state[r * COLS + c] > 0) {
                 const auto x = WINDOW_PADDING + 1 + c + c * CELL_SIZE;
                 const auto y = WINDOW_PADDING + 1 + r + r * CELL_SIZE;
-                g2d->fill_rect({x, y}, {CELL_SIZE, CELL_SIZE}, CELL_COLORS[state[r * COLS + c] - 1]);
+                g2d.fill_rect({x, y}, {CELL_SIZE, CELL_SIZE}, CELL_COLORS[state[r * COLS + c] - 1]);
             }
         }
     }

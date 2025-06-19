@@ -11,6 +11,7 @@
 #include "mizu/core/log.hpp"
 #include "mizu/core/window.hpp"
 #include "mizu/font/code_page_437.hpp"
+#include "mizu/gui/gui.hpp"
 #include "mizu/util/io.hpp"
 #include "mizu/util/rng.hpp"
 #include "mizu/util/time.hpp"

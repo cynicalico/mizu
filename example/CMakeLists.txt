@@ -11,3 +11,10 @@ add_custom_command(TARGET gol POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy -t $<TARGET_FILE_DIR:gol> $<TARGET_RUNTIME_DLLS:gol>
         COMMAND_EXPAND_LISTS
 )
+
+add_executable(gooey gooey.cpp)
+target_link_libraries(gooey PRIVATE mizu)
+add_custom_command(TARGET gooey POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy -t $<TARGET_FILE_DIR:gooey> $<TARGET_RUNTIME_DLLS:gooey>
+        COMMAND_EXPAND_LISTS
+)
