@@ -30,7 +30,7 @@ public:
 
     virtual ~Node() = default;
 
-    virtual glm::vec2 calc_size(const glm::vec2 &max_size_hint) = 0;
+    virtual void calc_size(const glm::vec2 &max_size_hint) = 0;
 
     virtual void draw(G2d &g2d, glm::vec2 pos) const = 0;
 };
@@ -47,7 +47,7 @@ public:
     VStack() = default;
     explicit VStack(Padding outer_pad, float inner_pad);
 
-    glm::vec2 calc_size(const glm::vec2 &max_size_hint) override;
+    void calc_size(const glm::vec2 &max_size_hint) override;
 
     void draw(G2d &g2d, glm::vec2 pos) const override;
 };
@@ -60,7 +60,7 @@ public:
     HStack() = default;
     explicit HStack(Padding outer_pad, float inner_pad);
 
-    glm::vec2 calc_size(const glm::vec2 &max_size_hint) override;
+    void calc_size(const glm::vec2 &max_size_hint) override;
 
     void draw(G2d &g2d, glm::vec2 pos) const override;
 };
@@ -71,16 +71,15 @@ public:
 
 class Button : public Node {
 public:
+    CodePage437 *font;
+    std::string text;
+    float text_scale;
+
     Button(CodePage437 *font, const std::string &text, float text_scale = 1.0f);
 
-    glm::vec2 calc_size(const glm::vec2 &max_size_hint) override;
+    void calc_size(const glm::vec2 &max_size_hint) override;
 
     void draw(G2d &g2d, glm::vec2 pos) const override;
-
-private:
-    CodePage437 *font_;
-    std::string text_;
-    float text_scale_;
 };
 } // namespace mizu::gui
 

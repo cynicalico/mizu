@@ -1,4 +1,5 @@
 #include "mizu/gui/gui.hpp"
+#include <ranges>
 #include <unordered_set>
 
 namespace mizu::gui {
@@ -8,7 +9,7 @@ constexpr auto UNDEFINED_SIZE_V = glm::vec2{UNDEFINED_SIZE, UNDEFINED_SIZE};
 VStack::VStack(const Padding outer_pad, float inner_pad)
     : outer_pad(outer_pad), inner_pad(inner_pad) {}
 
-glm::vec2 VStack::calc_size(const glm::vec2 &max_size_hint) {
+void VStack::calc_size(const glm::vec2 &max_size_hint) {
     switch (grow) {
     case Grow::Hori: size = {max_size_hint.x, UNDEFINED_SIZE}; break;
     case Grow::Vert: size = {UNDEFINED_SIZE, max_size_hint.y}; break;
@@ -33,11 +34,11 @@ glm::vec2 VStack::calc_size(const glm::vec2 &max_size_hint) {
     } else {
         // Check which elements won't grow vertically
         auto growing_children = std::unordered_set<std::size_t>();
-        for (std::size_t i = 0; i < children.size(); ++i) {
-            if (children[i]->grow == Grow::Hori || children[i]->grow == Grow::None) {
-                const auto child_size = children[i]->calc_size(UNDEFINED_SIZE_V);
+        for (const auto &[i, child]: children | std::views::enumerate) {
+            if (child->grow == Grow::Hori || child->grow == Grow::None) {
+                child->calc_size(UNDEFINED_SIZE_V);
                 if (child_max_size_hint.y != UNDEFINED_SIZE)
-                    child_max_size_hint.y -= child_size.y;
+                    child_max_size_hint.y -= child->size.y;
             } else {
                 growing_children.insert(i);
             }
@@ -74,8 +75,6 @@ glm::vec2 VStack::calc_size(const glm::vec2 &max_size_hint) {
         size.y += outer_pad.top + outer_pad.bottom;
         size.y += (children.size() - 1) * inner_pad;
     }
-
-    return size;
 }
 
 void VStack::draw(G2d &g2d, glm::vec2 pos) const {
@@ -98,7 +97,7 @@ void VStack::draw(G2d &g2d, glm::vec2 pos) const {
 HStack::HStack(const Padding outer_pad, float inner_pad)
     : outer_pad(outer_pad), inner_pad(inner_pad) {}
 
-glm::vec2 HStack::calc_size(const glm::vec2 &max_size_hint) {
+void HStack::calc_size(const glm::vec2 &max_size_hint) {
     switch (grow) {
     case Grow::Hori: size = {max_size_hint.x, UNDEFINED_SIZE}; break;
     case Grow::Vert: size = {UNDEFINED_SIZE, max_size_hint.y}; break;
@@ -123,11 +122,11 @@ glm::vec2 HStack::calc_size(const glm::vec2 &max_size_hint) {
     } else {
         // Check which elements won't grow horizontally
         auto growing_children = std::unordered_set<std::size_t>();
-        for (std::size_t i = 0; i < children.size(); ++i) {
-            if (children[i]->grow == Grow::Vert || children[i]->grow == Grow::None) {
-                const auto child_size = children[i]->calc_size({UNDEFINED_SIZE, child_max_size_hint.y});
+        for (const auto &[i, child]: children | std::views::enumerate) {
+            if (child->grow == Grow::Vert || child->grow == Grow::None) {
+                child->calc_size(UNDEFINED_SIZE_V);
                 if (child_max_size_hint.x != UNDEFINED_SIZE)
-                    child_max_size_hint.x -= child_size.x;
+                    child_max_size_hint.x -= child->size.x;
             } else {
                 growing_children.insert(i);
             }
@@ -164,8 +163,6 @@ glm::vec2 HStack::calc_size(const glm::vec2 &max_size_hint) {
         for (const auto &child: children)
             child->calc_size(child_max_size_hint);
     }
-
-    return size;
 }
 
 void HStack::draw(G2d &g2d, glm::vec2 pos) const {
@@ -192,10 +189,10 @@ void HStack::draw(G2d &g2d, glm::vec2 pos) const {
 }
 
 Button::Button(CodePage437 *font, const std::string &text, float text_scale)
-    : font_(font), text_(text), text_scale_(text_scale) {}
+    : font(font), text(text), text_scale(text_scale) {}
 
-glm::vec2 Button::calc_size(const glm::vec2 &max_size_hint) {
-    const auto text_size = font_->calculate_size(text_, text_scale_);
+void Button::calc_size(const glm::vec2 &max_size_hint) {
+    const auto text_size = font->calculate_size(text, text_scale);
 
     switch (grow) {
     case Grow::Hori: {
@@ -215,8 +212,6 @@ glm::vec2 Button::calc_size(const glm::vec2 &max_size_hint) {
         size.y = text_size.y + 2 + 2 * BORDER_SIZE;
     } break;
     }
-
-    return size;
 }
 
 void Button::draw(G2d &g2d, glm::vec2 pos) const {
@@ -231,7 +226,7 @@ void Button::draw(G2d &g2d, glm::vec2 pos) const {
             rgb(0x00ff00));
     g2d.line({pos.x, pos.y + size.y - BORDER_SIZE}, pos, rgb(0x00ff00));
 
-    const auto text_size = font_->calculate_size(text_, text_scale_);
-    font_->draw(text_, {pos.x + (size.x - text_size.x) / 2, pos.y + (size.y - text_size.y) / 2}, text_scale_);
+    const auto text_size = font->calculate_size(text, text_scale);
+    font->draw(text, {pos.x + (size.x - text_size.x) / 2, pos.y + (size.y - text_size.y) / 2}, text_scale);
 }
 } // namespace mizu::gui
