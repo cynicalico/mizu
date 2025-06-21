@@ -24,85 +24,25 @@ glm::vec2 Node::size() const {
 
 glm::vec2 VStack::calc_size(const glm::vec2 &max_size_hint) {
     switch (grow_) {
-    case Grow::Hori: {
-        size_ = {max_size_hint.x == UNDEFINED_SIZE ? 0 : max_size_hint.x, 0};
-        glm::vec2 child_max_size_hint = {
-                max_size_hint.x == UNDEFINED_SIZE ? UNDEFINED_SIZE : size_.x - 2 * BORDER_SIZE, UNDEFINED_SIZE};
+    case Grow::Hori: size_ = {max_size_hint.x, UNDEFINED_SIZE}; break;
+    case Grow::Vert: size_ = {UNDEFINED_SIZE, max_size_hint.y}; break;
+    case Grow::Both: size_ = {max_size_hint.x, max_size_hint.y}; break;
+    case Grow::None: size_ = {UNDEFINED_SIZE, UNDEFINED_SIZE}; break;
+    }
 
-        for (std::size_t i = 0; i < children_.size(); ++i) {
+    glm::vec2 child_max_size_hint{
+            size_.x == UNDEFINED_SIZE ? UNDEFINED_SIZE : size_.x - 2 * BORDER_SIZE,
+            size_.y == UNDEFINED_SIZE ? UNDEFINED_SIZE : size_.y - 2 * BORDER_SIZE};
+
+    if (grow_ == Grow::Hori || grow_ == Grow::None) {
+        for (std::size_t i = 0; i < children_.size(); ++i)
             children_[i]->calc_size(child_max_size_hint);
-            size_.y += children_[i]->size().y;
-        }
-        size_.y += 2 * BORDER_SIZE;
-
-        // Calculate our size now if we had no valid hint
-        if (size_.x == 0) {
-            for (std::size_t i = 0; i < children_.size(); ++i)
-                size_.x = std::max(size_.x, children_[i]->size().x);
-            size_.x += 2 * BORDER_SIZE;
-
-            child_max_size_hint.x = size_.x - 2 * BORDER_SIZE;
-            // One more pass with our newly calculated size
-            // because something inside may be horizontally growable
-            for (std::size_t i = 0; i < children_.size(); ++i)
-                children_[i]->calc_size(child_max_size_hint);
-        }
-    } break;
-    case Grow::Vert: {
-        size_ = {0, max_size_hint.y == UNDEFINED_SIZE ? 0 : max_size_hint.y};
-        glm::vec2 child_max_size_hint = {
-                UNDEFINED_SIZE, max_size_hint.y == UNDEFINED_SIZE ? UNDEFINED_SIZE : size_.y - 2 * BORDER_SIZE};
-
+    } else {
         // Check which elements won't grow vertically
         auto growing_children = std::unordered_set<std::size_t>();
         for (std::size_t i = 0; i < children_.size(); ++i) {
             if (children_[i]->grow() == Grow::Hori || children_[i]->grow() == Grow::None) {
                 const auto child_size = children_[i]->calc_size(UNDEFINED_SIZE_V);
-                size_.x = std::max(size_.x, child_size.x);
-                if (child_max_size_hint.y != UNDEFINED_SIZE)
-                    child_max_size_hint.y -= child_size.y;
-            } else {
-                growing_children.insert(i);
-            }
-        }
-        if (!growing_children.empty()) {
-            if (child_max_size_hint.y != UNDEFINED_SIZE)
-                child_max_size_hint.y /= growing_children.size();
-
-            // Calculate the rest in the remaining space
-            for (const std::size_t &i: growing_children) {
-                const auto child_size = children_[i]->calc_size(child_max_size_hint);
-                size_.x = std::max(size_.x, child_size.x);
-            }
-        }
-        size_.x += 2 * BORDER_SIZE;
-
-        child_max_size_hint.x = size_.x - 2 * BORDER_SIZE;
-        // One more pass with our newly calculated size
-        // because something inside may be horizontally growable
-        for (std::size_t i = 0; i < children_.size(); ++i)
-            children_[i]->calc_size(child_max_size_hint);
-
-        if (size_.y == 0) {
-            for (std::size_t i = 0; i < children_.size(); ++i)
-                size_.y += children_[i]->size().y;
-            size_.y += 2 * BORDER_SIZE;
-        }
-    } break;
-    case Grow::Both: {
-        size_ = {
-                max_size_hint.x == UNDEFINED_SIZE ? 0 : max_size_hint.x,
-                max_size_hint.y == UNDEFINED_SIZE ? 0 : max_size_hint.y};
-        glm::vec2 child_max_size_hint = {
-                max_size_hint.x == UNDEFINED_SIZE ? UNDEFINED_SIZE : size_.x - 2 * BORDER_SIZE,
-                max_size_hint.y == UNDEFINED_SIZE ? UNDEFINED_SIZE : size_.y - 2 * BORDER_SIZE};
-
-        // Check which elements won't grow vertically
-        auto growing_children = std::unordered_set<std::size_t>();
-        for (std::size_t i = 0; i < children_.size(); ++i) {
-            if (children_[i]->grow() == Grow::Hori || children_[i]->grow() == Grow::None) {
-                children_[i]->calc_size({child_max_size_hint.x, UNDEFINED_SIZE});
-                const auto child_size = children_[i]->size();
                 if (child_max_size_hint.y != UNDEFINED_SIZE)
                     child_max_size_hint.y -= child_size.y;
             } else {
@@ -117,44 +57,26 @@ glm::vec2 VStack::calc_size(const glm::vec2 &max_size_hint) {
             for (const std::size_t &i: growing_children)
                 children_[i]->calc_size(child_max_size_hint);
         }
+    }
 
-        // Calculate our size now if we had no valid hint
-        if (size_.x == 0) {
-            for (std::size_t i = 0; i < children_.size(); ++i)
-                size_.x = std::max(size_.x, children_[i]->size().x);
-            size_.x += 2 * BORDER_SIZE;
-
-            child_max_size_hint.x = size_.x - 2 * BORDER_SIZE;
-            // One more pass with our newly calculated size
-            // because something inside may be horizontally growable
-            for (std::size_t i = 0; i < children_.size(); ++i)
-                children_[i]->calc_size(child_max_size_hint);
-        }
-        if (size_.y == 0) {
-            for (std::size_t i = 0; i < children_.size(); ++i)
-                size_.y += children_[i]->size().y;
-            size_.y += 2 * BORDER_SIZE;
-        }
-    } break;
-    case Grow::None: {
-        size_ = {0, 0};
-        glm::vec2 child_max_size_hint = {UNDEFINED_SIZE, UNDEFINED_SIZE};
-
-        for (std::size_t i = 0; i < children_.size(); ++i) {
-            children_[i]->calc_size(child_max_size_hint);
-            const auto child_size = children_[i]->size();
-            size_.x = std::max(size_.x, child_size.x);
-            size_.y += child_size.y;
-        }
+    if (size_.x == UNDEFINED_SIZE) {
+        size_.x = 0;
+        for (std::size_t i = 0; i < children_.size(); ++i)
+            size_.x = std::max(size_.x, children_[i]->size().x);
         size_.x += 2 * BORDER_SIZE;
-        size_.y += 2 * BORDER_SIZE;
 
         child_max_size_hint.x = size_.x - 2 * BORDER_SIZE;
         // One more pass with our newly calculated size
         // because something inside may be horizontally growable
         for (std::size_t i = 0; i < children_.size(); ++i)
             children_[i]->calc_size(child_max_size_hint);
-    } break;
+    }
+
+    if (size_.y == UNDEFINED_SIZE) {
+        size_.y = 0;
+        for (std::size_t i = 0; i < children_.size(); ++i)
+            size_.y += children_[i]->size().y;
+        size_.y += 2 * BORDER_SIZE;
     }
 
     return size_;
@@ -182,78 +104,20 @@ void VStack::draw(G2d &g2d, glm::vec2 pos) {
 
 glm::vec2 HStack::calc_size(const glm::vec2 &max_size_hint) {
     switch (grow_) {
-    case Grow::Hori: {
-        size_ = {max_size_hint.x == UNDEFINED_SIZE ? 0 : max_size_hint.x, 0};
-        glm::vec2 child_max_size_hint = {
-                max_size_hint.x == UNDEFINED_SIZE ? UNDEFINED_SIZE : size_.x - 2 * BORDER_SIZE, UNDEFINED_SIZE};
+    case Grow::Hori: size_ = {max_size_hint.x, UNDEFINED_SIZE}; break;
+    case Grow::Vert: size_ = {UNDEFINED_SIZE, max_size_hint.y}; break;
+    case Grow::Both: size_ = {max_size_hint.x, max_size_hint.y}; break;
+    case Grow::None: size_ = {UNDEFINED_SIZE, UNDEFINED_SIZE}; break;
+    }
 
-        // Check which elements won't grow horizontally
-        auto growing_children = std::unordered_set<std::size_t>();
-        for (std::size_t i = 0; i < children_.size(); ++i) {
-            if (children_[i]->grow() == Grow::Vert || children_[i]->grow() == Grow::None) {
-                const auto child_size = children_[i]->calc_size(UNDEFINED_SIZE_V);
-                size_.y = std::max(size_.y, child_size.y);
-                if (child_max_size_hint.x != UNDEFINED_SIZE)
-                    child_max_size_hint.x -= child_size.x;
-            } else {
-                growing_children.insert(i);
-            }
-        }
-        if (!growing_children.empty()) {
-            if (child_max_size_hint.x != UNDEFINED_SIZE)
-                child_max_size_hint.x /= growing_children.size();
+    glm::vec2 child_max_size_hint{
+            size_.x == UNDEFINED_SIZE ? UNDEFINED_SIZE : size_.x - 2 * BORDER_SIZE,
+            size_.y == UNDEFINED_SIZE ? UNDEFINED_SIZE : size_.y - 2 * BORDER_SIZE};
 
-            // Calculate the rest in the remaining space
-            for (const std::size_t &i: growing_children) {
-                const auto child_size = children_[i]->calc_size(child_max_size_hint);
-                size_.y = std::max(size_.y, child_size.y);
-            }
-        }
-        size_.y += 2 * BORDER_SIZE;
-
-        child_max_size_hint.y = size_.y - 2 * BORDER_SIZE;
-        // One more pass with our newly calculated size
-        // before something inside may be horizontally growable
+    if (grow_ == Grow::Vert || grow_ == Grow::None) {
         for (std::size_t i = 0; i < children_.size(); ++i)
             children_[i]->calc_size(child_max_size_hint);
-
-        if (size_.x == 0) {
-            for (std::size_t i = 0; i < children_.size(); ++i)
-                size_.x += children_[i]->size().x;
-            size_.x += 2 * BORDER_SIZE;
-        }
-    } break;
-    case Grow::Vert: {
-        size_ = {0, max_size_hint.y == UNDEFINED_SIZE ? 0 : max_size_hint.y};
-        glm::vec2 child_max_size_hint = {
-                UNDEFINED_SIZE, max_size_hint.y == UNDEFINED_SIZE ? UNDEFINED_SIZE : size_.y - 2 * BORDER_SIZE};
-
-        for (std::size_t i = 0; i < children_.size(); ++i) {
-            const auto child_size = children_[i]->calc_size(child_max_size_hint);
-            size_.x += child_size.x;
-        }
-        size_.x += 2 * BORDER_SIZE;
-
-        if (size_.y == 0) {
-            for (std::size_t i = 0; i < children_.size(); ++i)
-                size_.y = std::max(size_.y, children_[i]->size().y);
-            size_.y += 2 * BORDER_SIZE;
-
-            child_max_size_hint.y = size_.y - 2 * BORDER_SIZE;
-            // One more pass with our newly calculated size
-            // because something inside may be vertically growable
-            for (std::size_t i = 0; i < children_.size(); ++i)
-                children_[i]->calc_size(child_max_size_hint);
-        }
-    } break;
-    case Grow::Both: {
-        size_ = {
-                max_size_hint.x == UNDEFINED_SIZE ? 0 : max_size_hint.x,
-                max_size_hint.y == UNDEFINED_SIZE ? 0 : max_size_hint.y};
-        glm::vec2 child_max_size_hint = {
-                max_size_hint.x == UNDEFINED_SIZE ? UNDEFINED_SIZE : size_.x - 2,
-                max_size_hint.y == UNDEFINED_SIZE ? UNDEFINED_SIZE : size_.y - 2};
-
+    } else {
         // Check which elements won't grow horizontally
         auto growing_children = std::unordered_set<std::size_t>();
         for (std::size_t i = 0; i < children_.size(); ++i) {
@@ -273,34 +137,19 @@ glm::vec2 HStack::calc_size(const glm::vec2 &max_size_hint) {
             for (const std::size_t &i: growing_children)
                 children_[i]->calc_size(child_max_size_hint);
         }
+    }
 
-        if (size_.x == 0) {
-            for (std::size_t i = 0; i < children_.size(); ++i)
-                size_.x += children_[i]->size().x;
-            size_.x += 2 * BORDER_SIZE;
-        }
-        if (size_.y == 0) {
-            for (std::size_t i = 0; i < children_.size(); ++i)
-                size_.y = std::max(size_.y, children_[i]->size().y);
-            size_.y += 2 * BORDER_SIZE;
-
-            child_max_size_hint.y = size_.y - 2 * BORDER_SIZE;
-            // One more pass with our newly calculated size
-            // because something inside may be vertically growable
-            for (std::size_t i = 0; i < children_.size(); ++i)
-                children_[i]->calc_size(child_max_size_hint);
-        }
-    } break;
-    case Grow::None: {
-        size_ = {0, 0};
-        glm::vec2 child_max_size_hint = {UNDEFINED_SIZE, UNDEFINED_SIZE};
-
-        for (std::size_t i = 0; i < children_.size(); ++i) {
-            const auto child_size = children_[i]->calc_size(child_max_size_hint);
-            size_.x += child_size.x;
-            size_.y = std::max(size_.y, child_size.y);
-        }
+    if (size_.x == UNDEFINED_SIZE) {
+        size_.x = 0;
+        for (std::size_t i = 0; i < children_.size(); ++i)
+            size_.x += children_[i]->size().x;
         size_.x += 2 * BORDER_SIZE;
+    }
+
+    if (size_.y == UNDEFINED_SIZE) {
+        size_.y = 0;
+        for (std::size_t i = 0; i < children_.size(); ++i)
+            size_.y = std::max(size_.y, children_[i]->size().y);
         size_.y += 2 * BORDER_SIZE;
 
         child_max_size_hint.y = size_.y - 2 * BORDER_SIZE;
@@ -308,7 +157,6 @@ glm::vec2 HStack::calc_size(const glm::vec2 &max_size_hint) {
         // because something inside may be vertically growable
         for (std::size_t i = 0; i < children_.size(); ++i)
             children_[i]->calc_size(child_max_size_hint);
-    } break;
     }
 
     return size_;
