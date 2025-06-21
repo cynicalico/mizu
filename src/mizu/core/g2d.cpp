@@ -158,6 +158,9 @@ void G2d::unregister_callbacks_() {
 }
 
 void G2d::pre_draw_() {
+    gl_.ctx.Viewport(0, 0, window_->size().x, window_->size().y);
+    CHECK_GL_ERROR(gl_.ctx, Viewport);
+
     gl_.enable(gloo::Capability::DepthTest);
     gl_.depth_func(gloo::DepthFunc::Greater);
     gl_.clip_control(gloo::ClipOrigin::LowerLeft, gloo::ClipDepth::ZeroToOne);
