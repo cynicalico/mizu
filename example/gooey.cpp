@@ -26,7 +26,7 @@ Gooey::Gooey(mizu::Engine *engine)
             "example/font/1px_7x9_no_bg.png", gloo::MinFilter::NearestMipmapNearest, gloo::MagFilter::Nearest);
     font = std::make_unique<mizu::CodePage437>(g2d, *font_tex, glm::uvec2{7, 9}, 2);
 
-    root = std::make_unique<gui::VStack>(gui::Padding(5.0f, 10.0f), 5.0f);
+    root = std::make_unique<gui::VStack>(gui::Padding(5.0f), 5.0f);
 
     root->add_child<gui::Button>(font.get(), "Button 1", 2.0f);
 

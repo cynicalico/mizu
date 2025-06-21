@@ -1,4 +1,5 @@
 #include "mizu/gui/gui.hpp"
+#include <algorithm>
 #include <ranges>
 #include <unordered_set>
 
@@ -54,9 +55,10 @@ void VStack::calc_size(const glm::vec2 &max_size_hint) {
     }
 
     if (size.x == UNDEFINED_SIZE) {
-        size.x = 0;
-        for (const auto &child: children)
-            size.x = std::max(size.x, child->size.x);
+        size.x = std::ranges::max_element(
+                         children, std::ranges::less{}, [](const auto &a) -> float { return a->size.x; })
+                         ->get()
+                         ->size.x;
         size.x += 2 * BORDER_SIZE;
         size.x += outer_pad.left + outer_pad.right;
 
@@ -68,9 +70,7 @@ void VStack::calc_size(const glm::vec2 &max_size_hint) {
     }
 
     if (size.y == UNDEFINED_SIZE) {
-        size.y = 0;
-        for (std::size_t i = 0; i < children.size(); ++i)
-            size.y += children[i]->size.y;
+        size.y = std::ranges::fold_left(children, 0.0f, [](float sum, const auto &a) { return sum + a->size.y; });
         size.y += 2 * BORDER_SIZE;
         size.y += outer_pad.top + outer_pad.bottom;
         size.y += (children.size() - 1) * inner_pad;
@@ -142,18 +142,17 @@ void HStack::calc_size(const glm::vec2 &max_size_hint) {
     }
 
     if (size.x == UNDEFINED_SIZE) {
-        size.x = 0;
-        for (const auto &child: children)
-            size.x += child->size.x;
+        size.x = std::ranges::fold_left(children, 0.0f, [](float sum, const auto &a) { return sum + a->size.x; });
         size.x += 2 * BORDER_SIZE;
         size.x += outer_pad.left + outer_pad.right;
         size.x += (children.size() - 1) * inner_pad;
     }
 
     if (size.y == UNDEFINED_SIZE) {
-        size.y = 0;
-        for (const auto &child: children)
-            size.y = std::max(size.y, child->size.y);
+        size.y = std::ranges::max_element(
+                         children, std::ranges::less{}, [](const auto &a) -> float { return a->size.y; })
+                         ->get()
+                         ->size.y;
         size.y += 2 * BORDER_SIZE;
         size.y += outer_pad.top + outer_pad.bottom;
 
