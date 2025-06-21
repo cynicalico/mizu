@@ -16,6 +16,9 @@ struct Padding {
     Padding(float left, float right, float top, float bottom)
         : left(left), right(right), top(top), bottom(bottom) {}
 
+    Padding(float hori, float vert)
+        : left(hori), right(hori), top(vert), bottom(vert) {}
+
     explicit Padding(float all)
         : left(all), right(all), top(all), bottom(all) {}
 };
@@ -23,7 +26,7 @@ struct Padding {
 class Node {
 public:
     glm::vec2 size{};
-    std::vector<Node *> children{};
+    std::vector<std::unique_ptr<Node>> children{};
     Grow grow{Grow::Both};
 
     Node *parent{nullptr};
@@ -33,6 +36,14 @@ public:
     virtual void calc_size(const glm::vec2 &max_size_hint) = 0;
 
     virtual void draw(G2d &g2d, glm::vec2 pos) const = 0;
+
+    template<typename T, typename... Args>
+        requires std::derived_from<T, Node>
+    T *add_child(Args &&...args) {
+        auto child = std::make_unique<T>(std::forward<Args>(args)...);
+        children.push_back(std::move(child));
+        return static_cast<T *>(children.back().get());
+    }
 };
 
 /***********

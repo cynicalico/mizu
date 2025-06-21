@@ -12,15 +12,6 @@ public:
     std::unique_ptr<mizu::CodePage437> font;
 
     std::unique_ptr<gui::Node> root;
-    std::unique_ptr<gui::Node> l1;
-    std::unique_ptr<gui::Node> l2;
-    std::unique_ptr<gui::Node> button1;
-    std::unique_ptr<gui::Node> button2;
-    std::unique_ptr<gui::Node> button3;
-    std::unique_ptr<gui::Node> button4;
-    std::unique_ptr<gui::Node> button5;
-    std::unique_ptr<gui::Node> button6;
-    std::unique_ptr<gui::Node> button7;
 
     explicit Gooey(mizu::Engine *engine);
 
@@ -35,34 +26,25 @@ Gooey::Gooey(mizu::Engine *engine)
             "example/font/1px_7x9_no_bg.png", gloo::MinFilter::NearestMipmapNearest, gloo::MagFilter::Nearest);
     font = std::make_unique<mizu::CodePage437>(g2d, *font_tex, glm::uvec2{7, 9}, 2);
 
-    root = std::make_unique<gui::VStack>(gui::Padding(5.0f), 5.0f);
+    root = std::make_unique<gui::VStack>(gui::Padding(5.0f, 10.0f), 5.0f);
 
-    button1 = std::make_unique<gui::Button>(font.get(), "Button 1", 2.0f);
-    root->children.push_back(button1.get());
+    root->add_child<gui::Button>(font.get(), "Button 1", 2.0f);
 
-    l1 = std::make_unique<gui::HStack>(gui::Padding(5.0f), 5.0f);
-    root->children.push_back(l1.get());
+    auto l1 = root->add_child<gui::HStack>(gui::Padding(5.0f), 5.0f);
 
-    button2 = std::make_unique<gui::Button>(font.get(), "Button 2", 2.0f);
-    l1->children.push_back(button2.get());
+    l1->add_child<gui::Button>(font.get(), "Button 2", 2.0f);
 
-    l2 = std::make_unique<gui::VStack>(gui::Padding(5.0f), 5.0f);
-    l1->children.push_back(l2.get());
+    auto l2 = l1->add_child<gui::VStack>(gui::Padding(5.0f), 5.0f);
 
-    button3 = std::make_unique<gui::Button>(font.get(), "Button 3", 2.0f);
-    l2->children.push_back(button3.get());
+    l2->add_child<gui::Button>(font.get(), "Button 3", 2.0f);
 
-    button4 = std::make_unique<gui::Button>(font.get(), "Button 4", 2.0f);
-    l2->children.push_back(button4.get());
+    l2->add_child<gui::Button>(font.get(), "Button 4", 2.0f);
 
-    button5 = std::make_unique<gui::Button>(font.get(), "Button 5", 2.0f);
-    l1->children.push_back(button5.get());
+    l1->add_child<gui::Button>(font.get(), "Button 5", 2.0f);
 
-    button6 = std::make_unique<gui::Button>(font.get(), "Button 6", 2.0f);
-    l1->children.push_back(button6.get());
+    l1->add_child<gui::Button>(font.get(), "Button 6", 2.0f);
 
-    button7 = std::make_unique<gui::Button>(font.get(), "Button 7", 2.0f);
-    root->children.push_back(button7.get());
+    root->add_child<gui::Button>(font.get(), "Button 7", 2.0f);
 }
 
 void Gooey::update(double dt) {
