@@ -10,26 +10,29 @@ constexpr float BORDER_SIZE = 1.0f;
 
 enum class Grow { Hori, Vert, Both, None };
 
+struct Padding {
+    float left, right, top, bottom;
+
+    Padding(float left, float right, float top, float bottom)
+        : left(left), right(right), top(top), bottom(bottom) {}
+
+    explicit Padding(float all)
+        : left(all), right(all), top(all), bottom(all) {}
+};
+
 class Node {
 public:
+    glm::vec2 size{};
+    std::vector<Node *> children{};
+    Grow grow{Grow::Both};
+
     Node *parent{nullptr};
 
     virtual ~Node() = default;
 
-    virtual void add_child(Node *child);
-
-    void set_grow(const Grow &grow);
-    Grow grow() const;
-
     virtual glm::vec2 calc_size(const glm::vec2 &max_size_hint) = 0;
-    glm::vec2 size() const;
 
-    virtual void draw(G2d &g2d, glm::vec2 pos) = 0;
-
-protected:
-    glm::vec2 size_{};
-    std::vector<Node *> children_{};
-    Grow grow_{Grow::Both};
+    virtual void draw(G2d &g2d, glm::vec2 pos) const = 0;
 };
 
 /***********
@@ -38,16 +41,28 @@ protected:
 
 class VStack : public Node {
 public:
-    glm::vec2 calc_size(const glm::vec2 &max_allowed_size) override;
+    Padding outer_pad{0.0f};
+    float inner_pad{0.0f};
 
-    void draw(G2d &g2d, glm::vec2 pos) override;
+    VStack() = default;
+    explicit VStack(Padding outer_pad, float inner_pad);
+
+    glm::vec2 calc_size(const glm::vec2 &max_size_hint) override;
+
+    void draw(G2d &g2d, glm::vec2 pos) const override;
 };
 
 class HStack : public Node {
 public:
-    glm::vec2 calc_size(const glm::vec2 &max_allowed_size) override;
+    Padding outer_pad{0.0f};
+    float inner_pad{0.0f};
 
-    void draw(G2d &g2d, glm::vec2 pos) override;
+    HStack() = default;
+    explicit HStack(Padding outer_pad, float inner_pad);
+
+    glm::vec2 calc_size(const glm::vec2 &max_size_hint) override;
+
+    void draw(G2d &g2d, glm::vec2 pos) const override;
 };
 
 /************
@@ -58,9 +73,9 @@ class Button : public Node {
 public:
     Button(CodePage437 *font, const std::string &text, float text_scale = 1.0f);
 
-    glm::vec2 calc_size(const glm::vec2 &max_allowed_size) override;
+    glm::vec2 calc_size(const glm::vec2 &max_size_hint) override;
 
-    void draw(G2d &g2d, glm::vec2 pos) override;
+    void draw(G2d &g2d, glm::vec2 pos) const override;
 
 private:
     CodePage437 *font_;
