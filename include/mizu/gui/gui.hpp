@@ -10,6 +10,12 @@ constexpr float BORDER_SIZE = 1.0f;
 
 enum class Grow { Hori, Vert, Both, None };
 
+struct PxBorder {
+    Rgba color;
+};
+
+using Border = std::variant<PxBorder>;
+
 struct Padding {
     float left, right, top, bottom;
 
@@ -50,8 +56,9 @@ public:
  * LAYOUTS *
  ***********/
 
-class VStack : public Node {
+class VStack final : public Node {
 public:
+    std::optional<Border> border{std::nullopt};
     Padding outer_pad{0.0f};
     float inner_pad{0.0f};
 
@@ -61,10 +68,14 @@ public:
     void calc_size(const glm::vec2 &max_size_hint) override;
 
     void draw(G2d &g2d, glm::vec2 pos) const override;
+
+private:
+    float border_size_() const;
 };
 
-class HStack : public Node {
+class HStack final : public Node {
 public:
+    std::optional<Border> border{std::nullopt};
     Padding outer_pad{0.0f};
     float inner_pad{0.0f};
 
@@ -74,13 +85,16 @@ public:
     void calc_size(const glm::vec2 &max_size_hint) override;
 
     void draw(G2d &g2d, glm::vec2 pos) const override;
+
+private:
+    float border_size_() const;
 };
 
 /************
  * CONTROLS *
  ************/
 
-class Button : public Node {
+class Button final : public Node {
 public:
     CodePage437 *font;
     std::string text;

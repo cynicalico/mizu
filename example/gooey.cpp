@@ -11,7 +11,7 @@ public:
     std::unique_ptr<mizu::Texture> font_tex;
     std::unique_ptr<mizu::CodePage437> font;
 
-    std::unique_ptr<gui::Node> root;
+    std::unique_ptr<gui::VStack> root;
 
     explicit Gooey(mizu::Engine *engine);
 
@@ -27,14 +27,15 @@ Gooey::Gooey(mizu::Engine *engine)
     font = std::make_unique<mizu::CodePage437>(g2d, *font_tex, glm::uvec2{7, 9}, 2);
 
     root = std::make_unique<gui::VStack>(gui::Padding(5.0f), 5.0f);
+    root->border = gui::PxBorder{mizu::rgb(0xffffff)};
 
     root->add_child<gui::Button>(font.get(), "Button 1", 2.0f);
 
-    auto l1 = root->add_child<gui::HStack>(gui::Padding(5.0f), 5.0f);
+    auto l1 = root->add_child<gui::HStack>(gui::Padding(0.0f), 5.0f);
 
     l1->add_child<gui::Button>(font.get(), "Button 2", 2.0f);
 
-    auto l2 = l1->add_child<gui::VStack>(gui::Padding(5.0f), 5.0f);
+    auto l2 = l1->add_child<gui::VStack>(gui::Padding(0.0f), 5.0f);
 
     l2->add_child<gui::Button>(font.get(), "Button 3", 2.0f);
 
