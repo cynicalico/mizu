@@ -31,6 +31,12 @@ Gooey::Gooey(mizu::Engine *engine)
 
     root->add_child<gui::Button>(font.get(), "Button 1", 2.0f);
 
+    root->add_child<gui::VSpacer>();
+    root->add_child<gui::VSpacer>();
+    root->add_child<gui::VSpacer>();
+    root->add_child<gui::VSpacer>();
+    root->add_child<gui::VSpacer>();
+
     auto l1 = root->add_child<gui::HStack>(gui::Padding(0.0f), 5.0f);
 
     l1->add_child<gui::Button>(font.get(), "Button 2", 2.0f);
@@ -42,6 +48,8 @@ Gooey::Gooey(mizu::Engine *engine)
     l2->add_child<gui::Button>(font.get(), "Button 4", 2.0f);
 
     l1->add_child<gui::Button>(font.get(), "Button 5", 2.0f);
+
+    l1->add_child<gui::HSpacer>();
 
     l1->add_child<gui::Button>(font.get(), "Button 6", 2.0f);
 

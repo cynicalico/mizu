@@ -225,6 +225,28 @@ float HStack::border_size_() const {
     return 0.0f;
 }
 
+VSpacer::VSpacer() {
+    grow = Grow::Vert;
+}
+
+void VSpacer::calc_size(const glm::vec2 &max_size_hint) {
+    size.x = 0.0f;
+    size.y = max_size_hint.y;
+}
+
+void VSpacer::draw(G2d &g2d, glm::vec2 pos) const { /* invisible */ }
+
+HSpacer::HSpacer() {
+    grow = Grow::Hori;
+}
+
+void HSpacer::calc_size(const glm::vec2 &max_size_hint) {
+    size.x = max_size_hint.x;
+    size.y = 0.0f;
+}
+
+void HSpacer::draw(G2d &g2d, glm::vec2 pos) const { /* invisible */ }
+
 Button::Button(CodePage437 *font, const std::string &text, float text_scale)
     : font(font), text(text), text_scale(text_scale) {}
 

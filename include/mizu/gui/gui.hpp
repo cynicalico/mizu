@@ -90,6 +90,28 @@ private:
     float border_size_() const;
 };
 
+/***********
+ * UTILITY *
+ ***********/
+
+class VSpacer final : public Node {
+public:
+    VSpacer();
+
+    void calc_size(const glm::vec2 &max_size_hint) override;
+
+    void draw(G2d &g2d, glm::vec2 pos) const override;
+};
+
+class HSpacer final : public Node {
+public:
+    HSpacer();
+
+    void calc_size(const glm::vec2 &max_size_hint) override;
+
+    void draw(G2d &g2d, glm::vec2 pos) const override;
+};
+
 /************
  * CONTROLS *
  ************/
