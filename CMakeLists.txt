@@ -41,7 +41,11 @@ set(mizu_headers
         include/mizu/core/window.hpp
         include/mizu/ds/priority_queue.hpp
         include/mizu/font/code_page_437.hpp
+        include/mizu/gui/control.hpp
         include/mizu/gui/gui.hpp
+        include/mizu/gui/layout.hpp
+        include/mizu/gui/node.hpp
+        include/mizu/gui/types.hpp
         include/mizu/util/averagers.hpp
         include/mizu/util/class_helpers.hpp
         include/mizu/util/enum_class_helpers.hpp
@@ -82,7 +86,9 @@ set(mizu_sources
         src/mizu/core/texture.cpp
         src/mizu/core/window.cpp
         src/mizu/font/code_page_437.cpp
+        src/mizu/gui/control.cpp
         src/mizu/gui/gui.cpp
+        src/mizu/gui/layout.cpp
         src/mizu/util/averagers.cpp
         src/mizu/util/io.cpp
         src/mizu/util/memusage.cpp

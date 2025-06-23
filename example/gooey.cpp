@@ -1,6 +1,6 @@
 #include "mizu/mizu.hpp"
 
-namespace gui = mizu::gui;
+namespace mgui = mizu::gui;
 
 class Gooey final : public mizu::Application {
 public:
@@ -11,7 +11,7 @@ public:
     std::unique_ptr<mizu::Texture> font_tex;
     std::unique_ptr<mizu::CodePage437> font;
 
-    std::unique_ptr<gui::VStack> root;
+    std::unique_ptr<mgui::Gui> gui;
 
     explicit Gooey(mizu::Engine *engine);
 
@@ -26,34 +26,23 @@ Gooey::Gooey(mizu::Engine *engine)
             "example/font/1px_7x9_no_bg.png", gloo::MinFilter::NearestMipmapNearest, gloo::MagFilter::Nearest);
     font = std::make_unique<mizu::CodePage437>(g2d, *font_tex, glm::uvec2{7, 9}, 2);
 
-    root = std::make_unique<gui::VStack>(gui::Padding(5.0f), 5.0f);
-    root->border = gui::PxBorder{mizu::rgb(0xffffff)};
-
-    root->add_child<gui::Button>(font.get(), "Button 1", 2.0f);
-
-    root->add_child<gui::VSpacer>();
-    root->add_child<gui::VSpacer>();
-    root->add_child<gui::VSpacer>();
-    root->add_child<gui::VSpacer>();
-    root->add_child<gui::VSpacer>();
-
-    auto l1 = root->add_child<gui::HStack>(gui::Padding(0.0f), 5.0f);
-
-    l1->add_child<gui::Button>(font.get(), "Button 2", 2.0f);
-
-    auto l2 = l1->add_child<gui::VStack>(gui::Padding(0.0f), 5.0f);
-
-    l2->add_child<gui::Button>(font.get(), "Button 3", 2.0f);
-
-    l2->add_child<gui::Button>(font.get(), "Button 4", 2.0f);
-
-    l1->add_child<gui::Button>(font.get(), "Button 5", 2.0f);
-
-    l1->add_child<gui::HSpacer>();
-
-    l1->add_child<gui::Button>(font.get(), "Button 6", 2.0f);
-
-    root->add_child<gui::Button>(font.get(), "Button 7", 2.0f);
+    gui = mgui::GuiBuilder()
+                  .start<mgui::VStack>(
+                          {.border = mgui::PxBorder{mizu::rgb(0xffffff)},
+                           .outer_pad = mgui::Padding(5.0f),
+                           .inner_pad = 5.0f})
+                  .add<mgui::Button>({.font = font.get(), .text = "Button 1", .text_scale = 2.0f})
+                  .start<mgui::HStack>({.outer_pad = mgui::Padding(0.0f), .inner_pad = 5.0f})
+                  .add<mgui::Button>({.font = font.get(), .text = "Button 2", .text_scale = 2.0f})
+                  .start<mgui::VStack>({.outer_pad = mgui::Padding(0.0f), .inner_pad = 5.0f})
+                  .add<mgui::Button>({.font = font.get(), .text = "Button 3", .text_scale = 2.0f})
+                  .add<mgui::Button>({.font = font.get(), .text = "Button 4", .text_scale = 2.0f})
+                  .end()
+                  .add<mgui::Button>({.font = font.get(), .text = "Button 5", .text_scale = 2.0f})
+                  .add<mgui::Button>({.font = font.get(), .text = "Button 6", .text_scale = 2.0f})
+                  .end()
+                  .add<mgui::Button>({.font = font.get(), .text = "Button 7", .text_scale = 2.0f})
+                  .build();
 }
 
 void Gooey::update(double dt) {
@@ -64,8 +53,8 @@ void Gooey::update(double dt) {
 void Gooey::draw() {
     g2d.clear(mizu::rgb(0x000000));
 
-    root->calc_size(window.size());
-    root->draw(g2d, {(window.size().x - root->size.x) / 2, (window.size().y - root->size.y) / 2});
+    gui->calc_size(window.size());
+    gui->draw(g2d, {(window.size().x - gui->size().x) / 2, (window.size().y - gui->size().y) / 2});
 }
 
 int main(int, char *[]) {

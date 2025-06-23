@@ -1,133 +1,70 @@
-#ifndef MIZU_GUI_HPP
-#define MIZU_GUI_HPP
+#ifndef MIZU_GUI_GUI_HPP
+#define MIZU_GUI_GUI_HPP
 
-#include <glm/vec2.hpp>
-#include <vector>
-#include "mizu/font/code_page_437.hpp"
+#include "mizu/gui/node.hpp"
+#include "mizu/util/class_helpers.hpp"
 
 namespace mizu::gui {
-constexpr float BORDER_SIZE = 1.0f;
+class Gui {
+    friend class GuiBuilder;
 
-enum class Grow { Hori, Vert, Both, None };
-
-struct PxBorder {
-    Rgba color;
-};
-
-using Border = std::variant<PxBorder>;
-
-struct Padding {
-    float left, right, top, bottom;
-
-    Padding(float left, float right, float top, float bottom)
-        : left(left), right(right), top(top), bottom(bottom) {}
-
-    Padding(float hori, float vert)
-        : left(hori), right(hori), top(vert), bottom(vert) {}
-
-    explicit Padding(float all)
-        : left(all), right(all), top(all), bottom(all) {}
-};
-
-class Node {
 public:
-    glm::vec2 size{};
-    std::vector<std::unique_ptr<Node>> children{};
-    Grow grow{Grow::Both};
+    glm::vec2 size() const;
 
-    Node *parent{nullptr};
+    void calc_size(const glm::vec2 &max_size_hint);
 
-    virtual ~Node() = default;
+    void draw(G2d &g2d, glm::vec2 pos) const;
 
-    virtual void calc_size(const glm::vec2 &max_size_hint) = 0;
+private:
+    std::unique_ptr<NodeI> root_;
 
-    virtual void draw(G2d &g2d, glm::vec2 pos) const = 0;
+    explicit Gui(std::unique_ptr<NodeI> root)
+        : root_(std::move(root)) {}
+};
 
-    template<typename T, typename... Args>
-        requires std::derived_from<T, Node>
-    T *add_child(Args &&...args) {
-        auto child = std::make_unique<T>(std::forward<Args>(args)...);
-        children.push_back(std::move(child));
-        return static_cast<T *>(children.back().get());
+class GuiBuilder {
+public:
+    GuiBuilder() = default;
+    ~GuiBuilder() = default;
+
+    NO_COPY(GuiBuilder)
+    NO_MOVE(GuiBuilder)
+
+    template<typename T>
+        requires std::derived_from<T, Node<typename T::ParamType>>
+    GuiBuilder &start(typename T::ParamType params);
+
+    template<typename T>
+        requires std::derived_from<T, Node<typename T::ParamType>>
+    GuiBuilder &add(typename T::ParamType params);
+
+    GuiBuilder &end();
+
+    std::unique_ptr<Gui> build();
+
+private:
+    std::unique_ptr<NodeI> root_{nullptr};
+    NodeI *current_{nullptr};
+};
+
+template<typename T>
+    requires std::derived_from<T, Node<typename T::ParamType>>
+GuiBuilder &GuiBuilder::start(typename T::ParamType params) {
+    if (!root_) {
+        root_ = std::make_unique<T>(params);
+        current_ = root_.get();
+    } else {
+        current_ = current_->add_child<T>(params);
     }
-};
+    return *this;
+}
 
-/***********
- * LAYOUTS *
- ***********/
-
-class VStack final : public Node {
-public:
-    std::optional<Border> border{std::nullopt};
-    Padding outer_pad{0.0f};
-    float inner_pad{0.0f};
-
-    VStack() = default;
-    explicit VStack(Padding outer_pad, float inner_pad);
-
-    void calc_size(const glm::vec2 &max_size_hint) override;
-
-    void draw(G2d &g2d, glm::vec2 pos) const override;
-
-private:
-    float border_size_() const;
-};
-
-class HStack final : public Node {
-public:
-    std::optional<Border> border{std::nullopt};
-    Padding outer_pad{0.0f};
-    float inner_pad{0.0f};
-
-    HStack() = default;
-    explicit HStack(Padding outer_pad, float inner_pad);
-
-    void calc_size(const glm::vec2 &max_size_hint) override;
-
-    void draw(G2d &g2d, glm::vec2 pos) const override;
-
-private:
-    float border_size_() const;
-};
-
-/***********
- * UTILITY *
- ***********/
-
-class VSpacer final : public Node {
-public:
-    VSpacer();
-
-    void calc_size(const glm::vec2 &max_size_hint) override;
-
-    void draw(G2d &g2d, glm::vec2 pos) const override;
-};
-
-class HSpacer final : public Node {
-public:
-    HSpacer();
-
-    void calc_size(const glm::vec2 &max_size_hint) override;
-
-    void draw(G2d &g2d, glm::vec2 pos) const override;
-};
-
-/************
- * CONTROLS *
- ************/
-
-class Button final : public Node {
-public:
-    CodePage437 *font;
-    std::string text;
-    float text_scale;
-
-    Button(CodePage437 *font, const std::string &text, float text_scale = 1.0f);
-
-    void calc_size(const glm::vec2 &max_size_hint) override;
-
-    void draw(G2d &g2d, glm::vec2 pos) const override;
-};
+template<typename T>
+    requires std::derived_from<T, Node<typename T::ParamType>>
+GuiBuilder &GuiBuilder::add(typename T::ParamType params) {
+    current_->add_child<T>(params);
+    return *this;
+}
 } // namespace mizu::gui
 
-#endif // MIZU_GUI_HPP
+#endif // MIZU_GUI_GUI_HPP

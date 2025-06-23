@@ -6,12 +6,12 @@
 #include "gloo/texture.hpp"
 #include "mizu/core/batcher.hpp"
 #include "mizu/core/callback_mgr.hpp"
-#include "mizu/util/class_helpers.hpp"
 #include "mizu/core/color.hpp"
-#include "mizu/util/enum_class_helpers.hpp"
-#include "mizu/util/shapes.hpp"
 #include "mizu/core/texture.hpp"
 #include "mizu/core/window.hpp"
+#include "mizu/util/class_helpers.hpp"
+#include "mizu/util/enum_class_helpers.hpp"
+#include "mizu/util/shapes.hpp"
 
 namespace mizu {
 class G2d {
@@ -26,8 +26,7 @@ public:
     std::unique_ptr<Texture> load_texture(
             const std::filesystem::path &path,
             gloo::MinFilter min_filter = gloo::MinFilter::Nearest,
-            gloo::MagFilter mag_filter = gloo::MagFilter::Linear
-    ) const;
+            gloo::MagFilter mag_filter = gloo::MagFilter::Linear) const;
 
     bool vsync() const;
     void set_vsync(bool enabled);
