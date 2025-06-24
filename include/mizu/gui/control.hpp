@@ -24,7 +24,13 @@ public:
 
     void calc_bbox(glm::vec2 pos) override;
 
+    void update(InputMgr &input) override;
+
     void draw(G2d &g2d) const override;
+
+private:
+    bool primed_{false};
+    bool hovered_{false};
 };
 } // namespace mizu::gui
 

@@ -5,6 +5,7 @@
 #include <memory>
 #include <vector>
 #include "mizu/core/g2d.hpp"
+#include "mizu/core/input_mgr.hpp"
 #include "mizu/gui/types.hpp"
 
 namespace mizu::gui {
@@ -24,6 +25,8 @@ public:
     virtual void resize(const glm::vec2 &max_size_hint) = 0;
 
     virtual void calc_bbox(glm::vec2 pos) = 0;
+
+    virtual void update(InputMgr &input) = 0;
 
     virtual void draw(G2d &g2d) const = 0;
 

@@ -23,6 +23,8 @@ public:
 
     void calc_bbox(glm::vec2 pos) override;
 
+    void update(InputMgr &input) override;
+
     void draw(G2d &g2d) const override;
 
 private:
@@ -47,6 +49,8 @@ public:
 
     void calc_bbox(glm::vec2 pos) override;
 
+    void update(InputMgr &input) override;
+
     void draw(G2d &g2d) const override;
 
 private:
@@ -61,6 +65,8 @@ public:
 
     void calc_bbox(glm::vec2 pos) override;
 
+    void update(InputMgr &input) override;
+
     void draw(G2d &g2d) const override;
 };
 
@@ -71,6 +77,8 @@ public:
     void resize(const glm::vec2 &max_size_hint) override;
 
     void calc_bbox(glm::vec2 pos) override;
+
+    void update(InputMgr &input) override;
 
     void draw(G2d &g2d) const override;
 };

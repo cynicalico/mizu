@@ -84,6 +84,11 @@ void VStack::calc_bbox(glm::vec2 pos) {
     }
 }
 
+void VStack::update(InputMgr &input) {
+    for (const auto &child: children)
+        child->update(input);
+}
+
 void VStack::draw(G2d &g2d) const {
     if (border) {
         if (std::holds_alternative<PxBorder>(*border)) {
@@ -199,6 +204,11 @@ void HStack::calc_bbox(glm::vec2 pos) {
     }
 }
 
+void HStack::update(InputMgr &input) {
+    for (const auto &child: children)
+        child->update(input);
+}
+
 void HStack::draw(G2d &g2d) const {
     if (border) {
         if (std::holds_alternative<PxBorder>(*border)) {
@@ -242,6 +252,8 @@ void VSpacer::resize(const glm::vec2 &max_size_hint) {
 
 void VSpacer::calc_bbox(glm::vec2 pos) { /* invisible */ }
 
+void VSpacer::update(InputMgr &input) { /* nothing to do */ }
+
 void VSpacer::draw(G2d &g2d) const { /* invisible */ }
 
 HSpacer::HSpacer() {
@@ -254,6 +266,8 @@ void HSpacer::resize(const glm::vec2 &max_size_hint) {
 }
 
 void HSpacer::calc_bbox(glm::vec2 pos) { /* invisible */ }
+
+void HSpacer::update(InputMgr &input) { /* nothing to do */ }
 
 void HSpacer::draw(G2d &g2d) const { /* invisible */ }
 } // namespace mizu::gui

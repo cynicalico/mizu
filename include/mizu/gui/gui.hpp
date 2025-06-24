@@ -1,7 +1,6 @@
 #ifndef MIZU_GUI_GUI_HPP
 #define MIZU_GUI_GUI_HPP
 
-#include "mizu/core/input_mgr.hpp"
 #include "mizu/gui/node.hpp"
 #include "mizu/util/class_helpers.hpp"
 

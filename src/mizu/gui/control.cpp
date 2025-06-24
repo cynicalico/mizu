@@ -31,11 +31,20 @@ void Button::calc_bbox(glm::vec2 pos) {
     bbox = {pos.x, pos.y, pos.x + size.x, pos.y + size.y};
 }
 
+void Button::update(InputMgr &input) {
+    hovered_ = input.mouse_x() >= bbox.x && input.mouse_x() < bbox.z && input.mouse_y() >= bbox.y &&
+               input.mouse_y() < bbox.w;
+}
+
 void Button::draw(G2d &g2d) const {
-    g2d.line({bbox.x, bbox.y}, {bbox.z - BORDER_SIZE, bbox.y}, rgb(0x00ff00));
-    g2d.line({bbox.z - BORDER_SIZE, bbox.y}, {bbox.z - BORDER_SIZE, bbox.w - BORDER_SIZE}, rgb(0x00ff00));
-    g2d.line({bbox.z - BORDER_SIZE, bbox.w - BORDER_SIZE}, {bbox.x, bbox.w - BORDER_SIZE}, rgb(0x00ff00));
-    g2d.line({bbox.x, bbox.w - BORDER_SIZE}, {bbox.x, bbox.y}, rgb(0x00ff00));
+    Rgba border_color = rgb(0x00ff00);
+    if (hovered_)
+        border_color = rgb(0xff00ff);
+
+    g2d.line({bbox.x, bbox.y}, {bbox.z - BORDER_SIZE, bbox.y}, border_color);
+    g2d.line({bbox.z - BORDER_SIZE, bbox.y}, {bbox.z - BORDER_SIZE, bbox.w - BORDER_SIZE}, border_color);
+    g2d.line({bbox.z - BORDER_SIZE, bbox.w - BORDER_SIZE}, {bbox.x, bbox.w - BORDER_SIZE}, border_color);
+    g2d.line({bbox.x, bbox.w - BORDER_SIZE}, {bbox.x, bbox.y}, border_color);
 
     const auto text_size = font->calculate_size(text, text_scale);
     font->draw(text, {bbox.x + (size.x - text_size.x) / 2, bbox.y + (size.y - text_size.y) / 2}, text_scale);
