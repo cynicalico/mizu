@@ -1,6 +1,7 @@
 #ifndef MIZU_GUI_GUI_HPP
 #define MIZU_GUI_GUI_HPP
 
+#include "mizu/core/input_mgr.hpp"
 #include "mizu/gui/node.hpp"
 #include "mizu/util/class_helpers.hpp"
 
@@ -11,15 +12,17 @@ class Gui {
 public:
     glm::vec2 size() const;
 
-    void calc_size(const glm::vec2 &max_size_hint);
+    void update(InputMgr &input);
 
-    void draw(G2d &g2d, glm::vec2 pos) const;
+    void resize(const glm::vec2 &max_size_hint, const glm::vec2 &pos);
+
+    void draw(G2d &g2d) const;
 
 private:
     std::unique_ptr<NodeI> root_;
+    NodeI *active__node_{nullptr};
 
-    explicit Gui(std::unique_ptr<NodeI> root)
-        : root_(std::move(root)) {}
+    explicit Gui(std::unique_ptr<NodeI> root);
 };
 
 class GuiBuilder {

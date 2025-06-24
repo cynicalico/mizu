@@ -1,19 +1,22 @@
 #include "mizu/gui/gui.hpp"
-#include <algorithm>
-#include <ranges>
-#include <unordered_set>
 
 namespace mizu::gui {
+Gui::Gui(std::unique_ptr<NodeI> root)
+    : root_(std::move(root)) {}
+
 glm::vec2 Gui::size() const {
     return root_->size;
 }
 
-void Gui::calc_size(const glm::vec2 &max_size_hint) {
-    root_->calc_size(max_size_hint);
+void Gui::update(InputMgr &input) {}
+
+void Gui::resize(const glm::vec2 &max_size_hint, const glm::vec2 &pos) {
+    root_->resize(max_size_hint);
+    root_->calc_bbox(pos);
 }
 
-void Gui::draw(G2d &g2d, glm::vec2 pos) const {
-    root_->draw(g2d, pos);
+void Gui::draw(G2d &g2d) const {
+    root_->draw(g2d);
 }
 
 GuiBuilder &GuiBuilder::end() {

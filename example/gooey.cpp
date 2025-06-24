@@ -48,13 +48,15 @@ Gooey::Gooey(mizu::Engine *engine)
 void Gooey::update(double dt) {
     if (input.pressed(mizu::Key::Escape))
         engine->shutdown();
+
+    gui->resize(window.size(), {0, 0});
+    gui->update(input);
 }
 
 void Gooey::draw() {
     g2d.clear(mizu::rgb(0x000000));
 
-    gui->calc_size(window.size());
-    gui->draw(g2d, {(window.size().x - gui->size().x) / 2, (window.size().y - gui->size().y) / 2});
+    gui->draw(g2d);
 }
 
 int main(int, char *[]) {

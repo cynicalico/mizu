@@ -19,9 +19,11 @@ public:
 
     explicit VStack(VStackParams params);
 
-    void calc_size(const glm::vec2 &max_size_hint) override;
+    void resize(const glm::vec2 &max_size_hint) override;
 
-    void draw(G2d &g2d, glm::vec2 pos) const override;
+    void calc_bbox(glm::vec2 pos) override;
+
+    void draw(G2d &g2d) const override;
 
 private:
     float border_size_() const;
@@ -41,9 +43,11 @@ public:
 
     explicit HStack(HStackParams params);
 
-    void calc_size(const glm::vec2 &max_size_hint) override;
+    void resize(const glm::vec2 &max_size_hint) override;
 
-    void draw(G2d &g2d, glm::vec2 pos) const override;
+    void calc_bbox(glm::vec2 pos) override;
+
+    void draw(G2d &g2d) const override;
 
 private:
     float border_size_() const;
@@ -53,18 +57,22 @@ class VSpacer final : public Node<void> {
 public:
     VSpacer();
 
-    void calc_size(const glm::vec2 &max_size_hint) override;
+    void resize(const glm::vec2 &max_size_hint) override;
 
-    void draw(G2d &g2d, glm::vec2 pos) const override;
+    void calc_bbox(glm::vec2 pos) override;
+
+    void draw(G2d &g2d) const override;
 };
 
 class HSpacer final : public Node<void> {
 public:
     HSpacer();
 
-    void calc_size(const glm::vec2 &max_size_hint) override;
+    void resize(const glm::vec2 &max_size_hint) override;
 
-    void draw(G2d &g2d, glm::vec2 pos) const override;
+    void calc_bbox(glm::vec2 pos) override;
+
+    void draw(G2d &g2d) const override;
 };
 } // namespace mizu::gui
 

@@ -108,9 +108,9 @@ if (WIN32)
     target_compile_options(mizu PUBLIC /utf-8 /W4)
 endif ()
 
-target_compile_definitions(mizu PUBLIC
-        IMGUI_USER_CONFIG="${CMAKE_CURRENT_SOURCE_DIR}/include/mizu/imconfig.hpp"
-)
+#target_compile_definitions(mizu PUBLIC
+#        IMGUI_USER_CONFIG="${CMAKE_CURRENT_SOURCE_DIR}/include/mizu/imconfig.hpp"
+#)
 
 add_subdirectory(thirdparty)
 target_link_libraries(mizu PUBLIC mizu_thirdparty)

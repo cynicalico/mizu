@@ -15,14 +15,17 @@ class NodeI {
 public:
     NodeI *parent{nullptr};
     glm::vec2 size{};
+    glm::vec4 bbox{};
     std::vector<std::unique_ptr<NodeI>> children{};
     Grow grow{Grow::Both};
 
     virtual ~NodeI() = default;
 
-    virtual void calc_size(const glm::vec2 &max_size_hint) = 0;
+    virtual void resize(const glm::vec2 &max_size_hint) = 0;
 
-    virtual void draw(G2d &g2d, glm::vec2 pos) const = 0;
+    virtual void calc_bbox(glm::vec2 pos) = 0;
+
+    virtual void draw(G2d &g2d) const = 0;
 
     template<typename T>
         requires std::derived_from<T, Node<typename T::ParamType>>
