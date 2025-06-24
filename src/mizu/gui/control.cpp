@@ -1,8 +1,8 @@
 #include "mizu/gui/control.hpp"
 
 namespace mizu::gui {
-Button::Button(ButtonParams params)
-    : font(params.font), text(params.text), text_scale(params.text_scale) {}
+Button::Button(const ButtonParams &params)
+    : font(params.font), text(params.text), text_scale(params.text_scale), onclick(params.onclick) {}
 
 void Button::resize(const glm::vec2 &max_size_hint) {
     const auto text_size = font->calculate_size(text, text_scale);
@@ -31,9 +31,28 @@ void Button::calc_bbox(glm::vec2 pos) {
     bbox = {pos.x, pos.y, pos.x + size.x, pos.y + size.y};
 }
 
-void Button::update(InputMgr &input) {
+const NodeI *Button::update(InputMgr &input, const NodeI *captured) {
+    if (captured && captured != this)
+        return nullptr;
+
     hovered_ = input.mouse_x() >= bbox.x && input.mouse_x() < bbox.z && input.mouse_y() >= bbox.y &&
                input.mouse_y() < bbox.w;
+
+    // If the user has release left click, process and uncapture
+    if (primed_ && input.released(MouseButton::Left)) {
+        if (hovered_)
+            onclick(this);
+        primed_ = false;
+    }
+
+    // If the user is in bounds and clicked, process and capture
+    if (!primed_ && hovered_ && input.pressed(MouseButton::Left))
+        primed_ = true;
+
+    if (primed_)
+        return this;
+
+    return nullptr;
 }
 
 void Button::draw(G2d &g2d) const {

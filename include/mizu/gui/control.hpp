@@ -6,10 +6,15 @@
 #include "mizu/gui/node.hpp"
 
 namespace mizu::gui {
+class Button;
+
+using ButtonOnClickFn = std::function<void(Button *)>;
+
 struct ButtonParams {
     CodePage437 *font;
     std::string text;
     float text_scale;
+    ButtonOnClickFn onclick{[](auto *) {}};
 };
 
 class Button final : public Node<ButtonParams> {
@@ -17,14 +22,15 @@ public:
     CodePage437 *font;
     std::string text;
     float text_scale;
+    ButtonOnClickFn onclick;
 
-    explicit Button(ButtonParams params);
+    explicit Button(const ButtonParams &params);
 
     void resize(const glm::vec2 &max_size_hint) override;
 
     void calc_bbox(glm::vec2 pos) override;
 
-    void update(InputMgr &input) override;
+    const NodeI *update(InputMgr &input, const NodeI *captured) override;
 
     void draw(G2d &g2d) const override;
 

@@ -26,7 +26,7 @@ public:
 
     virtual void calc_bbox(glm::vec2 pos) = 0;
 
-    virtual void update(InputMgr &input) = 0;
+    virtual const NodeI *update(InputMgr &input, const NodeI *captured) = 0;
 
     virtual void draw(G2d &g2d) const = 0;
 

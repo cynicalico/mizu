@@ -84,9 +84,12 @@ void VStack::calc_bbox(glm::vec2 pos) {
     }
 }
 
-void VStack::update(InputMgr &input) {
+const NodeI *VStack::update(InputMgr &input, const NodeI *captured) {
+    const NodeI *new_capture{nullptr};
     for (const auto &child: children)
-        child->update(input);
+        if (const auto *child_capture = child->update(input, captured); child_capture)
+            new_capture = child_capture;
+    return new_capture;
 }
 
 void VStack::draw(G2d &g2d) const {
@@ -204,9 +207,12 @@ void HStack::calc_bbox(glm::vec2 pos) {
     }
 }
 
-void HStack::update(InputMgr &input) {
+const NodeI *HStack::update(InputMgr &input, const NodeI *captured) {
+    const NodeI *new_capture{nullptr};
     for (const auto &child: children)
-        child->update(input);
+        if (const auto *child_capture = child->update(input, captured); child_capture)
+            new_capture = child_capture;
+    return new_capture;
 }
 
 void HStack::draw(G2d &g2d) const {
@@ -252,7 +258,9 @@ void VSpacer::resize(const glm::vec2 &max_size_hint) {
 
 void VSpacer::calc_bbox(glm::vec2 pos) { /* invisible */ }
 
-void VSpacer::update(InputMgr &input) { /* nothing to do */ }
+const NodeI *VSpacer::update(InputMgr &input, const NodeI *captured) {
+    return captured;
+}
 
 void VSpacer::draw(G2d &g2d) const { /* invisible */ }
 
@@ -267,7 +275,9 @@ void HSpacer::resize(const glm::vec2 &max_size_hint) {
 
 void HSpacer::calc_bbox(glm::vec2 pos) { /* invisible */ }
 
-void HSpacer::update(InputMgr &input) { /* nothing to do */ }
+const NodeI *HSpacer::update(InputMgr &input, const NodeI *captured) {
+    return captured;
+}
 
 void HSpacer::draw(G2d &g2d) const { /* invisible */ }
 } // namespace mizu::gui

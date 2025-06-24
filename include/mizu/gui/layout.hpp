@@ -23,7 +23,7 @@ public:
 
     void calc_bbox(glm::vec2 pos) override;
 
-    void update(InputMgr &input) override;
+    const NodeI *update(InputMgr &input, const NodeI *captured) override;
 
     void draw(G2d &g2d) const override;
 
@@ -49,7 +49,7 @@ public:
 
     void calc_bbox(glm::vec2 pos) override;
 
-    void update(InputMgr &input) override;
+    const NodeI *update(InputMgr &input, const NodeI *captured) override;
 
     void draw(G2d &g2d) const override;
 
@@ -65,7 +65,7 @@ public:
 
     void calc_bbox(glm::vec2 pos) override;
 
-    void update(InputMgr &input) override;
+    const NodeI *update(InputMgr &input, const NodeI *captured) override;
 
     void draw(G2d &g2d) const override;
 };
@@ -78,7 +78,7 @@ public:
 
     void calc_bbox(glm::vec2 pos) override;
 
-    void update(InputMgr &input) override;
+    const NodeI *update(InputMgr &input, const NodeI *captured) override;
 
     void draw(G2d &g2d) const override;
 };

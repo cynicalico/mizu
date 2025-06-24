@@ -41,7 +41,11 @@ Gooey::Gooey(mizu::Engine *engine)
                   .add<mgui::Button>({.font = font.get(), .text = "Button 5", .text_scale = 2.0f})
                   .add<mgui::Button>({.font = font.get(), .text = "Button 6", .text_scale = 2.0f})
                   .end()
-                  .add<mgui::Button>({.font = font.get(), .text = "Button 7", .text_scale = 2.0f})
+                  .add<mgui::Button>(
+                          {.font = font.get(),
+                           .text = "Button 7",
+                           .text_scale = 2.0f,
+                           .onclick = [&](auto *) { MIZU_LOG_INFO("Button 7 clicked!"); }})
                   .build();
 }
 
@@ -60,5 +64,5 @@ void Gooey::draw() {
 }
 
 int main(int, char *[]) {
-    mizu::Engine("gooey", {1280, 720}, [](auto &b) { b.display(1).resizable(); }).mainloop<Gooey>();
+    mizu::Engine("gooey", {1280, 720}, [](auto &b) { b.display(2).resizable(); }).mainloop<Gooey>();
 }
