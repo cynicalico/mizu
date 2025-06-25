@@ -30,7 +30,7 @@ public:
 
     void calc_bbox(glm::vec2 pos) override;
 
-    Id update(InputMgr &input, Id captured) override;
+    glm::tvec2<Id> update(InputMgr &input, Id mouse_captured, Id keyboard_captured) override;
 
     void draw(G2d &g2d) const override;
 

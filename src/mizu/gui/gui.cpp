@@ -9,7 +9,7 @@ glm::vec2 Gui::size() const {
 }
 
 void Gui::update(InputMgr &input) {
-    captured_ = root_->update(input, captured_);
+    captured_ = root_->update(input, captured_.x, captured_.y);
 }
 
 void Gui::resize(const glm::vec2 &max_size_hint, const glm::vec2 &pos) {

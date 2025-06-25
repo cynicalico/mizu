@@ -31,9 +31,9 @@ void Button::calc_bbox(glm::vec2 pos) {
     bbox = {pos.x, pos.y, pos.x + size.x, pos.y + size.y};
 }
 
-Id Button::update(InputMgr &input, const Id captured) {
-    if (captured != NO_CAPTURE && captured != id)
-        return NO_CAPTURE;
+glm::tvec2<Id> Button::update(InputMgr &input, Id mouse_captured, Id keyboard_captured) {
+    if (mouse_captured != NO_CAPTURE && mouse_captured != id)
+        return {NO_CAPTURE, NO_CAPTURE};
 
     hovered_ = input.mouse_x() >= bbox.x && input.mouse_x() < bbox.z && input.mouse_y() >= bbox.y &&
                input.mouse_y() < bbox.w;
@@ -50,7 +50,9 @@ Id Button::update(InputMgr &input, const Id captured) {
         primed_ = false;
     }
 
-    return primed_ ? id : NO_CAPTURE;
+    if (primed_)
+        return {id, NO_CAPTURE};
+    return {NO_CAPTURE, NO_CAPTURE};
 }
 
 void Button::draw(G2d &g2d) const {

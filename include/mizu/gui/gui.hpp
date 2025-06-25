@@ -19,7 +19,7 @@ public:
 
 private:
     std::unique_ptr<NodeI> root_;
-    Id captured_{NO_CAPTURE};
+    glm::tvec2<Id> captured_{NO_CAPTURE, NO_CAPTURE};
 
     explicit Gui(std::unique_ptr<NodeI> root);
 };

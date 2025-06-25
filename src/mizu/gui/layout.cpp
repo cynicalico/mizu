@@ -84,11 +84,15 @@ void VStack::calc_bbox(glm::vec2 pos) {
     }
 }
 
-Id VStack::update(InputMgr &input, const Id captured) {
-    Id new_capture = NO_CAPTURE;
-    for (const auto &child: children)
-        if (const auto child_capture = child->update(input, captured); child_capture != NO_CAPTURE)
-            new_capture = child_capture;
+glm::tvec2<Id> VStack::update(InputMgr &input, Id mouse_captured, Id keyboard_captured) {
+    glm::tvec2<Id> new_capture = {NO_CAPTURE, NO_CAPTURE};
+    for (const auto &child: children) {
+        const auto child_capture = child->update(input, mouse_captured, keyboard_captured);
+        if (child_capture.x != NO_CAPTURE)
+            new_capture.x = child_capture.x;
+        if (child_capture.y != NO_CAPTURE)
+            new_capture.y = child_capture.y;
+    }
     return new_capture;
 }
 
@@ -207,11 +211,15 @@ void HStack::calc_bbox(glm::vec2 pos) {
     }
 }
 
-Id HStack::update(InputMgr &input, const Id captured) {
-    Id new_capture = NO_CAPTURE;
-    for (const auto &child: children)
-        if (const auto child_capture = child->update(input, captured); child_capture != NO_CAPTURE)
-            new_capture = child_capture;
+glm::tvec2<Id> HStack::update(InputMgr &input, Id mouse_captured, Id keyboard_captured) {
+    glm::tvec2<Id> new_capture = {NO_CAPTURE, NO_CAPTURE};
+    for (const auto &child: children) {
+        const auto child_capture = child->update(input, mouse_captured, keyboard_captured);
+        if (child_capture.x != NO_CAPTURE)
+            new_capture.x = child_capture.x;
+        if (child_capture.y != NO_CAPTURE)
+            new_capture.y = child_capture.y;
+    }
     return new_capture;
 }
 
@@ -258,8 +266,8 @@ void VSpacer::resize(const glm::vec2 &max_size_hint) {
 
 void VSpacer::calc_bbox(glm::vec2 pos) { /* invisible */ }
 
-Id VSpacer::update(InputMgr &input, const Id captured) {
-    return NO_CAPTURE;
+glm::tvec2<Id> VSpacer::update(InputMgr &input, Id mouse_captured, Id keyboard_captured) {
+    return {NO_CAPTURE, NO_CAPTURE};
 }
 
 void VSpacer::draw(G2d &g2d) const { /* invisible */ }
@@ -275,8 +283,8 @@ void HSpacer::resize(const glm::vec2 &max_size_hint) {
 
 void HSpacer::calc_bbox(glm::vec2 pos) { /* invisible */ }
 
-Id HSpacer::update(InputMgr &input, const Id captured) {
-    return NO_CAPTURE;
+glm::tvec2<Id> HSpacer::update(InputMgr &input, Id mouse_captured, Id keyboard_captured) {
+    return {NO_CAPTURE, NO_CAPTURE};
 }
 
 void HSpacer::draw(G2d &g2d) const { /* invisible */ }

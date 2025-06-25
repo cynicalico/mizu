@@ -38,7 +38,7 @@ public:
 
     virtual void calc_bbox(glm::vec2 pos) = 0;
 
-    virtual Id update(InputMgr &input, Id captured) = 0;
+    virtual glm::tvec2<Id> update(InputMgr &input, Id mouse_captured, Id keyboard_captured) = 0;
 
     virtual void draw(G2d &g2d) const = 0;
 

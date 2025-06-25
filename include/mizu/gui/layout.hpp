@@ -23,7 +23,7 @@ public:
 
     void calc_bbox(glm::vec2 pos) override;
 
-    Id update(InputMgr &input, Id captured) override;
+    glm::tvec2<Id> update(InputMgr &input, Id mouse_captured, Id keyboard_captured) override;
 
     void draw(G2d &g2d) const override;
 
@@ -43,13 +43,13 @@ public:
     Padding outer_pad;
     float inner_pad;
 
-    explicit HStack(const HStackParams& params);
+    explicit HStack(const HStackParams &params);
 
     void resize(const glm::vec2 &max_size_hint) override;
 
     void calc_bbox(glm::vec2 pos) override;
 
-    Id update(InputMgr &input, Id captured) override;
+    glm::tvec2<Id> update(InputMgr &input, Id mouse_captured, Id keyboard_captured) override;
 
     void draw(G2d &g2d) const override;
 
@@ -65,7 +65,7 @@ public:
 
     void calc_bbox(glm::vec2 pos) override;
 
-    Id update(InputMgr &input, Id captured) override;
+    glm::tvec2<Id> update(InputMgr &input, Id mouse_captured, Id keyboard_captured) override;
 
     void draw(G2d &g2d) const override;
 };
@@ -78,7 +78,7 @@ public:
 
     void calc_bbox(glm::vec2 pos) override;
 
-    Id update(InputMgr &input, Id captured) override;
+    glm::tvec2<Id> update(InputMgr &input, Id mouse_captured, Id keyboard_captured) override;
 
     void draw(G2d &g2d) const override;
 };
