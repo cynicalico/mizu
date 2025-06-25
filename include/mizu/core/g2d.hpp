@@ -28,6 +28,11 @@ public:
             gloo::MinFilter min_filter = gloo::MinFilter::Nearest,
             gloo::MagFilter mag_filter = gloo::MagFilter::Linear) const;
 
+    std::unique_ptr<Texture> create_texture(
+            glm::ivec2 size,
+            gloo::MinFilter min_filter = gloo::MinFilter::Nearest,
+            gloo::MagFilter mag_filter = gloo::MagFilter::Linear) const;
+
     bool vsync() const;
     void set_vsync(bool enabled);
 

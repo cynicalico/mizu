@@ -88,5 +88,5 @@ void Gooey::draw() {
 }
 
 int main(int, char *[]) {
-    mizu::Engine("gooey", {1280, 720}, [](auto &b) { b.resizable(); }).mainloop<Gooey>();
+    mizu::Engine("gooey", {1280, 720}, [](auto &b) { b.display(1).resizable(); }).mainloop<Gooey>();
 }

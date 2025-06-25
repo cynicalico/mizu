@@ -119,16 +119,19 @@ add_library(mizu_thirdparty STATIC
         ${imgui_SOURCE_DIR}/backends/imgui_impl_opengl3.cpp
         ${imgui_SOURCE_DIR}/backends/imgui_impl_sdl3.cpp
         ${imgui_SOURCE_DIR}/misc/freetype/imgui_freetype.cpp
+
+        stb/stb_rect_pack.h
 )
 
- target_compile_definitions(mizu_thirdparty PUBLIC
-         IMGUI_USER_CONFIG="${CMAKE_CURRENT_SOURCE_DIR}/../include/mizu/imconfig.hpp"
- )
+target_compile_definitions(mizu_thirdparty PUBLIC
+        IMGUI_USER_CONFIG="${CMAKE_CURRENT_SOURCE_DIR}/../include/mizu/imconfig.hpp"
+)
 
 target_include_directories(mizu_thirdparty PUBLIC
         ${pcg_SOURCE_DIR}/include
         ${imgui_SOURCE_DIR}
         ${imgui_SOURCE_DIR}/backends
+        stb
 )
 
 target_link_libraries(mizu_thirdparty PUBLIC

@@ -9,7 +9,7 @@ Texture::Texture(GladGLContext &gl, const mizu::PngData &data, MinFilter min_fil
     MIZU_LOG_TRACE("Created texture id={}", id);
 
     gl_.ActiveTexture(GL_TEXTURE0);
-    CHECK_GL_ERROR(gl_, BindTexture);
+    CHECK_GL_ERROR(gl_, ActiveTexture);
     gl_.BindTexture(GL_TEXTURE_2D, id);
     CHECK_GL_ERROR(gl_, BindTexture);
 
@@ -26,6 +26,33 @@ Texture::Texture(GladGLContext &gl, const mizu::PngData &data, MinFilter min_fil
     CHECK_GL_ERROR(gl_, TexImage2D);
     gl_.GenerateMipmap(GL_TEXTURE_2D);
     CHECK_GL_ERROR(gl_, GenerateMipmap);
+
+    gl_.BindTexture(GL_TEXTURE_2D, 0);
+    CHECK_GL_ERROR(gl_, BindTexture);
+}
+
+Texture::Texture(GladGLContext &gl, glm::ivec2 size, MinFilter min_filter, MagFilter mag_filter)
+    : gl_(gl) {
+    gl_.GenTextures(1, &id);
+    CHECK_GL_ERROR(gl_, GenTextures);
+    MIZU_LOG_TRACE("Created texture id={}", id);
+
+    gl_.ActiveTexture(GL_TEXTURE0);
+    CHECK_GL_ERROR(gl_, ActiveTexture);
+    gl_.BindTexture(GL_TEXTURE_2D, id);
+    CHECK_GL_ERROR(gl_, BindTexture);
+
+    gl_.TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    CHECK_GL_ERROR(gl_, TexParameteri);
+    gl_.TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    CHECK_GL_ERROR(gl_, TexParameteri);
+    gl_.TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, unwrap(min_filter));
+    CHECK_GL_ERROR(gl_, TexParameteri);
+    gl_.TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, unwrap(mag_filter));
+    CHECK_GL_ERROR(gl_, TexParameteri);
+
+    gl_.TexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, size.x, size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+    CHECK_GL_ERROR(gl_, TexImage2D);
 
     gl_.BindTexture(GL_TEXTURE_2D, 0);
     CHECK_GL_ERROR(gl_, BindTexture);
@@ -52,5 +79,16 @@ MOVE_ASSIGN_OP_IMPL(Texture) {
         gl_ = other.gl_;
     }
     return *this;
+}
+
+void Texture::write_subimage(glm::ivec2 pos, glm::ivec2 size, const unsigned char *bytes) {
+    gl_.BindTexture(GL_TEXTURE_2D, id);
+    CHECK_GL_ERROR(gl_, BindTexture);
+
+    gl_.TexSubImage2D(GL_TEXTURE_2D, 0, pos.x, pos.y, size.x, size.y, GL_RGBA, GL_UNSIGNED_BYTE, bytes);
+    CHECK_GL_ERROR(gl_, TexSubImage2D);
+
+    gl_.BindTexture(GL_TEXTURE_2D, 0);
+    CHECK_GL_ERROR(gl_, BindTexture);
 }
 } // namespace gloo

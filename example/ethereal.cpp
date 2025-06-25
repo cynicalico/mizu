@@ -6,8 +6,9 @@ public:
     mizu::InputMgr &input;
     mizu::Window &window;
 
-    std::unique_ptr<mizu::Texture> font_tex;
-    std::unique_ptr<mizu::CodePage437> font;
+    std::unique_ptr<mizu::Ttf> font;
+
+    std::string text;
 
     explicit Ethereal(mizu::Engine *engine);
 
@@ -18,27 +19,24 @@ public:
 
 Ethereal::Ethereal(mizu::Engine *engine)
     : Application(engine), g2d(*engine->g2d), input(*engine->input), window(*engine->window) {
-    font_tex = g2d.load_texture(
-            "example/font/1px_7x9_no_bg.png", gloo::MinFilter::NearestMipmapNearest, gloo::MagFilter::Nearest);
-    font = std::make_unique<mizu::CodePage437>(g2d, *font_tex, glm::uvec2{7, 9}, 2);
+    font = std::make_unique<mizu::Ttf>(g2d, "example/font/IBMPlexSans-Regular.ttf");
+    text = mizu::rng::base58(11);
 }
 
 void Ethereal::update(double dt) {
     if (input.pressed(mizu::Key::Escape))
         engine->shutdown();
 
-    if (input.pressed(mizu::Key::F1))
-        g2d.set_vsync(!g2d.vsync());
+    if (input.pressed(mizu::MouseButton::Left))
+        text = mizu::rng::base58(11);
 }
 
 void Ethereal::draw() {
     g2d.clear(mizu::rgb(0x000000));
 
-    const std::string s = "Hello, world!\nThis is text!";
-    g2d.fill_rect({50, 50}, font->calculate_size(s, 2.0f), mizu::rgb(0xff0000));
-    font->draw(s, {50, 50}, 2.0f);
+    font->draw(text, {50, 50});
 }
 
 int main(int, char *[]) {
-    mizu::Engine("ethereal", {1280, 720}, [](auto &) {}).mainloop<Ethereal>();
+    mizu::Engine("ethereal", {1280, 720}, [](auto &b) { b.display(1); }).mainloop<Ethereal>();
 }

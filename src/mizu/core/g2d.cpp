@@ -16,6 +16,10 @@ std::unique_ptr<Texture>
 G2d::load_texture(const std::filesystem::path &path, gloo::MinFilter min_filter, gloo::MagFilter mag_filter) const {
     return std::make_unique<Texture>(gl_, path, min_filter, mag_filter);
 }
+std::unique_ptr<Texture>
+G2d::create_texture(glm::ivec2 size, gloo::MinFilter min_filter, gloo::MagFilter mag_filter) const {
+    return std::make_unique<Texture>(gl_, size, min_filter, mag_filter);
+}
 
 bool G2d::vsync() const {
     int vsync;

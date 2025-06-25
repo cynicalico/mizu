@@ -9,8 +9,12 @@
 namespace mizu {
 class Texture {
 public:
-    Texture(gloo::Context &gl, const std::filesystem::path &path, gloo::MinFilter min_filter, gloo::MagFilter mag_filter
-    );
+    Texture(gloo::Context &gl,
+            const std::filesystem::path &path,
+            gloo::MinFilter min_filter,
+            gloo::MagFilter mag_filter);
+
+    Texture(gloo::Context &gl, glm::ivec2 size, gloo::MinFilter min_filter, gloo::MagFilter mag_filter);
 
     ~Texture() = default;
 
@@ -26,6 +30,8 @@ public:
 
     float s(float x) const;
     float t(float y) const;
+
+    void write_subimage(glm::ivec2 pos, glm::ivec2 size, const unsigned char *bytes);
 
 private:
     gloo::Context &gl_;

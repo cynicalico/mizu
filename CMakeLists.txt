@@ -41,6 +41,7 @@ set(mizu_headers
         include/mizu/core/window.hpp
         include/mizu/ds/priority_queue.hpp
         include/mizu/font/code_page_437.hpp
+        include/mizu/font/ttf.hpp
         include/mizu/gui/control.hpp
         include/mizu/gui/gui.hpp
         include/mizu/gui/layout.hpp
@@ -86,6 +87,7 @@ set(mizu_sources
         src/mizu/core/texture.cpp
         src/mizu/core/window.cpp
         src/mizu/font/code_page_437.cpp
+        src/mizu/font/ttf.cpp
         src/mizu/gui/control.cpp
         src/mizu/gui/gui.cpp
         src/mizu/gui/layout.cpp
