@@ -89,6 +89,7 @@ set(mizu_sources
         src/mizu/gui/control.cpp
         src/mizu/gui/gui.cpp
         src/mizu/gui/layout.cpp
+        src/mizu/gui/node.cpp
         src/mizu/util/averagers.cpp
         src/mizu/util/io.cpp
         src/mizu/util/memusage.cpp

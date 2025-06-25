@@ -19,7 +19,7 @@ public:
 
 private:
     std::unique_ptr<NodeI> root_;
-    const NodeI *captured_{nullptr};
+    Id captured_{NO_CAPTURE};
 
     explicit Gui(std::unique_ptr<NodeI> root);
 };

@@ -7,26 +7,38 @@
 #include "mizu/core/g2d.hpp"
 #include "mizu/core/input_mgr.hpp"
 #include "mizu/gui/types.hpp"
+#include "mizu/util/class_helpers.hpp"
 
 namespace mizu::gui {
+using Id = std::uint32_t;
+constexpr Id NO_CAPTURE = 0;
+
 template<typename P>
 class Node;
 
 class NodeI {
 public:
+    Id id;
     NodeI *parent{nullptr};
     glm::vec2 size{};
     glm::vec4 bbox{};
     std::vector<std::unique_ptr<NodeI>> children{};
     Grow grow{Grow::Both};
 
+    NodeI();
+
     virtual ~NodeI() = default;
+
+    NO_COPY(NodeI);
+
+    MOVE_CONSTRUCTOR(NodeI);
+    MOVE_ASSIGN_OP(NodeI);
 
     virtual void resize(const glm::vec2 &max_size_hint) = 0;
 
     virtual void calc_bbox(glm::vec2 pos) = 0;
 
-    virtual const NodeI *update(InputMgr &input, const NodeI *captured) = 0;
+    virtual Id update(InputMgr &input, Id captured) = 0;
 
     virtual void draw(G2d &g2d) const = 0;
 

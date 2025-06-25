@@ -31,21 +31,45 @@ Gooey::Gooey(mizu::Engine *engine)
                           {.border = mgui::PxBorder{mizu::rgb(0xffffff)},
                            .outer_pad = mgui::Padding(5.0f),
                            .inner_pad = 5.0f})
-                  .add<mgui::Button>({.font = font.get(), .text = "Button 1", .text_scale = 2.0f})
+                  .add<mgui::Button>(
+                          {.font = font.get(),
+                           .text = "Button 1",
+                           .text_scale = 2.0f,
+                           .onclick = [&](auto *b) { MIZU_LOG_INFO("Button 1 clicked! id={}", b->id); }})
                   .start<mgui::HStack>({.outer_pad = mgui::Padding(0.0f), .inner_pad = 5.0f})
-                  .add<mgui::Button>({.font = font.get(), .text = "Button 2", .text_scale = 2.0f})
+                  .add<mgui::Button>(
+                          {.font = font.get(),
+                           .text = "Button 2",
+                           .text_scale = 2.0f,
+                           .onclick = [&](auto *b) { MIZU_LOG_INFO("Button 2 clicked! id={}", b->id); }})
                   .start<mgui::VStack>({.outer_pad = mgui::Padding(0.0f), .inner_pad = 5.0f})
-                  .add<mgui::Button>({.font = font.get(), .text = "Button 3", .text_scale = 2.0f})
-                  .add<mgui::Button>({.font = font.get(), .text = "Button 4", .text_scale = 2.0f})
+                  .add<mgui::Button>(
+                          {.font = font.get(),
+                           .text = "Button 3",
+                           .text_scale = 2.0f,
+                           .onclick = [&](auto *b) { MIZU_LOG_INFO("Button 3 clicked! id={}", b->id); }})
+                  .add<mgui::Button>(
+                          {.font = font.get(),
+                           .text = "Button 4",
+                           .text_scale = 2.0f,
+                           .onclick = [&](auto *b) { MIZU_LOG_INFO("Button 4 clicked! id={}", b->id); }})
                   .end()
-                  .add<mgui::Button>({.font = font.get(), .text = "Button 5", .text_scale = 2.0f})
-                  .add<mgui::Button>({.font = font.get(), .text = "Button 6", .text_scale = 2.0f})
+                  .add<mgui::Button>(
+                          {.font = font.get(),
+                           .text = "Button 5",
+                           .text_scale = 2.0f,
+                           .onclick = [&](auto *b) { MIZU_LOG_INFO("Button 5 clicked! id={}", b->id); }})
+                  .add<mgui::Button>(
+                          {.font = font.get(),
+                           .text = "Button 6",
+                           .text_scale = 2.0f,
+                           .onclick = [&](auto *b) { MIZU_LOG_INFO("Button 6 clicked! id={}", b->id); }})
                   .end()
                   .add<mgui::Button>(
                           {.font = font.get(),
                            .text = "Button 7",
                            .text_scale = 2.0f,
-                           .onclick = [&](auto *) { MIZU_LOG_INFO("Button 7 clicked!"); }})
+                           .onclick = [&](auto *b) { MIZU_LOG_INFO("Button 7 clicked! id={}", b->id); }})
                   .build();
 }
 

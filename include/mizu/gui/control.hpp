@@ -30,7 +30,7 @@ public:
 
     void calc_bbox(glm::vec2 pos) override;
 
-    const NodeI *update(InputMgr &input, const NodeI *captured) override;
+    Id update(InputMgr &input, Id captured) override;
 
     void draw(G2d &g2d) const override;
 

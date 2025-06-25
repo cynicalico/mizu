@@ -1,7 +1,7 @@
 #include "mizu/gui/layout.hpp"
 
 namespace mizu::gui {
-VStack::VStack(VStackParams params)
+VStack::VStack(const VStackParams &params)
     : border(params.border), outer_pad(params.outer_pad), inner_pad(params.inner_pad) {}
 
 void VStack::resize(const glm::vec2 &max_size_hint) {
@@ -20,7 +20,7 @@ void VStack::resize(const glm::vec2 &max_size_hint) {
     if (child_max_size_hint.y != UNDEFINED_SIZE) {
         child_max_size_hint.y -= 2 * border_size_();
         child_max_size_hint.y -= outer_pad.top + outer_pad.bottom;
-        child_max_size_hint.y -= (children.size() - 1) * inner_pad;
+        child_max_size_hint.y -= (static_cast<float>(children.size()) - 1) * inner_pad;
     }
 
     if (grow == Grow::Hori || grow == Grow::None) {
@@ -40,7 +40,7 @@ void VStack::resize(const glm::vec2 &max_size_hint) {
         }
         if (!growing_children.empty()) {
             if (child_max_size_hint.y != UNDEFINED_SIZE)
-                child_max_size_hint.y /= growing_children.size();
+                child_max_size_hint.y /= static_cast<float>(growing_children.size());
 
             // Calculate the rest in the remaining space
             for (const std::size_t &i: growing_children)
@@ -67,7 +67,7 @@ void VStack::resize(const glm::vec2 &max_size_hint) {
         size.y = std::ranges::fold_left(children, 0.0f, [](float sum, const auto &a) { return sum + a->size.y; });
         size.y += 2 * border_size_();
         size.y += outer_pad.top + outer_pad.bottom;
-        size.y += (children.size() - 1) * inner_pad;
+        size.y += (static_cast<float>(children.size()) - 1) * inner_pad;
     }
 }
 
@@ -84,10 +84,10 @@ void VStack::calc_bbox(glm::vec2 pos) {
     }
 }
 
-const NodeI *VStack::update(InputMgr &input, const NodeI *captured) {
-    const NodeI *new_capture{nullptr};
+Id VStack::update(InputMgr &input, const Id captured) {
+    Id new_capture = NO_CAPTURE;
     for (const auto &child: children)
-        if (const auto *child_capture = child->update(input, captured); child_capture)
+        if (const auto child_capture = child->update(input, captured); child_capture != NO_CAPTURE)
             new_capture = child_capture;
     return new_capture;
 }
@@ -124,7 +124,7 @@ float VStack::border_size_() const {
     return 0.0f;
 }
 
-HStack::HStack(HStackParams params)
+HStack::HStack(const HStackParams &params)
     : border(params.border), outer_pad(params.outer_pad), inner_pad(params.inner_pad) {}
 
 void HStack::resize(const glm::vec2 &max_size_hint) {
@@ -139,7 +139,7 @@ void HStack::resize(const glm::vec2 &max_size_hint) {
     if (child_max_size_hint.x != UNDEFINED_SIZE) {
         child_max_size_hint.x -= 2 * border_size_();
         child_max_size_hint.x -= outer_pad.left + outer_pad.right;
-        child_max_size_hint.x -= (children.size() - 1) * inner_pad;
+        child_max_size_hint.x -= (static_cast<float>(children.size()) - 1) * inner_pad;
     }
     if (child_max_size_hint.y != UNDEFINED_SIZE) {
         child_max_size_hint.y -= 2 * border_size_();
@@ -163,7 +163,7 @@ void HStack::resize(const glm::vec2 &max_size_hint) {
         }
         if (!growing_children.empty()) {
             if (child_max_size_hint.x != UNDEFINED_SIZE)
-                child_max_size_hint.x /= growing_children.size();
+                child_max_size_hint.x /= static_cast<float>(growing_children.size());
 
             // Calculate the rest in the remaining space
             for (const std::size_t &i: growing_children)
@@ -175,7 +175,7 @@ void HStack::resize(const glm::vec2 &max_size_hint) {
         size.x = std::ranges::fold_left(children, 0.0f, [](float sum, const auto &a) { return sum + a->size.x; });
         size.x += 2 * border_size_();
         size.x += outer_pad.left + outer_pad.right;
-        size.x += (children.size() - 1) * inner_pad;
+        size.x += (static_cast<float>(children.size() - 1)) * inner_pad;
     }
 
     if (size.y == UNDEFINED_SIZE) {
@@ -207,10 +207,10 @@ void HStack::calc_bbox(glm::vec2 pos) {
     }
 }
 
-const NodeI *HStack::update(InputMgr &input, const NodeI *captured) {
-    const NodeI *new_capture{nullptr};
+Id HStack::update(InputMgr &input, const Id captured) {
+    Id new_capture = NO_CAPTURE;
     for (const auto &child: children)
-        if (const auto *child_capture = child->update(input, captured); child_capture)
+        if (const auto child_capture = child->update(input, captured); child_capture != NO_CAPTURE)
             new_capture = child_capture;
     return new_capture;
 }
@@ -258,8 +258,8 @@ void VSpacer::resize(const glm::vec2 &max_size_hint) {
 
 void VSpacer::calc_bbox(glm::vec2 pos) { /* invisible */ }
 
-const NodeI *VSpacer::update(InputMgr &input, const NodeI *captured) {
-    return captured;
+Id VSpacer::update(InputMgr &input, const Id captured) {
+    return NO_CAPTURE;
 }
 
 void VSpacer::draw(G2d &g2d) const { /* invisible */ }
@@ -275,8 +275,8 @@ void HSpacer::resize(const glm::vec2 &max_size_hint) {
 
 void HSpacer::calc_bbox(glm::vec2 pos) { /* invisible */ }
 
-const NodeI *HSpacer::update(InputMgr &input, const NodeI *captured) {
-    return captured;
+Id HSpacer::update(InputMgr &input, const Id captured) {
+    return NO_CAPTURE;
 }
 
 void HSpacer::draw(G2d &g2d) const { /* invisible */ }
