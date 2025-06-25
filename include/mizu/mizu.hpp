@@ -12,7 +12,7 @@
 #include "mizu/core/window.hpp"
 
 #include "mizu/font/code_page_437.hpp"
-#include "mizu/font/ttf.hpp"
+#include "mizu/font/ft_font.hpp"
 
 #include "mizu/gui/control.hpp"
 #include "mizu/gui/gui.hpp"

@@ -13,16 +13,18 @@
 namespace mizu {
 constexpr glm::ivec2 ATLAS_SIZE{1024, 1024};
 
-class Ttf {
+class FtFont {
 public:
-    explicit Ttf(G2d &g2d, const std::filesystem::path &path);
+    explicit FtFont(G2d &g2d, const std::filesystem::path &path);
 
-    ~Ttf();
+    ~FtFont();
 
-    NO_COPY(Ttf)
-    NO_MOVE(Ttf)
+    NO_COPY(FtFont)
+    NO_MOVE(FtFont)
 
-    void draw(std::string_view text, glm::vec2 pos, const Color &color = rgb(0xffffff));
+    float line_height(int pt_size) const;
+
+    void draw(std::string_view text, int pt_size, glm::vec2 pos, const Color &color = rgb(0xffffff));
 
 private:
     G2d &g2d_;
@@ -39,11 +41,11 @@ private:
         glm::vec2 advance;
     };
     std::unique_ptr<Texture> atlas_{nullptr};
-    std::unordered_map<std::uint32_t, GlyphInfo> glyphs_{};
+    std::vector<std::unordered_map<std::uint32_t, GlyphInfo>> glyphs_{};
 
     stbrp_context rp_ctx_;
     stbrp_node *rp_nodes_{nullptr};
-    void check_populate_atlas_(std::string_view text);
+    void check_populate_atlas_(std::string_view text, int pt_size);
 
     static std::once_flag initialized_ft_;
     static FT_Library ft_library_;

@@ -6,9 +6,7 @@ public:
     mizu::InputMgr &input;
     mizu::Window &window;
 
-    std::unique_ptr<mizu::Ttf> font;
-
-    std::string text;
+    std::unique_ptr<mizu::FtFont> font;
 
     explicit Ethereal(mizu::Engine *engine);
 
@@ -19,22 +17,18 @@ public:
 
 Ethereal::Ethereal(mizu::Engine *engine)
     : Application(engine), g2d(*engine->g2d), input(*engine->input), window(*engine->window) {
-    font = std::make_unique<mizu::Ttf>(g2d, "example/font/IBMPlexSans-Regular.ttf");
-    text = mizu::rng::base58(11);
+    font = std::make_unique<mizu::FtFont>(g2d, "example/font/cozette.otb");
 }
 
 void Ethereal::update(double dt) {
     if (input.pressed(mizu::Key::Escape))
         engine->shutdown();
-
-    if (input.pressed(mizu::MouseButton::Left))
-        text = mizu::rng::base58(11);
 }
 
 void Ethereal::draw() {
     g2d.clear(mizu::rgb(0x000000));
 
-    font->draw(text, {50, 50});
+    font->draw("This text looks like a bitmap because it is, but it's from an .otb file!", 13, {50, 50});
 }
 
 int main(int, char *[]) {
