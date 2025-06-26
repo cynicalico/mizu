@@ -5,14 +5,12 @@
 #include "mizu/core/callback_mgr.hpp"
 #include "mizu/core/color.hpp"
 #include "mizu/core/engine.hpp"
+#include "mizu/core/font.hpp"
 #include "mizu/core/g2d.hpp"
 #include "mizu/core/input_mgr.hpp"
 #include "mizu/core/log.hpp"
 #include "mizu/core/payloads.hpp"
 #include "mizu/core/window.hpp"
-
-#include "mizu/font/code_page_437.hpp"
-#include "mizu/font/ft_font.hpp"
 
 #include "mizu/gui/control.hpp"
 #include "mizu/gui/gui.hpp"

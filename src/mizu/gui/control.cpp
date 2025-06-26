@@ -2,27 +2,38 @@
 
 namespace mizu::gui {
 Button::Button(const ButtonParams &params)
-    : font(params.font), text(params.text), text_scale(params.text_scale), onclick(params.onclick) {}
+    : Node(params.grow),
+      font(params.font),
+      text(params.text),
+      text_pad(params.text_pad),
+      bg_color(params.bg_color),
+      fg_color(params.fg_color),
+      border(params.border),
+      onclick(params.onclick) {}
 
 void Button::resize(const glm::vec2 &max_size_hint) {
-    const auto text_size = font->calculate_size(text, text_scale);
+    const auto text_size = font->calc_size(text);
 
     switch (grow) {
     case Grow::Hori: {
-        size.x = max_size_hint.x != UNDEFINED_SIZE ? max_size_hint.x : text_size.x + 2 + 2 * BORDER_SIZE;
-        size.y = text_size.y + 2 + 2 * BORDER_SIZE;
+        size.x = max_size_hint.x != UNDEFINED_SIZE ? max_size_hint.x
+                                                   : text_size.x + text_pad.left + text_pad.right + 2 * border_size_();
+        size.y = text_size.y + text_pad.top + text_pad.bottom + 2 * border_size_();
     } break;
     case Grow::Vert: {
-        size.x = text_size.x + 2 + 2 * BORDER_SIZE;
-        size.y = max_size_hint.y != UNDEFINED_SIZE ? max_size_hint.y : text_size.y + 2 + 2 * BORDER_SIZE;
+        size.x = text_size.x + text_pad.left + text_pad.right + 2 * border_size_();
+        size.y = max_size_hint.y != UNDEFINED_SIZE ? max_size_hint.y
+                                                   : text_size.y + text_pad.top + text_pad.bottom + 2 * border_size_();
     } break;
     case Grow::Both: {
-        size.x = max_size_hint.x != UNDEFINED_SIZE ? max_size_hint.x : text_size.x + 2 + 2 * BORDER_SIZE;
-        size.y = max_size_hint.y != UNDEFINED_SIZE ? max_size_hint.y : text_size.y + 2 + 2 * BORDER_SIZE;
+        size.x = max_size_hint.x != UNDEFINED_SIZE ? max_size_hint.x
+                                                   : text_size.x + text_pad.left + text_pad.right + 2 * border_size_();
+        size.y = max_size_hint.y != UNDEFINED_SIZE ? max_size_hint.y
+                                                   : text_size.y + text_pad.top + text_pad.bottom + 2 * border_size_();
     } break;
     case Grow::None: {
-        size.x = text_size.x + 2 + 2 * BORDER_SIZE;
-        size.y = text_size.y + 2 + 2 * BORDER_SIZE;
+        size.x = text_size.x + text_pad.left + text_pad.right + 2 * border_size_();
+        size.y = text_size.y + text_pad.top + text_pad.bottom + 2 * border_size_();
     } break;
     }
 }
@@ -56,16 +67,41 @@ glm::tvec2<Id> Button::update(InputMgr &input, Id mouse_captured, Id keyboard_ca
 }
 
 void Button::draw(G2d &g2d) const {
-    Rgba border_color = rgb(0x00ff00);
-    if (hovered_)
-        border_color = rgb(0xff00ff);
+    if (bg_color.a > 0)
+        g2d.fill_rect({bbox.x, bbox.y}, {size.x, size.y}, bg_color);
 
-    g2d.line({bbox.x, bbox.y}, {bbox.z - BORDER_SIZE, bbox.y}, border_color);
-    g2d.line({bbox.z - BORDER_SIZE, bbox.y}, {bbox.z - BORDER_SIZE, bbox.w - BORDER_SIZE}, border_color);
-    g2d.line({bbox.z - BORDER_SIZE, bbox.w - BORDER_SIZE}, {bbox.x, bbox.w - BORDER_SIZE}, border_color);
-    g2d.line({bbox.x, bbox.w - BORDER_SIZE}, {bbox.x, bbox.y}, border_color);
+    if (border) {
+        if (std::holds_alternative<PxBorder>(*border)) {
+            const auto border_color = std::get<PxBorder>(*border).color;
+            g2d.line({bbox.x, bbox.y}, {bbox.z - border_size_(), bbox.y}, border_color);
+            g2d.line(
+                    {bbox.z - border_size_(), bbox.y},
+                    {bbox.z - border_size_(), bbox.w - border_size_()},
+                    border_color);
+            g2d.line(
+                    {bbox.z - border_size_(), bbox.w - border_size_()},
+                    {bbox.x, bbox.w - border_size_()},
+                    border_color);
+            g2d.line({bbox.x, bbox.w - border_size_()}, {bbox.x, bbox.y}, border_color);
+        } else {
+            throw std::runtime_error("not yet implemented");
+        }
+    }
 
-    const auto text_size = font->calculate_size(text, text_scale);
-    font->draw(text, {bbox.x + (size.x - text_size.x) / 2, bbox.y + (size.y - text_size.y) / 2}, text_scale);
+    const auto text_size = font->calc_size(text);
+    font->draw(
+            text,
+            {std::round(bbox.x + (size.x - text_size.x) / 2),
+             std::round(bbox.y + (size.y - text_size.y) / 2) + font->pen_offset()},
+            fg_color);
+}
+
+float Button::border_size_() const {
+    if (border.has_value()) {
+        if (std::holds_alternative<PxBorder>(*border))
+            return 1.0f;
+        throw std::runtime_error("not yet implemented");
+    }
+    return 0.0f;
 }
 } // namespace mizu::gui

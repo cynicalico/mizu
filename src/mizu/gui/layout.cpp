@@ -2,7 +2,7 @@
 
 namespace mizu::gui {
 VStack::VStack(const VStackParams &params)
-    : border(params.border), outer_pad(params.outer_pad), inner_pad(params.inner_pad) {}
+    : Node(params.grow), border(params.border), outer_pad(params.outer_pad), inner_pad(params.inner_pad) {}
 
 void VStack::resize(const glm::vec2 &max_size_hint) {
     switch (grow) {
@@ -129,7 +129,7 @@ float VStack::border_size_() const {
 }
 
 HStack::HStack(const HStackParams &params)
-    : border(params.border), outer_pad(params.outer_pad), inner_pad(params.inner_pad) {}
+    : Node(params.grow), border(params.border), outer_pad(params.outer_pad), inner_pad(params.inner_pad) {}
 
 void HStack::resize(const glm::vec2 &max_size_hint) {
     switch (grow) {
@@ -255,10 +255,6 @@ float HStack::border_size_() const {
     return 0.0f;
 }
 
-VSpacer::VSpacer() {
-    grow = Grow::Vert;
-}
-
 void VSpacer::resize(const glm::vec2 &max_size_hint) {
     size.x = 0.0f;
     size.y = max_size_hint.y;
@@ -271,10 +267,6 @@ glm::tvec2<Id> VSpacer::update(InputMgr &input, Id mouse_captured, Id keyboard_c
 }
 
 void VSpacer::draw(G2d &g2d) const { /* invisible */ }
-
-HSpacer::HSpacer() {
-    grow = Grow::Hori;
-}
 
 void HSpacer::resize(const glm::vec2 &max_size_hint) {
     size.x = max_size_hint.x;

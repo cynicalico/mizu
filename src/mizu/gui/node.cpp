@@ -6,8 +6,11 @@ Id next_id() {
     return ++curr_id;
 }
 
+NodeI::NodeI(Grow grow)
+    : id(next_id()), grow(grow) {}
+
 NodeI::NodeI()
-    : id(next_id()) {}
+    : NodeI(Grow::Both) {}
 
 MOVE_CONSTRUCTOR_IMPL(NodeI)
     : id(other.id),

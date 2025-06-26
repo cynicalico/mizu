@@ -33,6 +33,7 @@ set(mizu_headers
         include/mizu/core/color.hpp
         include/mizu/core/dear.hpp
         include/mizu/core/engine.hpp
+        include/mizu/core/font.hpp
         include/mizu/core/g2d.hpp
         include/mizu/core/input_mgr.hpp
         include/mizu/core/log.hpp
@@ -40,8 +41,6 @@ set(mizu_headers
         include/mizu/core/texture.hpp
         include/mizu/core/window.hpp
         include/mizu/ds/priority_queue.hpp
-        include/mizu/font/code_page_437.hpp
-        include/mizu/font/ft_font.hpp
         include/mizu/gui/control.hpp
         include/mizu/gui/gui.hpp
         include/mizu/gui/layout.hpp
@@ -82,12 +81,11 @@ set(mizu_sources
         src/mizu/core/color.cpp
         src/mizu/core/dear.cpp
         src/mizu/core/engine.cpp
+        src/mizu/core/font.cpp
         src/mizu/core/g2d.cpp
         src/mizu/core/input_mgr.cpp
         src/mizu/core/texture.cpp
         src/mizu/core/window.cpp
-        src/mizu/font/code_page_437.cpp
-        src/mizu/font/ft_font.cpp
         src/mizu/gui/control.cpp
         src/mizu/gui/gui.cpp
         src/mizu/gui/layout.cpp

@@ -23,8 +23,10 @@ public:
     glm::vec2 size{};
     glm::vec4 bbox{};
     std::vector<std::unique_ptr<NodeI>> children{};
-    Grow grow{Grow::Both};
 
+    Grow grow;
+
+    explicit NodeI(Grow grow);
     NodeI();
 
     virtual ~NodeI() = default;
@@ -51,6 +53,9 @@ template<typename P>
 class Node : public NodeI {
 public:
     using ParamType = P;
+
+    explicit Node(Grow grow)
+        : NodeI(grow) {}
 };
 
 template<typename T>

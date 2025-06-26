@@ -6,6 +6,7 @@
 
 namespace mizu::gui {
 struct VStackParams {
+    Grow grow{Grow::Both};
     std::optional<Border> border{std::nullopt};
     Padding outer_pad{0.0f};
     float inner_pad{0.0f};
@@ -32,6 +33,7 @@ private:
 };
 
 struct HStackParams {
+    Grow grow{Grow::Both};
     std::optional<Border> border{std::nullopt};
     Padding outer_pad{0.0f};
     float inner_pad{0.0f};
@@ -59,8 +61,6 @@ private:
 
 class VSpacer final : public Node<void> {
 public:
-    VSpacer();
-
     void resize(const glm::vec2 &max_size_hint) override;
 
     void calc_bbox(glm::vec2 pos) override;
@@ -72,8 +72,6 @@ public:
 
 class HSpacer final : public Node<void> {
 public:
-    HSpacer();
-
     void resize(const glm::vec2 &max_size_hint) override;
 
     void calc_bbox(glm::vec2 pos) override;

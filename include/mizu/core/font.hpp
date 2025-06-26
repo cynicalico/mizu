@@ -5,29 +5,34 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include <mutex>
-#include "mizu/core/g2d.hpp"
-#include "mizu/core/texture.hpp"
+#include "g2d.hpp"
 #include "mizu/util/class_helpers.hpp"
 #include "stb_rect_pack.h"
+#include "texture.hpp"
 
 namespace mizu {
-constexpr glm::ivec2 ATLAS_SIZE{1024, 1024};
+constexpr glm::ivec2 ATLAS_SIZE{512, 512};
 
-class FtFont {
+class Font {
 public:
-    explicit FtFont(G2d &g2d, const std::filesystem::path &path);
+    explicit Font(G2d &g2d, const std::filesystem::path &path);
 
-    ~FtFont();
+    ~Font();
 
-    NO_COPY(FtFont)
-    NO_MOVE(FtFont)
+    NO_COPY(Font)
+    NO_MOVE(Font)
 
-    float line_height(int pt_size) const;
+    float pen_offset() const;
+    float line_height() const;
 
-    void draw(std::string_view text, int pt_size, glm::vec2 pos, const Color &color = rgb(0xffffff));
+    glm::vec2 calc_size(std::string_view text);
+
+    void draw(std::string_view text, glm::vec2 pos, const Color &color = rgb(0xffffff));
 
 private:
     G2d &g2d_;
+    float pen_offset_{0};
+    float line_height_{0};
 
     FT_Byte *face_data_{nullptr};
     std::size_t face_data_size_{0};
