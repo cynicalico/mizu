@@ -60,7 +60,6 @@ Engine::Engine(const std::string &window_title, glm::ivec2 window_size, WindowBu
         std::exit(EXIT_FAILURE);
     }
     window = std::make_unique<Window>(std::move(window_result.value()));
-    window->set_icon_dir("res/icon");
 
     window->make_context_current();
     auto glad_version_opt = gl.load(SDL_GL_GetProcAddress);

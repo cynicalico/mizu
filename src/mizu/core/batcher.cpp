@@ -1,6 +1,163 @@
 #include "mizu/core/batcher.hpp"
 #include "mizu/util/io.hpp"
 
+const auto POINTS_VERT_SRC = R"glsl(
+#version 330 core
+in vec3 pos;
+in vec4 color;
+
+out vec4 out_color;
+
+uniform mat4 proj;
+
+void main() {
+    out_color = color;
+
+    float z = -1.0 / pos.z;
+    gl_Position = proj * vec4(pos.x + 0.5, pos.y + 0.5, z, 1.0);
+}
+)glsl";
+
+const auto POINTS_FRAG_SRC = R"glsl(
+#version 330 core
+in vec4 out_color;
+
+out vec4 FragColor;
+
+void main() {
+    FragColor = out_color;
+}
+)glsl";
+
+const auto LINES_VERT_SRC = R"glsl(
+#version 330 core
+in vec3 pos;
+in vec4 color;
+in vec3 rot_params;
+
+out vec4 out_color;
+
+uniform mat4 proj;
+
+void main() {
+    out_color = color;
+
+    float c = cos(rot_params.z);
+    float s = sin(rot_params.z);
+    float xtr = -rot_params.x * c + rot_params.y * s + rot_params.x;
+    float ytr = -rot_params.x * s - rot_params.y * c + rot_params.y;
+
+    mat4 rot = mat4(
+        vec4( c,   s,   0.0, 0.0),
+        vec4(-s,   c,   0.0, 0.0),
+        vec4( 0.0, 0.0, 1.0, 0.0),
+        vec4( xtr, ytr, 0.0, 1.0)
+    );
+
+    float z = -1.0 / pos.z;
+    gl_Position = proj * rot * vec4(pos.x + 0.5, pos.y + 0.5, z, 1.0);
+}
+)glsl";
+
+const auto LINES_FRAG_SRC = R"glsl(
+#version 330 core
+in vec4 out_color;
+
+out vec4 FragColor;
+
+void main() {
+    FragColor = out_color;
+}
+)glsl";
+
+const auto TRIS_VERT_SRC = R"glsl(
+#version 330 core
+in vec3 pos;
+in vec4 color;
+in vec3 rot_params;
+
+out vec4 out_color;
+
+uniform mat4 proj;
+
+void main() {
+    out_color = color;
+
+    float c = cos(rot_params.z);
+    float s = sin(rot_params.z);
+    float xtr = -rot_params.x * c + rot_params.y * s + rot_params.x;
+    float ytr = -rot_params.x * s - rot_params.y * c + rot_params.y;
+
+    mat4 rot = mat4(
+        vec4( c,   s,   0.0, 0.0),
+        vec4(-s,   c,   0.0, 0.0),
+        vec4( 0.0, 0.0, 1.0, 0.0),
+        vec4( xtr, ytr, 0.0, 1.0)
+    );
+
+    float z = -1.0 / pos.z;
+    gl_Position = proj * rot * vec4(pos.xy, z, 1.0);
+}
+)glsl";
+
+const auto TRIS_FRAG_SRC = R"glsl(
+#version 330 core
+in vec4 out_color;
+
+out vec4 FragColor;
+
+void main() {
+    FragColor = out_color;
+}
+)glsl";
+
+const auto TEX_VERT_SRC = R"glsl(
+#version 330 core
+in vec3 pos;
+in vec4 color;
+in vec3 rot_params;
+in vec2 tex_coord;
+
+out vec4 out_color;
+out vec2 out_tex_coord;
+
+uniform mat4 proj;
+
+void main() {
+    out_color = color;
+    out_tex_coord = tex_coord;
+
+    float c = cos(rot_params.z);
+    float s = sin(rot_params.z);
+    float xtr = -rot_params.x * c + rot_params.y * s + rot_params.x;
+    float ytr = -rot_params.x * s - rot_params.y * c + rot_params.y;
+
+    mat4 rot = mat4(
+        vec4(c, s, 0.0, 0.0),
+        vec4(-s, c, 0.0, 0.0),
+        vec4(0.0, 0.0, 1.0, 0.0),
+        vec4(xtr, ytr, 0.0, 1.0)
+    );
+
+    float z = -1.0 / pos.z;
+    gl_Position = proj * rot * vec4(pos.xy, z, 1.0);
+}
+)glsl";
+
+const auto TEX_FRAG_SRC = R"glsl(
+#version 330 core
+in vec2 out_tex_coord;
+in vec4 out_color;
+
+out vec4 FragColor;
+
+uniform sampler2D tex;
+
+void main() {
+    FragColor = out_color * texture(tex, out_tex_coord);
+}
+)glsl";
+
 namespace mizu {
 constexpr std::size_t vertex_size_map[4] = {7, 10, 10, 12};
 
@@ -183,20 +340,20 @@ Batcher::Batcher(gloo::Context &ctx)
     : gl_(ctx),
       shaders_{
               gloo::ShaderBuilder(gl_.ctx)
-                      .stage_src(gloo::ShaderType::Vertex, *read_file("res/shader/points.vert"))
-                      .stage_src(gloo::ShaderType::Fragment, *read_file("res/shader/points.frag"))
+                      .stage_src(gloo::ShaderType::Vertex, POINTS_VERT_SRC)
+                      .stage_src(gloo::ShaderType::Fragment, POINTS_FRAG_SRC)
                       .link(),
               gloo::ShaderBuilder(gl_.ctx)
-                      .stage_src(gloo::ShaderType::Vertex, *read_file("res/shader/lines.vert"))
-                      .stage_src(gloo::ShaderType::Fragment, *read_file("res/shader/lines.frag"))
+                      .stage_src(gloo::ShaderType::Vertex, LINES_VERT_SRC)
+                      .stage_src(gloo::ShaderType::Fragment, LINES_FRAG_SRC)
                       .link(),
               gloo::ShaderBuilder(gl_.ctx)
-                      .stage_src(gloo::ShaderType::Vertex, *read_file("res/shader/tris.vert"))
-                      .stage_src(gloo::ShaderType::Fragment, *read_file("res/shader/tris.frag"))
+                      .stage_src(gloo::ShaderType::Vertex, TRIS_VERT_SRC)
+                      .stage_src(gloo::ShaderType::Fragment, TRIS_FRAG_SRC)
                       .link(),
               gloo::ShaderBuilder(gl_.ctx)
-                      .stage_src(gloo::ShaderType::Vertex, *read_file("res/shader/tex.vert"))
-                      .stage_src(gloo::ShaderType::Fragment, *read_file("res/shader/tex.frag"))
+                      .stage_src(gloo::ShaderType::Vertex, TEX_VERT_SRC)
+                      .stage_src(gloo::ShaderType::Fragment, TEX_FRAG_SRC)
                       .link(),
       },
       opaque_batch_lists_{
