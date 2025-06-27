@@ -4,7 +4,7 @@
 
 namespace mizu {
 InputMgr::InputMgr(CallbackMgr &callbacks, Window *window)
-    : callbacks_(callbacks) {
+    : callbacks_(callbacks), window_(window) {
     register_callbacks_();
 }
 
