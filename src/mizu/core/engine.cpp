@@ -17,8 +17,7 @@ void gl_debug_message_callback(
         GLenum severity,
         GLsizei length,
         const GLchar *message,
-        const void *userParam
-);
+        const void *userParam);
 
 Engine::Engine(const std::string &window_title, glm::ivec2 window_size, WindowBuildFunc f)
     : running_(true) {
@@ -42,8 +41,7 @@ Engine::Engine(const std::string &window_title, glm::ivec2 window_size, WindowBu
             "Initialized SDL v{}.{}.{}",
             SDL_VERSIONNUM_MAJOR(sdl_version),
             SDL_VERSIONNUM_MINOR(sdl_version),
-            SDL_VERSIONNUM_MICRO(sdl_version)
-    );
+            SDL_VERSIONNUM_MICRO(sdl_version));
 
     gloo::sdl3::Attr::set_context_version(gloo::ContextVersion(4, 5));
     gloo::sdl3::Attr::set_context_profile(gloo::sdl3::Profile::Core);
@@ -83,10 +81,9 @@ Engine::Engine(const std::string &window_title, glm::ivec2 window_size, WindowBu
             glad_version_opt->major,
             glad_version_opt->minor,
             reinterpret_cast<const char *>(gl.ctx.GetString(GL_VENDOR)),
-            reinterpret_cast<const char *>(gl.ctx.GetString(GL_RENDERER))
-    );
+            reinterpret_cast<const char *>(gl.ctx.GetString(GL_RENDERER)));
 
-    input = std::make_unique<InputMgr>(callbacks);
+    input = std::make_unique<InputMgr>(callbacks, window.get());
 
     g2d = std::make_unique<G2d>(callbacks, gl, window.get());
     g2d->set_vsync(1);
@@ -127,8 +124,7 @@ void Engine::poll_events_() {
         case SDL_EVENT_KEY_DOWN:
             if (!dear->ignore_keyboard_inputs()) {
                 callbacks.pub<PEventKeyDown>(
-                        event.key.timestamp, event.key.scancode, event.key.key, event.key.mod, event.key.repeat
-                );
+                        event.key.timestamp, event.key.scancode, event.key.key, event.key.mod, event.key.repeat);
             }
             break;
         case SDL_EVENT_KEY_UP:
@@ -138,22 +134,23 @@ void Engine::poll_events_() {
         case SDL_EVENT_MOUSE_MOTION:
             if (!dear->ignore_mouse_inputs()) {
                 callbacks.pub<PEventMouseMotion>(
-                        event.motion.timestamp, event.motion.x, event.motion.y, event.motion.xrel, event.motion.yrel
-                );
+                        event.motion.timestamp, event.motion.x, event.motion.y, event.motion.xrel, event.motion.yrel);
             }
             break;
         case SDL_EVENT_MOUSE_BUTTON_DOWN:
             if (!dear->ignore_mouse_inputs()) {
                 callbacks.pub<PEventMouseButtonDown>(
-                        event.button.timestamp, event.button.button, event.button.clicks, event.button.x, event.button.y
-                );
+                        event.button.timestamp,
+                        event.button.button,
+                        event.button.clicks,
+                        event.button.x,
+                        event.button.y);
             }
             break;
         case SDL_EVENT_MOUSE_BUTTON_UP:
             if (!dear->ignore_mouse_inputs()) {
                 callbacks.pub<PEventMouseButtonUp>(
-                        event.button.timestamp, event.button.button, event.button.x, event.button.y
-                );
+                        event.button.timestamp, event.button.button, event.button.x, event.button.y);
             }
             break;
         case SDL_EVENT_MOUSE_WHEEL:
@@ -164,8 +161,7 @@ void Engine::poll_events_() {
                         event.wheel.x,
                         event.wheel.y,
                         event.wheel.mouse_x,
-                        event.wheel.mouse_y
-                );
+                        event.wheel.mouse_y);
             }
             break;
         case SDL_EVENT_WINDOW_MOUSE_ENTER:
@@ -185,6 +181,10 @@ void Engine::poll_events_() {
         case SDL_EVENT_WINDOW_FOCUS_GAINED: callbacks.pub<PEventWindowFocusGained>(event.window.timestamp); break;
         case SDL_EVENT_WINDOW_FOCUS_LOST: callbacks.pub<PEventWindowFocusLost>(event.window.timestamp); break;
         case SDL_EVENT_QUIT: callbacks.pub<PEventQuit>(event.quit.timestamp); break;
+        case SDL_EVENT_TEXT_INPUT:
+            if (!dear->ignore_keyboard_inputs())
+                callbacks.pub<PEventTextInput>(event.text.timestamp, event.text.text);
+            break;
         default: break;
         }
     }
@@ -207,8 +207,7 @@ void gl_debug_message_callback(
         GLenum severity,
         GLsizei length,
         const GLchar *message,
-        const void *userParam
-) {
+        const void *userParam) {
 #define STRINGIFY(e)                                                                                                   \
     case e: return #e;
 

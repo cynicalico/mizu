@@ -3,13 +3,23 @@
 #include "mizu/core/log.hpp"
 
 namespace mizu {
-InputMgr::InputMgr(CallbackMgr &callbacks)
+InputMgr::InputMgr(CallbackMgr &callbacks, Window *window)
     : callbacks_(callbacks) {
     register_callbacks_();
 }
 
 InputMgr::~InputMgr() {
     unregister_callbacks_();
+}
+
+void InputMgr::start_text_input() {
+    if (!SDL_StartTextInput(window_->underlying()))
+        MIZU_LOG_ERROR("Failed to start text input: {}", SDL_GetError());
+}
+
+void InputMgr::stop_text_input() {
+    if (!SDL_StopTextInput(window_->underlying()))
+        MIZU_LOG_ERROR("Failed to stop text input: {}", SDL_GetError());
 }
 
 bool InputMgr::down(Key key, Mod mods) {
@@ -97,18 +107,14 @@ void InputMgr::register_callbacks_() {
     callbacks_.sub<PPreUpdate>(callback_id_, [&](const auto &p) { update_(p.dt); });
     callbacks_.sub<PEventKeyDown>(callback_id_, [&](const auto &p) { key_down_(p.timestamp, p.key, p.mod); });
     callbacks_.sub<PEventKeyUp>(callback_id_, [&](const auto &p) { key_up_(p.timestamp, p.key, p.mod); });
-    callbacks_.sub<PEventMouseMotion>(callback_id_, [&](const auto &p) {
-        mouse_motion_(p.timestamp, p.x, p.y, p.dx, p.dy);
-    });
-    callbacks_.sub<PEventMouseButtonDown>(callback_id_, [&](const auto &p) {
-        mouse_down_(p.timestamp, p.button, p.x, p.y);
-    });
-    callbacks_.sub<PEventMouseButtonUp>(callback_id_, [&](const auto &p) {
-        mouse_up_(p.timestamp, p.button, p.x, p.y);
-    });
-    callbacks_.sub<PEventMouseWheel>(callback_id_, [&](const auto &p) {
-        mouse_wheel_(p.timestamp, p.natural, p.x, p.y, p.mouse_x, p.mouse_y);
-    });
+    callbacks_.sub<PEventMouseMotion>(
+            callback_id_, [&](const auto &p) { mouse_motion_(p.timestamp, p.x, p.y, p.dx, p.dy); });
+    callbacks_.sub<PEventMouseButtonDown>(
+            callback_id_, [&](const auto &p) { mouse_down_(p.timestamp, p.button, p.x, p.y); });
+    callbacks_.sub<PEventMouseButtonUp>(
+            callback_id_, [&](const auto &p) { mouse_up_(p.timestamp, p.button, p.x, p.y); });
+    callbacks_.sub<PEventMouseWheel>(
+            callback_id_, [&](const auto &p) { mouse_wheel_(p.timestamp, p.natural, p.x, p.y, p.mouse_x, p.mouse_y); });
 }
 
 void InputMgr::unregister_callbacks_() {

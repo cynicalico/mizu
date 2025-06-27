@@ -13,6 +13,8 @@ public:
     void update(double dt) override;
 
     void draw() override;
+
+    void key_release_callback(mizu::Key key, mizu::Mod mods) override;
 };
 
 Ethereal::Ethereal(mizu::Engine *engine)
@@ -20,21 +22,20 @@ Ethereal::Ethereal(mizu::Engine *engine)
     font = std::make_unique<mizu::Font>(g2d, "example/font/ter-u20b.bdf");
 }
 
-void Ethereal::update(double dt) {
-    if (input.pressed(mizu::Key::Escape))
-        engine->shutdown();
-}
+void Ethereal::update(double dt) {}
 
 void Ethereal::draw() {
     g2d.clear(mizu::rgb(0x000000));
 
     const auto text = "Hello, world!\nMultiline text\nOptimized for bitmap fonts that I want right now";
-    g2d.fill_rect({0, 0}, {50, 50}, mizu::rgb(0xff0000));
-    const auto size = font->calc_size(text);
-    g2d.fill_rect({50, 50}, size, mizu::rgb(0x00ff00));
     font->draw(text, {50, 50 + font->line_height()});
 }
 
+void Ethereal::key_release_callback(const mizu::Key key, mizu::Mod) {
+    if (key == mizu::Key::Escape)
+        engine->shutdown();
+}
+
 int main(int, char *[]) {
-    mizu::Engine("ethereal", {1280, 720}, [](auto &b) { b.display(1); }).mainloop<Ethereal>();
+    mizu::Engine("ethereal", {1280, 720}, [](auto &) {}).mainloop<Ethereal>();
 }

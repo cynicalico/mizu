@@ -36,6 +36,7 @@ set(mizu_headers
         include/mizu/core/font.hpp
         include/mizu/core/g2d.hpp
         include/mizu/core/input_mgr.hpp
+        include/mizu/core/input_types.hpp
         include/mizu/core/log.hpp
         include/mizu/core/payloads.hpp
         include/mizu/core/texture.hpp

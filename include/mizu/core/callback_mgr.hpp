@@ -52,7 +52,10 @@ public:
         return next_id_++;
     }
 
-    void unreg(std::size_t id) { recycled_ids_.push_back(id); }
+    void unreg(std::size_t id) {
+        if (id != 0)
+            recycled_ids_.push_back(id);
+    }
 
     template<typename T>
     void sub(std::size_t id, Callback<T> &&callback);
@@ -82,6 +85,9 @@ private:
 
 template<typename T>
 void CallbackMgr::sub(std::size_t id, Callback<T> &&callback) {
+    if (id == 0)
+        return;
+
     auto &callbacks = callbacks_<T>();
     if (id >= callbacks.size()) {
         callbacks.resize(id + 1, nullptr);
@@ -93,6 +99,9 @@ void CallbackMgr::sub(std::size_t id, Callback<T> &&callback) {
 
 template<typename T>
 void CallbackMgr::unsub(std::size_t id) {
+    if (id == 0)
+        return;
+
     auto &callbacks = callbacks_<T>();
     if (id < callbacks.size()) {
         callbacks[id] = nullptr;
@@ -117,6 +126,9 @@ void CallbackMgr::pub_nowait(Args &&...args) {
 
 template<typename T>
 void CallbackMgr::poll(std::size_t id) {
+    if (id == 0)
+        return;
+
     auto &callbacks = callbacks_<T>();
     if (id >= callbacks.size())
         return;

@@ -133,6 +133,12 @@ struct PEventQuit {
     std::uint64_t timestamp;
 };
 
+// https://wiki.libsdl.org/SDL3/SDL_TextInputEvent
+struct PEventTextInput {
+    std::uint64_t timestamp;
+    const char *text;
+};
+
 /*****************
  * OpenAL EVENTS *
  *****************/
