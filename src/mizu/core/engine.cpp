@@ -20,7 +20,7 @@ void gl_debug_message_callback(
         const void *userParam);
 
 Engine::Engine(const std::string &window_title, glm::ivec2 window_size, WindowBuildFunc f)
-    : running_(true) {
+    : running_(true), show_fps_(false) {
     // Log levels are controlled through MIZU_SPDLOG_LEVEL, but we don't know what the user
     // has set, so just assume trace logging to catch everything
     spdlog::set_level(spdlog::level::trace);
@@ -112,6 +112,14 @@ Engine::~Engine() {
 
 void Engine::shutdown() {
     running_ = false;
+}
+
+bool Engine::show_fps() const {
+    return show_fps_;
+}
+
+void Engine::set_show_fps(bool v) {
+    show_fps_ = v;
 }
 
 void Engine::poll_events_() {

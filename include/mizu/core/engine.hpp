@@ -45,12 +45,16 @@ public:
 
     void shutdown();
 
+    bool show_fps() const;
+    void set_show_fps(bool v);
+
     template<typename T, typename... Args>
         requires std::derived_from<T, Application>
     void mainloop(Args &&...args);
 
 private:
     bool running_;
+    bool show_fps_;
     std::size_t callback_id_{0};
 
     void poll_events_();
@@ -75,18 +79,20 @@ void Engine::mainloop(Args &&...args) {
         callbacks.pub_nowait<PPreDraw>();
         callbacks.pub_nowait<PPreDrawOverlay>();
 
-        ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-        dear::begin("FPS", nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoDecoration) && [&] {
-            auto fps_str = fmt::format(
-                    std::locale("en_US.UTF-8"),
-                    "FPS: {:.2Lf}{} | Mem: {:.2Lf} MB",
-                    frame_counter.fps(),
-                    g2d->vsync() ? " (vsync)" : "",
-                    memusage());
-            ImGui::Text("%s", fps_str.c_str());
-        };
-        ImGui::PopStyleVar();
+        if (show_fps_) {
+            ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
+            ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(2.0f, 2.0f));
+            dear::begin("FPS", nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoDecoration) && [&] {
+                const auto fps_str = fmt::format(
+                        std::locale("en_US.UTF-8"),
+                        "FPS: {:.2Lf}{} | Mem: {:.2Lf} MB",
+                        frame_counter.fps(),
+                        g2d->vsync() ? " (vsync)" : "",
+                        memusage());
+                ImGui::Text("%s", fps_str.c_str());
+            };
+            ImGui::PopStyleVar();
+        }
 
         callbacks.pub_nowait<PDraw>();
 
