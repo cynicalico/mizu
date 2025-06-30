@@ -29,10 +29,13 @@ Font::Font(G2d &g2d, const std::filesystem::path &path)
     if (const auto err = _wfopen_s(&file, path.c_str(), L"rb"); err != 0) {
         char buf[1024];
         strerror_s(buf, err);
-        MIZU_LOG_ERROR("Failed to open font file '{}'", path, buf);
+        MIZU_LOG_ERROR("Failed to open font file '{}': {}", path, buf);
     }
 #else
-    // TODO: linux
+    file = fopen(path.c_str(), "rb");
+    if (!file) {
+        MIZU_LOG_ERROR("Failed to open font file '{}': {}", path, strerror(errno));
+    }
 #endif
 
     fseek(file, 0, SEEK_END);
