@@ -6,7 +6,9 @@
 #include <string>
 #include "gloo/context.hpp"
 #include "mizu/core/application.hpp"
+#if defined(MIZU_FEATURE_AUDIO)
 #include "mizu/core/audio_mgr.hpp"
+#endif
 #include "mizu/core/callback_mgr.hpp"
 #include "mizu/core/dear.hpp"
 #include "mizu/core/g2d.hpp"
@@ -24,7 +26,9 @@ public:
     gloo::Context gl{};
     CallbackMgr callbacks{};
 
+#if defined(MIZU_FEATURE_AUDIO)
     std::unique_ptr<AudioMgr> audio{nullptr};
+#endif
     std::unique_ptr<Dear> dear{nullptr};
     std::unique_ptr<G2d> g2d{nullptr};
     std::unique_ptr<InputMgr> input{nullptr};

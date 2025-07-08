@@ -34,30 +34,6 @@ CPMAddPackage(
         OPTIONS "BUILD_SHARED_LIBS OFF" "GLM_ENABLE_CXX_20 ON" "GLM_ENABLE_LANG_EXTENSIONS ON"
 )
 
-set(OPENAL_SOFT_CPM_OPTIONS "ALSOFT_UTILS OFF" "ALSOFT_EXAMPLES OFF")
-if (MSVC)
-    set(OPENAL_SOFT_CPM_OPTIONS ${OPENAL_SOFT_CPM_OPTIONS}
-            "ALSOFT_BACKEND_WINMM OFF"
-            "ALSOFT_REQUIRE_WASAPI ON"
-            "ALSOFT_BACKEND_DSOUND OFF"
-            "ALSOFT_BACKEND_WAVE OFF"
-    )
-else ()
-    set(OPENAL_SOFT_CPM_OPTIONS ${OPENAL_SOFT_CPM_OPTIONS}
-            "ALSOFT_BACKEND_PIPEWIRE ON"
-            "ALSOFT_REQUIRE_PIPEWIRE ON"
-            "ALSOFT_BACKEND_PULSEAUDIO OFF"
-            "ALSOFT_BACKEND_OSS OFF"
-            "ALSOFT_BACKEND_SOLARIS OFF"
-    )
-endif ()
-CPMAddPackage(
-        NAME openal-soft
-        GITHUB_REPOSITORY kcat/openal-soft
-        GIT_TAG 481c9e0
-        OPTIONS ${OPENAL_SOFT_CPM_OPTIONS}
-)
-
 CPMAddPackage(
         NAME fmt
         GITHUB_REPOSITORY fmtlib/fmt
@@ -73,13 +49,6 @@ CPMAddPackage(
 )
 
 CPMAddPackage(
-        NAME libsndfile
-        GITHUB_REPOSITORY libsndfile/libsndfile
-        GIT_TAG ea9ff56
-        OPTIONS "BUILD_SHARED_LIBS OFF"
-)
-
-CPMAddPackage(
         NAME pcg
         GITHUB_REPOSITORY imneme/pcg-cpp
         GIT_TAG 428802d
@@ -92,6 +61,40 @@ CPMAddPackage(
         GIT_TAG f4d9359
         DOWNLOAD_ONLY TRUE
 )
+
+if (MIZU_BUILD_AUDIO)
+    set(OPENAL_SOFT_CPM_OPTIONS "ALSOFT_UTILS OFF" "ALSOFT_EXAMPLES OFF")
+    if (MSVC)
+        set(OPENAL_SOFT_CPM_OPTIONS ${OPENAL_SOFT_CPM_OPTIONS}
+                "ALSOFT_BACKEND_WINMM OFF"
+                "ALSOFT_REQUIRE_WASAPI ON"
+                "ALSOFT_BACKEND_DSOUND OFF"
+                "ALSOFT_BACKEND_WAVE OFF"
+        )
+    else ()
+        set(OPENAL_SOFT_CPM_OPTIONS ${OPENAL_SOFT_CPM_OPTIONS}
+                "ALSOFT_BACKEND_PIPEWIRE ON"
+                "ALSOFT_REQUIRE_PIPEWIRE ON"
+                "ALSOFT_BACKEND_PULSEAUDIO OFF"
+                "ALSOFT_BACKEND_OSS OFF"
+                "ALSOFT_BACKEND_SOLARIS OFF"
+        )
+    endif ()
+
+    CPMAddPackage(
+            NAME openal-soft
+            GITHUB_REPOSITORY kcat/openal-soft
+            GIT_TAG 481c9e0
+            OPTIONS ${OPENAL_SOFT_CPM_OPTIONS}
+    )
+
+    CPMAddPackage(
+            NAME libsndfile
+            GITHUB_REPOSITORY libsndfile/libsndfile
+            GIT_TAG ea9ff56
+            OPTIONS "BUILD_SHARED_LIBS OFF"
+    )
+endif ()
 
 find_package(PNG REQUIRED)
 find_package(Freetype REQUIRED)
@@ -139,9 +142,11 @@ target_link_libraries(mizu_thirdparty PUBLIC
         spdlog::spdlog
         glm::glm
         glad_gl_core_mx_43
-        SndFile::sndfile
-        OpenAL::OpenAL
         SDL3::SDL3
         PNG::PNG
         Freetype::Freetype
 )
+
+if (MIZU_BUILD_AUDIO)
+    target_link_libraries(mizu_thirdparty PUBLIC SndFile::sndfile OpenAL::OpenAL)
+endif ()

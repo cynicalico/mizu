@@ -1,7 +1,9 @@
 #ifndef MIZU_PAYLOADS_HPP
 #define MIZU_PAYLOADS_HPP
 
+#if defined(MIZU_FEATURE_AUDIO)
 #include <AL/alc.h>
+#endif
 #include <SDL3/SDL_keycode.h>
 #include <SDL3/SDL_scancode.h>
 #include <cstdint>
@@ -139,6 +141,7 @@ struct PEventTextInput {
     const char *text;
 };
 
+#if defined(MIZU_FEATURE_AUDIO)
 /*****************
  * OpenAL EVENTS *
  *****************/
@@ -163,6 +166,7 @@ struct PDeviceRemoved {
     ALCdevice *device;
     std::string message;
 };
+#endif
 
 } // namespace mizu
 

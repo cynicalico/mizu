@@ -89,7 +89,9 @@ Engine::Engine(const std::string &window_title, glm::ivec2 window_size, WindowBu
 
     dear = std::make_unique<Dear>(callbacks, window.get());
 
+#if defined(MIZU_FEATURE_AUDIO)
     audio = std::make_unique<AudioMgr>(callbacks);
+#endif
 
     frame_counter = FrameCounter();
 }
@@ -100,7 +102,10 @@ Engine::Engine(const std::string &window_title, WindowBuildFunc f)
 Engine::~Engine() {
     unregister_callbacks_();
 
+
+#if defined(MIZU_FEATURE_AUDIO)
     audio.reset();
+#endif
     dear.reset();
     g2d.reset();
     input.reset();
